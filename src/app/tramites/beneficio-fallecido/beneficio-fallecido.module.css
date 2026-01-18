@@ -1,0 +1,147 @@
+/* ======================================================
+   CONTENEDOR GENERAL
+   ====================================================== */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  background-color: #ffffff;
+}
+
+/* ======================================================
+   TÍTULO Y DESCRIPCIÓN
+   CTA LATERAL INSTITUCIONAL – BENEFICIOS
+   ====================================================== */
+.titulo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+
+  /* Línea CTA lateral */
+  padding-left: 1.25rem;
+  border-left: 6px solid #047857; /* verde institucional */
+}
+
+.descripcion {
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.75;
+  max-width: 920px;
+  margin-bottom: 3rem;
+
+  padding-left: 1.25rem;
+  border-left: 2px solid #d1fae5;
+}
+
+/* ======================================================
+   IMAGEN HERO
+   ====================================================== */
+.heroImage {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 3.5rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+/* ======================================================
+   BLOQUES / BENEFICIOS
+   ====================================================== */
+.requisitos {
+  margin-bottom: 3.5rem;
+}
+
+.requisitos h4 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+
+  padding-left: 0.75rem;
+  border-left: 4px solid #059669;
+}
+
+/* Layout imagen izquierda / texto derecha */
+.requisitosLayout {
+  align-items: center;
+  margin-top: 2rem;
+}
+
+/* Imagen beneficios */
+.requisitosImagen {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+/* Lista de beneficios */
+.requisitos :global(.list-group-item) {
+  font-size: 0.95rem;
+  color: #334155;
+  border: none;
+  padding-left: 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  line-height: 1.75;
+}
+
+/* ======================================================
+   FAQ / INFORMACIÓN ADICIONAL
+   ====================================================== */
+.faqs {
+  margin-bottom: 2rem;
+}
+
+.faqs h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #1e293b;
+
+  padding-left: 0.75rem;
+  border-left: 4px solid #047857;
+}
+
+/* Accordion Bootstrap */
+.faqs :global(.accordion-item) {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.faqs :global(.accordion-button) {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  background-color: #ecfdf5;
+}
+
+.faqs :global(.accordion-button:not(.collapsed)) {
+  background-color: #d1fae5;
+  color: #064e3b;
+}
+
+.faqs :global(.accordion-body) {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.7;
+}
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+@media (max-width: 768px) {
+  .titulo {
+    font-size: 1.6rem;
+    padding-left: 1rem;
+    border-left-width: 5px;
+  }
+
+  .descripcion {
+    font-size: 0.95rem;
+    padding-left: 1rem;
+  }
+}

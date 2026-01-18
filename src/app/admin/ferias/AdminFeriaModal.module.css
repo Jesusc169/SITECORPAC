@@ -1,0 +1,264 @@
+/* =========================
+   OVERLAY
+   ========================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   MODAL
+   ========================= */
+.modalContent {
+  background: #ffffff;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+
+  border-radius: 12px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modalHeader button {
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* =========================
+   BODY
+   ========================= */
+.modalBody {
+  padding: 24px;
+  overflow-y: auto;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.modalBody label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #374151;
+}
+
+.modalBody input,
+.modalBody textarea,
+.modalBody select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.modalBody input:focus,
+.modalBody textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb33;
+}
+
+.modalBody textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* =========================
+   COMBOBOX EMPRESAS
+   ========================= */
+.comboBox {
+  position: relative;
+}
+
+.comboBox input {
+  width: 100%;
+}
+
+.comboList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.comboItem {
+  padding: 8px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.comboItem:hover {
+  background: #f3f4f6;
+}
+
+.comboEmpty {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* =========================
+   CHIPS SELECCIONADOS
+   ========================= */
+.selectedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #e5e7eb;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.chip button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* =========================
+   FECHAS
+   ========================= */
+.fechasSection {
+  margin-top: 16px;
+}
+
+.fechasHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fechasHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fechasHeader button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.fechasHeader button:hover {
+  background: #1d4ed8;
+}
+
+.fechaRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.fechaRow input {
+  font-size: 13px;
+}
+
+.fechaRow button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.fechaRow button:hover {
+  background: #b91c1c;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modalActions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modalActions button:first-child {
+  background: #e5e7eb;
+}
+
+.modalActions button:first-child:hover {
+  background: #d1d5db;
+}
+
+.modalActions button:last-child {
+  background: #2563eb;
+  color: white;
+}
+
+.modalActions button:last-child:hover {
+  background: #1d4ed8;
+}

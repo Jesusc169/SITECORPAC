@@ -1,0 +1,137 @@
+/* ===============================
+   CONTENEDOR GENERAL
+================================ */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+/* ===============================
+   TÍTULO PRINCIPAL
+   CTA VISUAL ROJO NORMATIVO
+================================ */
+.titulo {
+  font-size: 2.05rem;
+  font-weight: 700;
+  color: #1f2937; /* gris institucional */
+  margin-bottom: 3.25rem;
+  padding-left: 1rem;
+  border-left: 5px solid #dc2626; /* rojo institucional */
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+/* ===============================
+   BLOQUE DE CONTENIDO
+================================ */
+.bloque {
+  margin-bottom: 4rem;
+}
+
+.bloque h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.descripcion {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.8;
+  margin-top: 0.5rem;
+  max-width: 720px; /* mejora lectura institucional */
+}
+
+/* ===============================
+   IMAGEN INSTITUCIONAL
+================================ */
+.imagen {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* ===============================
+   CTA – ENLACE OIT
+   ROJO FORMAL
+================================ */
+.cta {
+  margin-top: 4.5rem;
+  padding: 3rem 2rem;
+  background-color: #fef2f2;  /* rojo muy suave */
+  border: 1px solid #fecaca;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.ctaTexto {
+  font-size: 1.05rem;
+  color: #374151;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.8rem 1.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #dc2626;
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    background-color 0.25s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ctaLink:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(220, 38, 38, 0.35);
+}
+
+.ctaLink:active {
+  transform: scale(0.97);
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+  .container {
+    padding: 3rem 1.25rem;
+  }
+
+  .titulo {
+    font-size: 1.65rem;
+    margin-bottom: 2.75rem;
+  }
+
+  .bloque {
+    margin-bottom: 3rem;
+  }
+
+  .descripcion {
+    max-width: 100%;
+  }
+
+  .cta {
+    padding: 2.25rem 1.5rem;
+  }
+
+  .ctaTexto {
+    font-size: 1rem;
+  }
+}

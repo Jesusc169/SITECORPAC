@@ -1,0 +1,178 @@
+/* ======================================================
+   CONTENEDOR GENERAL
+   ====================================================== */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  background-color: #ffffff;
+}
+
+/* ======================================================
+   TÍTULO Y DESCRIPCIÓN
+   CTA LATERAL INSTITUCIONAL – BENEFICIOS
+   ====================================================== */
+.titulo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+
+  /* CTA lateral verde institucional */
+  padding-left: 1.25rem;
+  border-left: 6px solid #15803d;
+}
+
+.descripcion {
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.75;
+  max-width: 920px;
+  margin-bottom: 3rem;
+
+  padding-left: 1.25rem;
+  border-left: 2px solid #dcfce7;
+}
+
+/* ======================================================
+   COOPERATIVAS / BENEFICIOS
+   ====================================================== */
+.cooperativas {
+  margin-bottom: 3.5rem;
+}
+
+.coopCard {
+  height: 100%;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.coopCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+}
+
+.coopLogo {
+  max-height: 80px;
+  object-fit: contain;
+  margin-bottom: 0.85rem;
+}
+
+.coopCard p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #065f46;
+  font-weight: 600;
+}
+
+/* ======================================================
+   REQUISITOS
+   ====================================================== */
+.requisitos {
+  margin-bottom: 3.5rem;
+}
+
+.requisitos h4 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+
+  padding-left: 0.75rem;
+  border-left: 4px solid #16a34a;
+}
+
+/* Layout imagen izquierda / texto derecha */
+.requisitosLayout {
+  align-items: center;
+  margin-top: 2rem;
+}
+
+/* Imagen requisitos */
+.requisitosImagen {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #d1fae5;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+/* Lista de requisitos */
+.requisitos :global(.list-group-item) {
+  font-size: 0.95rem;
+  color: #065f46;
+  border: none;
+  padding-left: 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  line-height: 1.75;
+}
+
+/* ======================================================
+   FAQ
+   ====================================================== */
+.faq {
+  margin-bottom: 2rem;
+}
+
+.faq h4 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+
+  padding-left: 0.75rem;
+  border-left: 4px solid #15803d;
+}
+
+/* Accordion Bootstrap ajustado */
+.faq :global(.accordion-item) {
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.faq :global(.accordion-button) {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #065f46;
+  background-color: #f0fdf4;
+}
+
+.faq :global(.accordion-button:not(.collapsed)) {
+  background-color: #dcfce7;
+  color: #064e3b;
+}
+
+.faq :global(.accordion-body) {
+  font-size: 0.95rem;
+  color: #065f46;
+  line-height: 1.7;
+}
+
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+@media (max-width: 768px) {
+  .titulo {
+    font-size: 1.65rem;
+    padding-left: 1rem;
+    border-left-width: 5px;
+  }
+
+  .descripcion {
+    font-size: 0.95rem;
+    padding-left: 1rem;
+  }
+
+  .coopLogo {
+    max-height: 65px;
+  }
+
+  .requisitosLayout {
+    row-gap: 1.5rem;
+  }
+}

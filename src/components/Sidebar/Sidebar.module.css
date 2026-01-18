@@ -1,0 +1,123 @@
+/* Sidebar.module.css - sin selectores globales (no body/html) */
+
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0d6efd 0%, #0b5ed7 100%);
+  color: #fff;
+  padding: 1.75rem 1rem;
+  box-shadow: 2px 0 12px rgba(3, 15, 30, 0.08);
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1000;
+  transition: transform 0.25s ease;
+}
+
+/* header / marca */
+.header {
+  margin-bottom: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandLogo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+
+.brandText {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.6px;
+}
+
+/* navegación */
+.nav {
+  flex: 1;
+  margin-top: 1rem;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav li {
+  margin-bottom: 0.6rem;
+}
+
+.link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #f8fbff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+/* activo */
+.active {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* footer pequeño */
+.footer {
+  font-size: 0.78rem;
+  text-align: center;
+  color: rgba(255,255,255,0.85);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding-top: 12px;
+}
+
+/* responsive: en pantallas pequeñas, convertir el sidebar en barra superior */
+@media (max-width: 900px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    display: block;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav ul {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+
+  .nav li {
+    margin-bottom: 0;
+  }
+
+  .link {
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .footer {
+    display: none;
+  }
+}

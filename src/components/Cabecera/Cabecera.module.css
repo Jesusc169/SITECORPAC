@@ -1,0 +1,61 @@
+.rectangulo {
+  background-color: #82B0C4;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 0;
+}
+
+/* 🔹 Logo */
+.logo {
+  width: clamp(80px, 10vw, 60px);
+  height: clamp(80px, 10vw, 60px);
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+/* 🔹 Título */
+.titulo {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: bold;
+  margin: 0;
+  color: rgb(0, 0, 0);
+  text-align: center;
+}
+
+/* 🔹 Frases */
+.frases {
+  margin-top: 10px;
+  color: black;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  text-align: center;
+  padding: 0 15px;
+  line-height: 1.5;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .rectangulo {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .logo {
+    margin-right: 20px;
+    margin-bottom: 0;
+  }
+
+  .titulo {
+    margin-right: auto;
+    text-align: left;
+  }
+
+  .frases {
+    max-width: 60%;
+    padding-right: 50px;
+    text-align: right;
+  }
+}

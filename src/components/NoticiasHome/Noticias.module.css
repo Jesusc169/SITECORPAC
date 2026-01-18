@@ -1,0 +1,121 @@
+/* 🔹 Sección completa de noticias */
+.noticiasSection {
+  width: 100%;
+  padding: 40px 20px;
+  background: #f5f5f5; /* fondo claro */
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* 🔹 Título de sección */
+.noticiasTitulo {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #000000;
+}
+
+/* 🔹 Contenedor principal de noticias (grid) */
+.noticiasContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* responsive */
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+/* 🔹 Cada tarjeta */
+.noticiaCard {
+  background: #82b0c4; /* azul como en tu ejemplo */
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover efecto */
+.noticiaCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 🔹 Contenedor con proporción fija para la imagen */
+.noticiaImagenContainer {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 20px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+/* 🔹 Imagen de la tarjeta */
+.noticiaImagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+
+/* 🔹 Título de la tarjeta */
+.noticiaTituloCard {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 🔹 Texto de la tarjeta */
+.noticiaTexto {
+  color: #ffffff;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+/* 🔹 Contenedor del botón */
+.botonContainer {
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 🔹 Botón "Más noticias" */
+.noticiaBoton {
+  background: #004080; /* azul institucional */
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.noticiaBoton:hover {
+  background: #0059b3;
+}
+
+/* 🔹 Responsive ajustes */
+@media (max-width: 600px) {
+  .noticiaTituloCard {
+    font-size: 1.4rem;
+  }
+
+  .noticiaTexto {
+    font-size: 1rem;
+  }
+
+  .noticiaBoton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .botonContainer {
+    justify-content: center;
+  }
+}

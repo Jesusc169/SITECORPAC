@@ -1,0 +1,142 @@
+/* ===============================
+   Directorio.module.css
+   =============================== */
+
+/* Contenedor general con sidebar */
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f6fa;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===============================
+   Main Content
+   =============================== */
+.main {
+  flex: 1;
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Título principal */
+.main h1 {
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  color: #0d6efd;
+  font-weight: 600;
+  border-bottom: 2px solid #0d6efd;
+  display: inline-block;
+  padding-bottom: 0.3rem;
+}
+
+/* Botón para agregar miembro */
+.btnAgregar {
+  background-color: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.btnAgregar:hover {
+  background-color: #0849b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   Lista de Miembros
+   =============================== */
+.listaMiembros {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ===============================
+   Tarjeta de Miembro
+   =============================== */
+.miembroCard {
+  display: flex;
+  flex-direction: column; /* Imagen arriba, info debajo */
+  align-items: center;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1.5rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.miembroCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Foto del miembro */
+.foto {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #0d6efd;
+  margin-bottom: 1rem;
+}
+
+/* Nombre y cargo */
+.miembroCard h3 {
+  margin: 0.3rem 0 0.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #0d6efd;
+  text-align: center;
+}
+
+.miembroCard p {
+  margin: 0.2rem 0;
+  font-size: 0.95rem;
+  color: #333;
+  text-align: center;
+}
+
+/* Información adicional (teléfono, anexo) */
+.miembroCard .info {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Enlace de perfil */
+.miembroCard a {
+  margin-top: 0.8rem;
+  font-size: 0.95rem;
+  color: #0d6efd;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.miembroCard a:hover {
+  color: #0849b3;
+}
+
+/* Mensaje cuando no hay registros */
+.main p {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 2rem;
+}
