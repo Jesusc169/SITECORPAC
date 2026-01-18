@@ -1,0 +1,103 @@
+/* Estilo general para el contenedor principal */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Asegura que la página ocupe al menos la altura de la ventana */
+}
+
+/* Contenido principal de la página */
+.main-content {
+  flex: 1;
+  /* Aquí puedes agregar más estilos si es necesario */
+}
+
+/* Estilos del Footer */
+.footer {
+  background-color: #82b0c4;
+  color: #000;
+  padding: 20px 40px;
+  width: 100%;
+  position: relative; /* Asegura que se posicione dentro del flujo normal */
+}
+
+.footerTitulo {
+  color: white;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+/* Grilla principal */
+.footerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+/* Caja individual de contacto (modificable por separado) */
+.contactoBox {
+  background-color: #d6e4eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.contactoBox:hover {
+  transform: translateY(-5px);
+}
+
+/* Contenido de cada ítem */
+.contactoItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.25rem;
+}
+
+/* Íconos */
+.contactoItem i {
+  font-size: 1.6rem;
+  color: #000;
+}
+
+/* Enlaces */
+.link {
+  color: black;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .footer {
+    padding: 40px 20px;
+  }
+
+  .footerTitulo {
+    text-align: center;
+    font-size: 1.8rem;
+  }
+
+  .footerGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .contactoItem {
+    font-size: 1.1rem;
+  }
+
+  .contactoItem i {
+    font-size: 1.4rem;
+  }
+
+  .contactoBox {
+    padding: 15px;
+  }
+}

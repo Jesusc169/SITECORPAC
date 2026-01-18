@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cooperativas {
+  id         Int       @id @default(autoincrement())
+  nombre     String    @db.VarChar(100)
+  logo       String?   @db.VarChar(255)
+  estado     Int?      @default(1) @db.TinyInt
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model directorio {
+  id            Int       @id @default(autoincrement())
+  nombre        String
+  cargo         String
+  correo        String
+  telefono      String
+  fotoUrl       String?
+  periodoInicio DateTime
+  periodoFin    DateTime?
+  createdAt     DateTime  @default(now())
+  orden         Int
+}
+
+model noticia {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  descripcion String
+  contenido   String?
+  imagen      String?
+  fecha       DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  autor       String
+}
+
+model prestamo_faq {
+  id         Int       @id @default(autoincrement())
+  pregunta   String    @db.VarChar(255)
+  respuesta  String    @db.Text
+  estado     Int?      @default(1) @db.TinyInt
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model prestamo_requisitos {
+  id          Int       @id @default(autoincrement())
+  descripcion String    @db.VarChar(255)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String   @unique(map: "User_email_key")
+  password  String
+  rol       String
+  createdAt DateTime @default(now())
+}
+
+model beneficio_fallecido {
+  id                             Int                              @id @default(autoincrement())
+  titulo                         String                           @db.VarChar(150)
+  descripcion                    String                           @db.Text
+  imagen_hero                    String?                          @db.VarChar(255)
+  created_at                     DateTime?                        @default(now()) @db.Timestamp(0)
+  beneficio_fallecido_faq        beneficio_fallecido_faq[]
+  beneficio_fallecido_requisitos beneficio_fallecido_requisitos[]
+}
+
+model beneficio_fallecido_faq {
+  id                  Int                 @id @default(autoincrement())
+  beneficio_id        Int
+  pregunta            String              @db.VarChar(255)
+  respuesta           String              @db.Text
+  orden               Int?                @default(1)
+  beneficio_fallecido beneficio_fallecido @relation(fields: [beneficio_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_beneficio_faq")
+
+  @@index([beneficio_id], map: "fk_beneficio_faq")
+}
+
+model beneficio_fallecido_requisitos {
+  id                  Int                 @id @default(autoincrement())
+  beneficio_id        Int
+  descripcion         String              @db.VarChar(255)
+  orden               Int?                @default(1)
+  beneficio_fallecido beneficio_fallecido @relation(fields: [beneficio_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_beneficio_requisitos")
+
+  @@index([beneficio_id], map: "fk_beneficio_requisitos")
+}
+
+model empresa {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(150)
+  logo_url             String                 @db.VarChar(255)
+  rubro                String?                @db.VarChar(100)
+  estado               Boolean?               @default(true)
+  evento_feria_empresa evento_feria_empresa[]
+  feria_empresa        feria_empresa[]
+}
+
+model feria {
+  id             Int             @id @default(autoincrement())
+  titulo         String          @db.VarChar(150)
+  descripcion    String          @db.Text
+  mes            String          @db.VarChar(20)
+  anio           Int
+  imagen_portada String?         @db.VarChar(255)
+  estado         Boolean?        @default(true)
+  created_at     DateTime?       @default(now()) @db.DateTime(0)
+  feria_empresa  feria_empresa[]
+  feria_fecha    feria_fecha[]
+  ubicacion      ubicacion[]
+}
+
+model feria_empresa {
+  id         Int     @id @default(autoincrement())
+  feria_id   Int
+  empresa_id Int
+  feria      feria   @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_empresa_ibfk_1")
+  empresa    empresa @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_empresa_ibfk_2")
+
+  @@unique([feria_id, empresa_id], map: "feria_id")
+  @@index([empresa_id], map: "empresa_id")
+}
+
+model feria_fecha {
+  id          Int      @id @default(autoincrement())
+  feria_id    Int
+  fecha       DateTime @db.Date
+  hora_inicio DateTime @db.Time(0)
+  hora_fin    DateTime @db.Time(0)
+  feria       feria    @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_fecha_ibfk_1")
+
+  @@index([feria_id], map: "feria_id")
+}
+
+model ubicacion {
+  id          Int     @id @default(autoincrement())
+  feria_id    Int
+  descripcion String  @db.VarChar(200)
+  zona        String? @db.VarChar(100)
+  feria       feria   @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ubicacion_ibfk_1")
+
+  @@index([feria_id], map: "feria_id")
+}
+
+model evento_feria {
+  id                   Int                    @id @default(autoincrement())
+  titulo               String                 @db.VarChar(150)
+  descripcion          String                 @db.Text
+  anio                 Int
+  imagen_portada       String?                @db.VarChar(255)
+  estado               Boolean?               @default(true)
+  created_at           DateTime?              @default(now()) @db.DateTime(0)
+  evento_feria_empresa evento_feria_empresa[]
+  evento_feria_fecha   evento_feria_fecha[]
+}
+
+model evento_feria_empresa {
+  id           Int          @id @default(autoincrement())
+  feria_id     Int
+  empresa_id   Int
+  empresa      empresa      @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_evento_empresa")
+  evento_feria evento_feria @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_evento_feria")
+
+  @@unique([feria_id, empresa_id], map: "uk_evento_empresa")
+  @@index([empresa_id], map: "fk_evento_empresa")
+}
+
+model evento_feria_fecha {
+  id           Int          @id @default(autoincrement())
+  feria_id     Int
+  fecha        DateTime     @db.Date
+  hora_inicio  String       @db.VarChar(10)
+  hora_fin     String       @db.VarChar(10)
+  ubicacion    String       @db.VarChar(200)
+  zona         String?      @db.VarChar(100)
+  evento_feria evento_feria @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_evento_fecha_feria")
+
+  @@index([feria_id], map: "fk_evento_fecha_feria")
+}
+
+model sorteo {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.VarChar(150)
+  descripcion     String            @db.Text
+  imagen          String?           @db.VarChar(255)
+  lugar           String            @db.VarChar(150)
+  fecha_hora      DateTime          @db.DateTime(0)
+  anio            Int
+  estado          sorteo_estado?    @default(ACTIVO)
+  creado_en       DateTime?         @default(now()) @db.Timestamp(0)
+  actualizado_en  DateTime?         @default(now()) @db.Timestamp(0)
+  sorteo_producto sorteo_producto[]
+}
+
+model sorteo_producto {
+  id          Int     @id @default(autoincrement())
+  sorteo_id   Int
+  nombre      String  @db.VarChar(150)
+  descripcion String? @db.VarChar(255)
+  cantidad    Int?    @default(1)
+  sorteo      sorteo  @relation(fields: [sorteo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "sorteo_producto_ibfk_1")
+
+  @@index([sorteo_id], map: "sorteo_id")
+}
+
+model oit_contenido {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(150)
+  descripcion String    @db.Text
+  imagen      String?   @db.VarChar(255)
+  orden       Int?      @default(1)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+
+  @@index([estado], map: "idx_oit_contenido_estado")
+  @@index([orden], map: "idx_oit_contenido_orden")
+}
+
+model constitucion_contenido {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(150)
+  descripcion String    @db.Text
+  imagen      String?   @db.VarChar(255)
+  orden       Int?      @default(1)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+
+  @@index([estado], map: "idx_constitucion_contenido_estado")
+  @@index([orden], map: "idx_constitucion_contenido_orden")
+}
+
+model estatuto_contenido {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(255)
+  descripcion String    @db.Text
+  enlace_pdf  String    @db.VarChar(255)
+  imagen      String?   @db.VarChar(255)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model ley_seguridad_contenido {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(150)
+  descripcion String    @db.Text
+  imagen      String?   @db.VarChar(255)
+  orden       Int?      @default(1)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+}
+
+enum sorteo_estado {
+  ACTIVO
+  INACTIVO
+}

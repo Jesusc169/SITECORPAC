@@ -1,0 +1,120 @@
+/* =========================
+   CONTENEDOR PRINCIPAL
+   ========================= */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+/* =========================
+   TÍTULO – QUIÉNES SOMOS
+   ========================= */
+.main h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2.5rem;
+
+  /* Barra lateral institucional */
+  padding-left: 1rem;
+  border-left: 5px solid #0f4c81; /* azul gris institucional */
+}
+
+/* =========================
+   GRID DE MIEMBROS
+   ========================= */
+.listaMiembros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* =========================
+   TARJETA
+   ========================= */
+.miembroCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.miembroCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   FOTO
+   ========================= */
+.foto {
+  width: 130px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #334155; /* coherente con Quiénes Somos */
+  margin-bottom: 1.2rem;
+}
+
+/* =========================
+   INFORMACIÓN
+   ========================= */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.info strong {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.info span {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+/* Cargo resaltado */
+.info span:first-of-type {
+  font-weight: 500;
+  color: #334155; /* institucional */
+}
+
+/* Periodo */
+.periodo {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 768px) {
+  .main {
+    padding: 2rem 1rem;
+  }
+
+  .main h1 {
+    font-size: 1.6rem;
+    padding-left: 0.85rem;
+    border-left-width: 4px;
+  }
+
+  .foto {
+    width: 110px;
+    height: 110px;
+  }
+
+  .miembroCard {
+    padding: 1.5rem 1.2rem;
+  }
+}

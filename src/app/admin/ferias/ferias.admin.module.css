@@ -1,0 +1,214 @@
+/* =========================================================
+   CONTENEDOR GENERAL
+   ========================================================= */
+.adminWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #1f2937;
+}
+
+/* =========================================================
+   PANEL ADMIN
+   ========================================================= */
+.panelContainer {
+  flex: 1;
+  margin-left: 260px;
+  padding: 36px 48px;
+  background-color: #f3f4f6;
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .panelContainer {
+    margin-left: 0;
+    padding: 24px;
+  }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.newBtn {
+  background-color: #14532d;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.newBtn:hover {
+  background-color: #166534;
+}
+
+/* =========================================================
+   TABLA
+   ========================================================= */
+.tableWrapper {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+/* =========================================================
+   CABECERA TABLA
+   ========================================================= */
+.adminTable thead {
+  background-color: #f9fafb;
+}
+
+.adminTable th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: #111827;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   CUERPO TABLA
+   ========================================================= */
+.adminTable td {
+  padding: 16px;
+  vertical-align: top;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+/* Hover sutil institucional */
+.adminTable tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* =========================================================
+   IMAGEN
+   ========================================================= */
+.imagenCell {
+  width: 140px;
+}
+
+.feriaImagen {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #e5e7eb;
+}
+
+/* =========================================================
+   TEXTO JUSTIFICADO
+   ========================================================= */
+.descripcion {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #374151;
+  text-align: justify;          /* 🔥 clave */
+  hyphens: auto;                /* 🔥 mejora cortes */
+}
+
+/* =========================================================
+   LISTA SIMPLE (EMPRESAS)
+   ========================================================= */
+.simpleList {
+  padding-left: 16px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.simpleList li {
+  margin-bottom: 4px;
+}
+
+/* =========================================================
+   FECHAS (BLOQUES INTERNOS)
+   ========================================================= */
+.fechasCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fechaItem {
+  background-color: #f9fafb;
+  border-left: 4px solid #14532d;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.fechaItem span {
+  display: block;
+}
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actions button {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+/* Editar */
+.actions button:nth-child(1) {
+  background-color: #374151;
+}
+.actions button:nth-child(1):hover {
+  background-color: #1f2937;
+}
+
+/* Duplicar */
+.actions button:nth-child(2) {
+  background-color: #1d4ed8;
+}
+.actions button:nth-child(2):hover {
+  background-color: #1e40af;
+}
+
+/* Eliminar */
+.actions button:nth-child(3) {
+  background-color: #991b1b;
+}
+.actions button:nth-child(3):hover {
+  background-color: #7f1d1d;
+}

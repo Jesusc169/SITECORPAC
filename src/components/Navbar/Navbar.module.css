@@ -1,0 +1,53 @@
+/* Fondo del navbar */
+.navbarCustom {
+  background-color: #e6f4fa;
+}
+
+/* Lista principal de navegación -> distribuye equitativamente */
+.navbarList {
+  display: flex;
+  justify-content: space-between; /* distribuye los ítems */
+  align-items: center;
+  width: 100%;
+  padding: 0 60px;
+}
+
+/* Estilo general de links */
+.navLink {
+  color: #000000 !important;
+  transition: color 0.2s ease-in-out;
+}
+
+.navLink:hover {
+  color: #82b0c4 !important; /* azul corporativo */
+}
+
+/* Dropdown menú */
+.dropdownMenu {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: none; /* por defecto oculto */
+  margin-top: 0; /* evita saltos raros */
+}
+
+.dropdownItem:hover {
+  background-color: #82b0c4;
+  color: #fff !important;
+}
+
+/* Hover para mostrar menú */
+.dropdownHover:hover .dropdownMenu {
+  display: block;
+  position: absolute; /* se despliega sobre el contenido */
+}
+
+/* Botón Únete */
+.btnUnete {
+  background-color: #82b0c4 !important;
+  border: none;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btnUnete:hover {
+  background-color: #5a8fa7 !important;
+}

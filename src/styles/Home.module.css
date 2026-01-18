@@ -1,0 +1,57 @@
+/* 🔹 Contenedor de la imagen debajo del navbar */
+.contenedorImagen {
+  position: relative;
+  width: 100%;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+/* 🔹 Imagen responsiva */
+.imagenFondo {
+  width: 100%;
+  height: clamp(300px, 50vw, 600px); /* escala según viewport */
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔹 Frases superpuestas sobre la imagen */
+.textosSobreImagen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* centrado vertical */
+  align-items: flex-start;   /* alineado a la izquierda */
+  text-align: left;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ✅ Primera frase */
+.frasePrincipal {
+  color: #000000;
+  font-size: clamp(2rem, 6vw, 8rem);
+  font-weight: bold;
+  padding: 15px 25px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  max-width: 90%;
+  white-space: normal;  /* permite salto si es muy largo */
+  word-wrap: break-word;
+}
+
+/* ✅ Segunda frase */
+.fraseSecundaria {
+  color: #000000;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 6px;
+  max-width: 90%;
+  white-space: normal;
+  word-wrap: break-word;
+}

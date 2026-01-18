@@ -1,0 +1,109 @@
+/* 🔹 Sección completa de beneficios */
+.beneficiosSection {
+  width: 100%;
+  padding: 40px 20px;
+  background: #ffffff;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* 🔹 Título de la sección */
+.beneficiosTitulo {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #000000;
+}
+
+/* 🔹 Contenedor vertical */
+.beneficiosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* 🔹 Tarjeta */
+.beneficioCard {
+  border-radius: 50px;
+  padding: 25px 40px;
+  width: 100%;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+  text-align: left;
+}
+
+/* 🔹 Hover efecto */
+.beneficioCard:hover {
+  transform: translateY(-5px);
+}
+
+/* 🔹 Estilo azul */
+.azul {
+  background: #82b0c4;
+  color: white;
+}
+
+/* 🔹 Estilo gris */
+.gris {
+  background: #bfbfbf;
+  color: white;
+}
+
+/* 🔹 Contenedor de contenido (texto + icono) */
+.beneficioContenido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 🔹 Contenedor solo del texto */
+.beneficioTextoContainer {
+  flex: 1;
+}
+
+/* 🔹 Título del beneficio */
+.beneficioTitulo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 🔹 Texto del beneficio */
+.beneficioTexto {
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+/* 🔹 Icono a la derecha */
+.iconoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beneficioIcono {
+  font-size: 3rem;
+  color: inherit;
+}
+
+/* 🔹 Responsive para móviles */
+@media (max-width: 600px) {
+  .beneficioCard {
+    padding: 20px;
+    border-radius: 30px;
+  }
+
+  .beneficioTitulo {
+    font-size: 1.1rem;
+  }
+
+  .beneficioTexto {
+    font-size: 0.95rem;
+  }
+
+  .beneficioIcono {
+    font-size: 1.6rem;
+  }
+}
