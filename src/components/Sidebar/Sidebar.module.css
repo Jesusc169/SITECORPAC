@@ -1,52 +1,100 @@
-/* Sidebar.module.css - sin selectores globales (no body/html) */
+/* Sidebar.module.css */
 
-.sidebar {
-  width: 260px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #0d6efd 0%, #0b5ed7 100%);
-  color: #fff;
-  padding: 1.75rem 1rem;
-  box-shadow: 2px 0 12px rgba(3, 15, 30, 0.08);
+/* ===============================
+   OVERLAY (mobile)
+================================ */
+.overlay {
   position: fixed;
-  left: 0;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  z-index: 1000;
-  transition: transform 0.25s ease;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1035;
 }
 
-/* header / marca */
+/* ===============================
+   SIDEBAR
+================================ */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: #e6f4fa; /* mismo fondo que navbar */
+  color: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #dbeaf1;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+/* Mobile oculto */
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+}
+
+.open {
+  transform: translateX(0) !important;
+}
+
+/* ===============================
+   TOGGLE
+================================ */
+.toggleBtn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1050;
+  background-color: #82b0c4;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 1.25rem;
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .toggleBtn {
+    display: block;
+  }
+}
+
+/* ===============================
+   HEADER
+================================ */
 .header {
-  margin-bottom: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #dbeaf1;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .brandLogo {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  border: 2px solid rgba(255,255,255,0.06);
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
 }
 
 .brandText {
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.6px;
+  font-size: 0.95rem;
+  color: #000;
 }
 
-/* navegación */
+/* ===============================
+   NAV
+================================ */
 .nav {
+  padding: 1rem;
   flex: 1;
-  margin-top: 1rem;
 }
 
 .nav ul {
@@ -56,68 +104,61 @@
 }
 
 .nav li {
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem;
 }
 
 .link {
   display: block;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #f8fbff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #000;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: background 0.18s ease, transform 0.18s ease;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
 .link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateX(4px);
+  background-color: #82b0c4;
+  color: #fff;
 }
 
-/* activo */
 .active {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  background-color: #5a8fa7;
+  color: #fff;
 }
 
-/* footer pequeño */
+/* ===============================
+   BOTÓN CERRAR SESIÓN
+================================ */
+.logoutBtn {
+  width: 100%;
+  margin-bottom: 0.6rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background-color: #dc2626; /* rojo acción */
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.logoutBtn:hover {
+  background-color: #b91c1c;
+}
+
+.logoutBtn:active {
+  transform: scale(0.98);
+}
+
+/* ===============================
+   FOOTER
+================================ */
 .footer {
-  font-size: 0.78rem;
+  padding: 0.75rem;
+  font-size: 0.75rem;
   text-align: center;
-  color: rgba(255,255,255,0.85);
-  border-top: 1px solid rgba(255,255,255,0.04);
-  padding-top: 12px;
-}
-
-/* responsive: en pantallas pequeñas, convertir el sidebar en barra superior */
-@media (max-width: 900px) {
-  .sidebar {
-    position: relative;
-    width: 100%;
-    min-height: auto;
-    height: auto;
-    display: block;
-    padding: 0.75rem 1rem;
-  }
-
-  .nav ul {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 8px 0;
-  }
-
-  .nav li {
-    margin-bottom: 0;
-  }
-
-  .link {
-    padding: 8px 10px;
-    white-space: nowrap;
-  }
-
-  .footer {
-    display: none;
-  }
+  color: #333;
+  border-top: 1px solid #dbeaf1;
 }

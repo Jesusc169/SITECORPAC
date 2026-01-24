@@ -1,4 +1,6 @@
-/* 🔹 Contenedor de la imagen debajo del navbar */
+/* ===============================
+   CONTENEDOR IMAGEN PRINCIPAL
+================================ */
 .contenedorImagen {
   position: relative;
   width: 100%;
@@ -6,16 +8,21 @@
   overflow: hidden;
 }
 
-/* 🔹 Imagen responsiva */
+/* Imagen responsiva */
 .imagenFondo {
   width: 100%;
-  height: clamp(300px, 50vw, 600px); /* escala según viewport */
+  height: clamp(300px, 50vw, 600px); /* ajusta según pantalla */
   object-fit: cover;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.5s ease;
 }
 
-/* 🔹 Frases superpuestas sobre la imagen */
+.imagenFondo:hover {
+  transform: scale(1.02); /* pequeño efecto hover */
+}
+
+/* Textos superpuestos */
 .textosSobreImagen {
   position: absolute;
   top: 0;
@@ -24,34 +31,59 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* centrado vertical */
-  align-items: flex-start;   /* alineado a la izquierda */
+  justify-content: center; /* centrado vertical */
+  align-items: flex-start; /* alineado a la izquierda */
   text-align: left;
-  padding: 20px;
+  padding: 2rem 3rem;
   box-sizing: border-box;
+  color: #0b2a4a;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.25);
 }
 
-/* ✅ Primera frase */
+/* Frase principal */
 .frasePrincipal {
-  color: #000000;
-  font-size: clamp(2rem, 6vw, 8rem);
-  font-weight: bold;
-  padding: 15px 25px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  max-width: 90%;
-  white-space: normal;  /* permite salto si es muy largo */
-  word-wrap: break-word;
+  font-size: clamp(2.5rem, 6vw, 7rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.1;
 }
 
-/* ✅ Segunda frase */
+/* Frase secundaria */
 .fraseSecundaria {
-  color: #000000;
-  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-size: clamp(1.2rem, 3vw, 2rem);
   font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 6px;
-  max-width: 90%;
-  white-space: normal;
-  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 1200px) {
+  .textosSobreImagen {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .frasePrincipal {
+    font-size: clamp(2rem, 5vw, 4rem);
+  }
+
+  .fraseSecundaria {
+    font-size: clamp(1rem, 3vw, 1.6rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .textosSobreImagen {
+    padding: 1rem 1.5rem;
+  }
+
+  .frasePrincipal {
+    font-size: clamp(1.5rem, 6vw, 3rem);
+  }
+
+  .fraseSecundaria {
+    font-size: clamp(0.9rem, 4vw, 1.2rem);
+  }
 }

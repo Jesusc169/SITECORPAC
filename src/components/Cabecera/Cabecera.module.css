@@ -1,61 +1,110 @@
-.rectangulo {
-  background-color: #82B0C4;
+/* ===============================
+   CABECERA GENERAL
+================================ */
+.cabecera {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2px;
-  border-radius: 0;
+  background: linear-gradient(
+    135deg,
+    #82b0c4 0%,
+    #6b9fb6 100%
+  );
+  padding: 22px 24px;
 }
 
-/* 🔹 Logo */
+/* Contenedor */
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* ===============================
+   MARCA
+================================ */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Logo */
 .logo {
-  width: clamp(80px, 10vw, 60px);
-  height: clamp(80px, 10vw, 60px);
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 10px;
+  background: #ffffff;
+  padding: 4px;
 }
 
-/* 🔹 Título */
+/* Título principal */
 .titulo {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: bold;
+  font-size: 2.2rem;
+  font-weight: 800;
   margin: 0;
-  color: rgb(0, 0, 0);
-  text-align: center;
+  color: #0b2a4a;
+  letter-spacing: -0.4px;
 }
 
-/* 🔹 Frases */
-.frases {
-  margin-top: 10px;
-  color: black;
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
-  text-align: center;
-  padding: 0 15px;
-  line-height: 1.5;
-  max-width: 100%;
+/* Subtítulo */
+.subtitulo {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  opacity: 0.85;
+  margin-top: 2px;
 }
 
-@media (min-width: 768px) {
-  .rectangulo {
-    flex-direction: row;
-    align-items: center;
+/* ===============================
+   MENSAJE
+================================ */
+.mensaje {
+  margin-left: auto;
+  max-width: 520px;
+  text-align: right;
+  color: #0f172a;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.mensajeSecundario {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 900px) {
+  .contenedor {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .mensaje {
+    margin-left: 0;
+    text-align: left;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .titulo {
+    font-size: 1.8rem;
   }
 
   .logo {
-    margin-right: 20px;
-    margin-bottom: 0;
+    width: 56px;
+    height: 56px;
   }
 
-  .titulo {
-    margin-right: auto;
-    text-align: left;
-  }
-
-  .frases {
-    max-width: 60%;
-    padding-right: 50px;
-    text-align: right;
+  .mensaje {
+    font-size: 0.95rem;
   }
 }

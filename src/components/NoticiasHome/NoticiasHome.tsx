@@ -1,48 +1,117 @@
-import styles from "./Noticias.module.css";
+"use client";
 
-export default async function NoticiasHome() {
-  try {
-    // Llamada al endpoint que obtiene noticias desde tu controlador MVC
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/noticias`, {
-      cache: "no-store",
-    });
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "@/components/NoticiasHome/Noticias.module.css";
 
-    if (!res.ok) throw new Error("Error al cargar noticias");
-    const todasLasNoticias = await res.json();
+interface Noticia {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  imagen: string;
+}
 
-    // Tomar solo las 3 primeras (más recientes)
-    const noticias = todasLasNoticias.slice(0, 3);
+interface Props {
+  noticias?: Noticia[];
+}
 
-    return (
-      <section className={styles.noticiasSection}>
-        <h2 className={styles.noticiasTitulo}>Noticias</h2>
+export default function NoticiasHome({ noticias = [] }: Props) {
+  const [indexActual, setIndexActual] = useState(0);
 
-        {noticias.length === 0 ? (
-          <p className={styles.noticiasVacio}>No hay noticias por mostrar.</p>
-        ) : (
-          <div className={styles.noticiasContainer}>
-            {noticias.map((noticia: any) => (
-              <div key={noticia.id} className={styles.noticiaCard}>
-                <img
-                  src={noticia.imagen || "/Noticias_site.jpg"}
-                  alt={noticia.titulo}
-                  className={styles.noticiaImagen}
-                />
-                <h3 className={styles.noticiaTituloCard}>{noticia.titulo}</h3>
-                <p className={styles.noticiaTexto}>{noticia.descripcion}</p>
-              </div>
+  useEffect(() => {
+    if (!noticias.length) return;
+
+    const interval = setInterval(() => {
+      setIndexActual((prev) =>
+        prev === noticias.length - 1 ? 0 : prev + 1
+      );
+    }, 18000);
+
+    return () => clearInterval(interval);
+  }, [noticias]);
+
+  return (
+    <section className={styles.noticiasSection}>
+      {/* HEADER */}
+      <header className={styles.header}>
+        <h2 className={styles.titulo}>Noticias SITECORPAC</h2>
+        <p className={styles.subtitulo}>
+          Mantente informado sobre nuestras actividades, comunicados y acciones
+          en defensa de los trabajadores.
+        </p>
+      </header>
+
+      {!noticias.length ? (
+        <p className={styles.sinNoticias}>
+          No hay noticias disponibles en este momento.
+        </p>
+      ) : (
+        <>
+          {/* CARRUSEL */}
+          <div className={styles.carruselWrapper}>
+            <div
+              className={styles.carrusel}
+              style={{
+                transform: `translateX(-${indexActual * 100}%)`,
+              }}
+            >
+              {noticias.map((noticia) => (
+                <article
+                  key={noticia.id}
+                  className={styles.noticiaCard}
+                  aria-label={`Noticia: ${noticia.titulo}`}
+                >
+                  <div className={styles.imagenWrapper}>
+                    <img
+                      src={noticia.imagen}
+                      alt={noticia.titulo}
+                      className={styles.imagen}
+                    />
+                  </div>
+
+                  <div className={styles.contenido}>
+                    <h3 className={styles.cardTitulo}>
+                      {noticia.titulo}
+                    </h3>
+
+                    <p className={styles.descripcion}>
+                      {noticia.descripcion}
+                    </p>
+
+                    <Link
+                      href={`/actividades/noticias/${noticia.id}`}
+                      className={styles.verMas}
+                    >
+                      Leer noticia completa
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          {/* INDICADORES */}
+          <div className={styles.indicadores}>
+            {noticias.map((_, i) => (
+              <button
+                key={i}
+                className={`${styles.indicador} ${
+                  i === indexActual ? styles.activo : ""
+                }`}
+                onClick={() => setIndexActual(i)}
+                aria-label={`Ir a noticia ${i + 1}`}
+              />
             ))}
           </div>
-        )}
-      </section>
-    );
-  } catch (error) {
-    console.error("Error al cargar noticias:", error);
-    return (
-      <section className={styles.noticiasSection}>
-        <h2 className={styles.noticiasTitulo}>Noticias</h2>
-        <p className={styles.noticiasVacio}>No hay noticias por mostrar.</p>
-      </section>
-    );
-  }
+
+          {/* VER TODAS */}
+          <div className={styles.verTodasWrapper}>
+            <Link href="/noticias" className={styles.verTodasBtn}>
+              Ver todas las noticias
+            </Link>
+          </div>
+        </>
+      )}
+    </section>
+  );
 }

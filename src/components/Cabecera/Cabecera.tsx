@@ -3,29 +3,35 @@ import styles from "./Cabecera.module.css";
 
 export default function Cabecera() {
   return (
-    <div className={styles.rectangulo}>
-      <img
-        src="/logo_site.jpg"
-        alt="Logo SITE CORPAC"
-        className={styles.logo}
-      />
-      <h1 className={styles.titulo}>SITECORPAC</h1>
-
-      {/* Contenedor de frases */}
-      <div className={styles.frases}>
-        <div className={styles.frase}>
-          <p>
-            Fomentar la equidad social y garantizar condiciones de trabajo digno
-            en CORPAC
-          </p>
+    <header className={styles.cabecera}>
+      <div className={styles.contenedor}>
+        {/* Logo + nombre */}
+        <div className={styles.marca}>
+          <img
+            src="/logo_site.jpg"
+            alt="Logo SITECORPAC"
+            className={styles.logo}
+          />
+          <div>
+            <h1 className={styles.titulo}>SITECORPAC</h1>
+            <span className={styles.subtitulo}>
+              Sindicato de Trabajadores de CORPAC
+            </span>
+          </div>
         </div>
-        <div className={styles.frase}>
+
+        {/* Mensaje institucional */}
+        <div className={styles.mensaje}>
           <p>
-            El SITECORPAC es una organización sindical de los trabajadores de
-            CORPAC
+            Fomentamos la equidad social y defendemos condiciones de trabajo
+            dignas para todos los trabajadores de CORPAC.
+          </p>
+          <p className={styles.mensajeSecundario}>
+            Organización sindical representativa, democrática y comprometida
+            con sus afiliados.
           </p>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

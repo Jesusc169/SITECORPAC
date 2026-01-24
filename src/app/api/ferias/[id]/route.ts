@@ -3,20 +3,54 @@ import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
+// cache corto para detalle
+export const revalidate = 30;
+
 /* ===========================
-   GET: obtener feria por ID
+   GET – FERIA POR ID (OPTIMIZADO)
 =========================== */
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const id = Number(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
+
     const feria = await prisma.evento_feria.findUnique({
-      where: { id: Number(params.id) },
-      include: {
-        evento_feria_fecha: true,
+      where: { id },
+      select: {
+        id: true,
+        titulo: true,
+        descripcion: true,
+        anio: true,
+        imagen_portada: true,
+        created_at: true,
+
+        evento_feria_fecha: {
+          select: {
+            id: true,
+            fecha: true,
+            hora_inicio: true,
+            hora_fin: true,
+            ubicacion: true,
+            zona: true,
+          },
+        },
+
         evento_feria_empresa: {
-          include: { empresa: true },
+          select: {
+            empresa: {
+              select: {
+                id: true,
+                nombre: true,
+                logo_url: true,
+              },
+            },
+          },
         },
       },
     });
@@ -30,7 +64,7 @@ export async function GET(
 
     return NextResponse.json(feria);
   } catch (error) {
-    console.error(error);
+    console.error("ERROR GET FERIA ID:", error);
     return NextResponse.json(
       { error: "Error al obtener feria" },
       { status: 500 }
@@ -39,13 +73,14 @@ export async function GET(
 }
 
 /* ===========================
-   PUT: editar feria
+   PUT – EDITAR FERIA (TRANSACCIONAL)
 =========================== */
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const id = Number(params.id);
     const form = await req.formData();
 
     const titulo = String(form.get("titulo") || "");
@@ -57,7 +92,6 @@ export async function PUT(
 
     let imagePath: string | undefined;
 
-    /* ---- Imagen opcional ---- */
     if (imagen && imagen.size > 0) {
       const buffer = Buffer.from(await imagen.arrayBuffer());
       const fileName = `${Date.now()}-${imagen.name}`;
@@ -71,43 +105,45 @@ export async function PUT(
       imagePath = `/uploads/ferias/${fileName}`;
     }
 
-    /* ---- Limpiar relaciones ---- */
-    await prisma.evento_feria_fecha.deleteMany({
-      where: { feria_id: Number(params.id) },
-    });
+    const feria = await prisma.$transaction(async (tx) => {
+      await tx.evento_feria_fecha.deleteMany({
+        where: { feria_id: id },
+      });
 
-    await prisma.evento_feria_empresa.deleteMany({
-      where: { feria_id: Number(params.id) },
-    });
+      await tx.evento_feria_empresa.deleteMany({
+        where: { feria_id: id },
+      });
 
-    /* ---- Actualizar feria ---- */
-    const feria = await prisma.evento_feria.update({
-      where: { id: Number(params.id) },
-      data: {
-        titulo,
-        descripcion,
-        anio,
-        ...(imagePath && { imagen_portada: imagePath }),
-        evento_feria_fecha: {
-          create: fechas.map((f: any) => ({
-            fecha: new Date(f.fecha),
-            hora_inicio: f.hora_inicio,
-            hora_fin: f.hora_fin,
-            ubicacion: f.ubicacion,
-            zona: f.zona || null,
-          })),
+      return tx.evento_feria.update({
+        where: { id },
+        data: {
+          titulo,
+          descripcion,
+          anio,
+          ...(imagePath && { imagen_portada: imagePath }),
+
+          evento_feria_fecha: {
+            create: fechas.map((f: any) => ({
+              fecha: new Date(f.fecha),
+              hora_inicio: f.hora_inicio,
+              hora_fin: f.hora_fin,
+              ubicacion: f.ubicacion,
+              zona: f.zona || null,
+            })),
+          },
+
+          evento_feria_empresa: {
+            create: empresas.map((empresa_id: number) => ({
+              empresa_id,
+            })),
+          },
         },
-        evento_feria_empresa: {
-          create: empresas.map((id: number) => ({
-            empresa_id: id,
-          })),
-        },
-      },
+      });
     });
 
     return NextResponse.json(feria);
   } catch (error) {
-    console.error(error);
+    console.error("ERROR PUT FERIA:", error);
     return NextResponse.json(
       { error: "Error al actualizar feria" },
       { status: 500 }
@@ -116,28 +152,32 @@ export async function PUT(
 }
 
 /* ===========================
-   DELETE: eliminar feria
+   DELETE – ELIMINAR FERIA (SEGURO)
 =========================== */
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.evento_feria_fecha.deleteMany({
-      where: { feria_id: Number(params.id) },
-    });
+    const id = Number(params.id);
 
-    await prisma.evento_feria_empresa.deleteMany({
-      where: { feria_id: Number(params.id) },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.evento_feria_fecha.deleteMany({
+        where: { feria_id: id },
+      });
 
-    await prisma.evento_feria.delete({
-      where: { id: Number(params.id) },
+      await tx.evento_feria_empresa.deleteMany({
+        where: { feria_id: id },
+      });
+
+      await tx.evento_feria.delete({
+        where: { id },
+      });
     });
 
     return NextResponse.json({ message: "Feria eliminada" });
   } catch (error) {
-    console.error(error);
+    console.error("ERROR DELETE FERIA:", error);
     return NextResponse.json(
       { error: "Error al eliminar feria" },
       { status: 500 }
