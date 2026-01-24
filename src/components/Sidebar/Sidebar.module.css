@@ -1,5 +1,3 @@
-/* Sidebar.module.css */
-
 /* ===============================
    OVERLAY (mobile)
 ================================ */
@@ -16,7 +14,7 @@
 .sidebar {
   width: 260px;
   height: 100vh;
-  background-color: #e6f4fa; /* mismo fondo que navbar */
+  background-color: #e6f4fa; /* institucional claro */
   color: #000;
   position: fixed;
   top: 0;
@@ -41,7 +39,7 @@
 }
 
 /* ===============================
-   TOGGLE
+   TOGGLE (mobile)
 ================================ */
 .toggleBtn {
   position: fixed;
@@ -54,6 +52,7 @@
   padding: 6px 10px;
   color: #fff;
   font-size: 1.25rem;
+  cursor: pointer;
   display: none;
 }
 
@@ -81,12 +80,46 @@
   width: 40px;
   height: 40px;
   border-radius: 6px;
+  object-fit: cover;
 }
 
 .brandText {
   font-weight: 700;
   font-size: 0.95rem;
   color: #000;
+  letter-spacing: 0.3px;
+}
+
+/* ===============================
+   BOTÓN INICIO
+================================ */
+.homeWrapper {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dbeaf1;
+}
+
+.homeBtn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.homeBtn:hover {
+  background-color: #82b0c4;
+  color: #ffffff;
+}
+
+.activeHome {
+  background-color: #5a8fa7;
+  color: #ffffff;
 }
 
 /* ===============================
@@ -110,11 +143,12 @@
 .link {
   display: block;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #000;
   text-decoration: none;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  font-size: 0.88rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .link:hover {
@@ -128,15 +162,30 @@
 }
 
 /* ===============================
-   BOTÓN CERRAR SESIÓN
+   FOOTER
+================================ */
+.footer {
+  padding: 0.75rem;
+  border-top: 1px solid #dbeaf1;
+  text-align: center;
+}
+
+.footerText {
+  font-size: 0.75rem;
+  color: #333;
+  margin-top: 0.4rem;
+}
+
+/* ===============================
+   LOGOUT
 ================================ */
 .logoutBtn {
   width: 100%;
   margin-bottom: 0.6rem;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background-color: #dc2626; /* rojo acción */
+  background-color: #dc2626;
   color: #fff;
   font-weight: 600;
   font-size: 0.85rem;
@@ -149,16 +198,5 @@
 }
 
 .logoutBtn:active {
-  transform: scale(0.98);
-}
-
-/* ===============================
-   FOOTER
-================================ */
-.footer {
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: #333;
-  border-top: 1px solid #dbeaf1;
+  transform: scale(0.97);
 }
