@@ -14,7 +14,6 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      // Cierra sesión en backend (cookie / JWT)
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -23,11 +22,10 @@ export default function Sidebar() {
       console.error("Error al cerrar sesión", e);
     }
 
-    // Limpieza total de cliente
     localStorage.clear();
     sessionStorage.clear();
 
-    // 🔥 IMPORTANTE: evita volver con "atrás"
+    // Evita volver con "atrás"
     window.location.replace("/login");
   };
 
@@ -69,7 +67,20 @@ export default function Sidebar() {
             </div>
           </div>
 
-          {/* Nav */}
+          {/* Botón Inicio */}
+          <div className={styles.homeWrapper}>
+            <Link
+              href="/dashboard"
+              className={`${styles.homeBtn} ${
+                isActive("/dashboard") ? styles.activeHome : ""
+              }`}
+              onClick={() => setOpen(false)}
+            >
+              Inicio
+            </Link>
+          </div>
+
+          {/* Navegación */}
           <nav className={styles.nav}>
             <ul>
               <li>
@@ -132,7 +143,7 @@ export default function Sidebar() {
             Cerrar sesión
           </button>
 
-          <div>
+          <div className={styles.footerText}>
             SITECORPAC • Panel administrativo
           </div>
         </div>
