@@ -4,55 +4,79 @@ import styles from "./Footer.module.css";
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <h2 className={styles.footerTitulo}>Contáctanos</h2>
+      <div className={styles.footerContainer}>
+        {/* CABECERA */}
+        <header className={styles.header}>
+          <h2 className={styles.titulo}>Contáctanos</h2>
+          <p className={styles.descripcion}>
+            Estamos disponibles para atender consultas, brindar información
+            institucional y acompañar a nuestros afiliados.
+          </p>
+        </header>
 
-      <div className={styles.footerGrid}>
-        {/* Correo */}
-        <div className={styles.contactoBox}>
-          <div className={styles.contactoItem}>
+        {/* GRID DE CONTACTO */}
+        <div className={styles.grid}>
+          {/* Email */}
+          <div className={styles.card}>
             <i className="bi bi-envelope-fill"></i>
-            <a href="mailto:sitecorpac@corpac.pe" className={styles.link}>
-              sitecorpac@corpac.pe
-            </a>
+            <div>
+              <span className={styles.label}>Correo institucional</span>
+              <a
+                href="mailto:sitecorpac@corpac.pe"
+                className={styles.link}
+              >
+                sitecorpac@corpac.pe
+              </a>
+            </div>
           </div>
-        </div>
 
-        {/* Teléfono */}
-        <div className={styles.contactoBox}>
-          <div className={styles.contactoItem}>
+          {/* Teléfono */}
+          <div className={styles.card}>
             <i className="bi bi-telephone-fill"></i>
-            <span>+51 987654321</span>
+            <div>
+              <span className={styles.label}>Teléfono</span>
+              <span className={styles.text}>+51 987 654 321</span>
+            </div>
           </div>
-        </div>
 
-        {/* WhatsApp */}
-        <div className={styles.contactoBox}>
-            <div className={styles.contactoItem}>
-                <i className="bi bi-whatsapp"></i>
-                <a
-                href="https://wa.me/+51940218125"
+          {/* WhatsApp */}
+          <div className={styles.card}>
+            <i className="bi bi-whatsapp"></i>
+            <div>
+              <span className={styles.label}>WhatsApp</span>
+              <a
+                href="https://wa.me/51940218125"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
-                >
-                +51 987654321
-                </a>
+              >
+                +51 940 218 125
+              </a>
             </div>
-            </div>
-
-        {/* Facebook */}
-        <div className={styles.contactoBox}>
-          <div className={styles.contactoItem}>
-            <i className="bi bi-facebook"></i>
-            <a
-              href="https://www.facebook.com/SITECORPAC"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.link}
-            >
-              SITECORPAC
-            </a>
           </div>
+
+          {/* Facebook */}
+          <div className={styles.card}>
+            <i className="bi bi-facebook"></i>
+            <div>
+              <span className={styles.label}>Facebook</span>
+              <a
+                href="https://www.facebook.com/SITECORPAC"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                SITECORPAC
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER LEGAL */}
+        <div className={styles.footerBottom}>
+          <p>
+            © {new Date().getFullYear()} SITECORPAC — Sindicato de Trabajadores de CORPAC
+          </p>
         </div>
       </div>
     </footer>

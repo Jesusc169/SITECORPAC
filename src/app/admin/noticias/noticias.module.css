@@ -1,0 +1,231 @@
+/* ===============================
+   CONTENEDOR GENERAL
+================================ */
+.container {
+  padding: 2.5rem 2.75rem;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* espacio sidebar */
+  margin-left: 260px;
+  transition: margin-left 0.3s ease;
+}
+
+/* ===============================
+   CABECERA
+================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.header h1 {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+/* ===============================
+   BOTÓN PRINCIPAL
+================================ */
+.btnPrimary {
+  background-color: #0d6efd;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+}
+
+.btnPrimary:hover {
+  background-color: #0b5ed7;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+}
+
+/* ===============================
+   TABLA
+================================ */
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08);
+}
+
+.table thead {
+  background-color: #1e293b;
+}
+
+.table th {
+  color: #f8fafc;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  padding: 0.85rem 1rem;
+  text-align: left;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #334155;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* ===============================
+   ACCIONES
+================================ */
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.actions button {
+  background-color: #e2e8f0;
+  border: none;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #0f172a;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.actions button:hover {
+  background-color: #cbd5f5;
+  transform: translateY(-1px);
+}
+
+.actions .danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.actions .danger:hover {
+  background-color: #fecaca;
+}
+
+/* ===============================
+   MODAL ELIMINAR – FIX DEFINITIVO
+   (ANTI DIFUMINADO)
+================================ */
+
+/* backdrop limpio, sin blur */
+.modal-backdrop.show {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: none !important;
+}
+
+/* aislar completamente el modal */
+.modal.show {
+  position: fixed !important;
+  inset: 0;
+  z-index: 1055 !important;
+  isolation: isolate;
+}
+
+/* diálogo estándar */
+.modal-dialog {
+  max-width: 420px;
+  margin: 1.75rem auto;
+}
+
+/* contenido 100% nítido */
+.modal-content {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22) !important;
+  border-radius: 8px;
+}
+
+/* header */
+.modal-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-header h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+/* body */
+.modal-body {
+  background-color: #ffffff;
+  color: #212529;
+  font-size: 0.95rem;
+}
+
+/* footer */
+.modal-footer {
+  background-color: #ffffff;
+  border-top: 1px solid #dee2e6;
+}
+
+/* ===============================
+   RESPONSIVE – TABLET & MOBILE
+================================ */
+@media (max-width: 991.98px) {
+  .container {
+    margin-left: 0;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btnPrimary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
+
+/* ===============================
+   MOBILE PEQUEÑO
+================================ */
+@media (max-width: 576px) {
+  .header h1 {
+    font-size: 1.35rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.78rem;
+    padding: 0.55rem;
+  }
+}

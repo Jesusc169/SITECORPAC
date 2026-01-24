@@ -6,15 +6,18 @@ import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 import styles from "./Directorio.module.css";
 
+/* =========================
+   Tipado alineado al API
+   ========================= */
 type Miembro = {
   id: number;
   nombre: string;
   cargo: string;
-  correo: string;
+  email: string;
   telefono: string;
-  fotoUrl?: string;
-  periodoInicio: string;
-  periodoFin?: string;
+  foto?: string;
+  fechaInicio: string;
+  fechaFin?: string;
   orden: number;
 };
 
@@ -22,9 +25,11 @@ type Miembro = {
    Utilidad fechas (FIX TZ)
    ========================= */
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("es-PE", {
+  return new Date(dateStr).toLocaleDateString("es-PE", {
     timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 }
 
@@ -37,17 +42,22 @@ export default function DirectorioPage() {
      ========================= */
   const fetchMiembros = async () => {
     try {
-      const res = await fetch("/api/directorio");
-      if (!res.ok) throw new Error("Error al obtener directorio");
+      const res = await fetch("/api/directorio", {
+        cache: "no-store", // 👈 fuerza data fresca en dev
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al obtener directorio");
+      }
 
       const data: Miembro[] = await res.json();
 
-      // 🔥 ORDEN DEFINIDO POR BD
+      // 🔥 Orden viene de BD, pero blindamos
       data.sort((a, b) => a.orden - b.orden);
 
       setMiembros(data);
     } catch (error) {
-      console.error(error);
+      console.error("Error directorio:", error);
       setMiembros([]);
     } finally {
       setLoading(false);
@@ -74,34 +84,28 @@ export default function DirectorioPage() {
           <ul className={styles.listaMiembros}>
             {miembros.map((m) => (
               <li key={m.id} className={styles.miembroCard}>
-                {m.fotoUrl && (
+                {/* FOTO */}
+                {m.foto && (
                   <img
-                    src={m.fotoUrl}
+                    src={m.foto}
                     alt={`Foto de ${m.nombre}`}
                     className={styles.foto}
+                    loading="lazy" // ⚡ mejora performance
                   />
                 )}
 
                 <div className={styles.info}>
                   <strong>{m.nombre}</strong>
 
-                  <span>
-                    👔 {m.cargo}
-                  </span>
+                  <span>👔 {m.cargo}</span>
 
-                  <span>
-                    📧 {m.correo}
-                  </span>
+                  <span>📧 {m.email}</span>
 
-                  <span>
-                    📞 {m.telefono}
-                  </span>
+                  <span>📞 {m.telefono}</span>
 
                   <span className={styles.periodo}>
-                    📅{" "}
-                    {new Date(m.periodoInicio).toLocaleDateString()}{" "}
-                    {m.periodoFin &&
-                      `- ${new Date(m.periodoFin).toLocaleDateString()}`}
+                    📅 {formatDate(m.fechaInicio)}
+                    {m.fechaFin && ` – ${formatDate(m.fechaFin)}`}
                   </span>
                 </div>
               </li>

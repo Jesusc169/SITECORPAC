@@ -26,13 +26,16 @@ model directorio {
   periodoFin    DateTime?
   createdAt     DateTime  @default(now())
   orden         Int
+
+  @@index([nombre], map: "idx_directorio_nombre")
+  @@index([orden], map: "idx_directorio_orden")
 }
 
 model noticia {
   id          Int      @id @default(autoincrement())
   titulo      String
   descripcion String
-  contenido   String?
+  contenido   String?  @db.Text
   imagen      String?
   fecha       DateTime @default(now())
   createdAt   DateTime @default(now())
@@ -161,6 +164,11 @@ model evento_feria {
   created_at           DateTime?              @default(now()) @db.DateTime(0)
   evento_feria_empresa evento_feria_empresa[]
   evento_feria_fecha   evento_feria_fecha[]
+
+  @@index([anio, estado], map: "idx_evento_feria_anio_estado")
+  @@index([created_at], map: "idx_evento_feria_created")
+  @@index([id, estado], map: "idx_evento_feria_id_estado")
+  @@index([estado, anio, created_at(sort: Desc)], map: "idx_evento_feria_listado")
 }
 
 model evento_feria_empresa {
@@ -172,6 +180,7 @@ model evento_feria_empresa {
 
   @@unique([feria_id, empresa_id], map: "uk_evento_empresa")
   @@index([empresa_id], map: "fk_evento_empresa")
+  @@index([feria_id], map: "idx_evento_feria_empresa_feria")
 }
 
 model evento_feria_fecha {
@@ -184,7 +193,7 @@ model evento_feria_fecha {
   zona         String?      @db.VarChar(100)
   evento_feria evento_feria @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_evento_fecha_feria")
 
-  @@index([feria_id], map: "fk_evento_fecha_feria")
+  @@index([feria_id], map: "idx_evento_feria_fecha_feria")
 }
 
 model sorteo {
@@ -254,6 +263,16 @@ model ley_seguridad_contenido {
   descripcion String    @db.Text
   imagen      String?   @db.VarChar(255)
   orden       Int?      @default(1)
+  estado      Int?      @default(1) @db.TinyInt
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model ley_relaciones_colectivas {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(255)
+  descripcion String    @db.Text
+  enlace_pdf  String    @db.VarChar(255)
+  imagen      String?   @db.VarChar(255)
   estado      Int?      @default(1) @db.TinyInt
   created_at  DateTime? @default(now()) @db.Timestamp(0)
 }

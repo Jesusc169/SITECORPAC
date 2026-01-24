@@ -1,60 +1,56 @@
 // components/Beneficios.tsx
 import styles from "./Beneficios.module.css";
 
-// Importa los íconos de Bootstrap (ya mencionaste que están importados)
 export default function Beneficios() {
   const beneficios = [
     {
       titulo: "Asesoría legal",
       descripcion:
-        "Te acompañamos en reclamos laborales, sanciones, despidos injustificados o cualquier afectación a los derechos del trabajador.",
-      color: "azul",
-      icono: "bi bi-file-earmark-text", // ícono de martillo (legal)
+        "Acompañamiento en reclamos laborales, sanciones, despidos injustificados y defensa de los derechos del trabajador.",
+      icono: "bi bi-file-earmark-text",
     },
     {
       titulo: "Apoyo en casos especiales",
       descripcion:
-        "Bono a familiares por fallecimiento de colaborador por el sindicato, ayudas en casos médicos urgentes, y apoyos en gestiones ante CORPAC.",
-      color: "gris",
-      icono: "bi bi-heart-pulse", // ícono de salud / ayuda
+        "Apoyo solidario en casos de fallecimiento, emergencias médicas y gestiones ante CORPAC.",
+      icono: "bi bi-heart-pulse",
     },
     {
-      titulo: "Préstamos por convenio a bajo interés",
+      titulo: "Préstamos por convenio",
       descripcion:
-        "Brindamos a nuestros afiliados préstamos para ayudarlos a cumplir sus metas.",
-      color: "azul",
-      icono: "bi bi-cash-coin", // ícono de dinero
+        "Acceso a préstamos con tasas preferenciales para apoyar el bienestar económico de nuestros afiliados.",
+      icono: "bi bi-cash-coin",
     },
     {
       titulo: "Ferias y campañas",
       descripcion:
-        "Organizamos campañas de salud y campañas de ventas de alimentos y productos a precios accesibles.",
-      color: "gris",
-      icono: "bi bi-megaphone", // ícono de evento / campaña
+        "Organización de campañas de salud y ferias de productos a precios accesibles para los afiliados.",
+      icono: "bi bi-megaphone",
     },
   ];
 
   return (
     <section className={styles.beneficiosSection}>
-      <h2 className={styles.beneficiosTitulo}>Beneficios para nuestros afiliados</h2>
-      <div className={styles.beneficiosContainer}>
+      <header className={styles.header}>
+        <h2 className={styles.titulo}>Beneficios para nuestros afiliados</h2>
+        <p className={styles.subtitulo}>
+          Comprometidos con la defensa, el bienestar y el desarrollo de nuestros
+          afiliados.
+        </p>
+      </header>
+
+      <div className={styles.grid}>
         {beneficios.map((beneficio, index) => (
-          <div
-            key={index}
-            className={`${styles.beneficioCard} ${
-              beneficio.color === "azul" ? styles.azul : styles.gris
-            }`}
-          >
-            <div className={styles.beneficioContenido}>
-              <div className={styles.beneficioTextoContainer}>
-                <h3 className={styles.beneficioTitulo}>{beneficio.titulo}</h3>
-                <p className={styles.beneficioTexto}>{beneficio.descripcion}</p>
-              </div>
-              <div className={styles.iconoContainer}>
-                <i className={`${beneficio.icono} ${styles.beneficioIcono}`}></i>
-              </div>
+          <article key={index} className={styles.card}>
+            <div className={styles.icono}>
+              <i className={beneficio.icono} />
             </div>
-          </div>
+
+            <div className={styles.contenido}>
+              <h3 className={styles.cardTitulo}>{beneficio.titulo}</h3>
+              <p className={styles.descripcion}>{beneficio.descripcion}</p>
+            </div>
+          </article>
         ))}
       </div>
     </section>

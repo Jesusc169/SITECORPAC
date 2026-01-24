@@ -1,35 +1,53 @@
+// controllers/NoticiasController.ts
 import prisma from "@/lib/prisma";
 
-// 🟢 Obtener todas las noticias
-export async function obtenerNoticias() {
-  return await prisma.noticia.findMany({
-    orderBy: { fecha: "desc" },
-  });
-}
+export class NoticiasController {
+  // 🟢 Obtener todas las noticias (para histórico)
+  static async obtenerNoticias() {
+    return await prisma.noticia.findMany({
+      orderBy: { fecha: "desc" },
+    });
+  }
 
-// 🔵 Obtener noticia por ID
-export async function obtenerNoticiaPorId(id) {
-  return await prisma.noticia.findUnique({
-    where: { id: Number(id) },
-  });
-}
+  // 🔵 Obtener las últimas N noticias (para la página principal)
+  static async obtenerUltimasNoticias(limit = 3) {
+    return await prisma.noticia.findMany({
+      orderBy: { fecha: "desc" },
+      take: limit,
+    });
+  }
 
-// 🟡 Crear noticia
-export async function crearNoticia(data) {
-  return await prisma.noticia.create({ data });
-}
+  // 🟣 Obtener noticia por ID (para página individual)
+  static async obtenerNoticiaPorId(id: number) {
+    return await prisma.noticia.findUnique({
+      where: { id },
+    });
+  }
 
-// 🟠 Actualizar noticia
-export async function actualizarNoticia(id, data) {
-  return await prisma.noticia.update({
-    where: { id: Number(id) },
-    data,
-  });
-}
+  // 🟡 Crear noticia
+  static async crearNoticia(data: {
+    titulo: string;
+    descripcion: string;
+    contenido?: string;
+    imagen?: string;
+    fecha?: Date;
+    autor: string;
+  }) {
+    return await prisma.noticia.create({ data });
+  }
 
-// 🔴 Eliminar noticia
-export async function eliminarNoticia(id) {
-  return await prisma.noticia.delete({
-    where: { id: Number(id) },
-  });
+  // 🟠 Actualizar noticia
+  static async actualizarNoticia(id: number, data: any) {
+    return await prisma.noticia.update({
+      where: { id },
+      data,
+    });
+  }
+
+  // 🔴 Eliminar noticia
+  static async eliminarNoticia(id: number) {
+    return await prisma.noticia.delete({
+      where: { id },
+    });
+  }
 }

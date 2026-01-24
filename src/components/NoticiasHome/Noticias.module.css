@@ -1,121 +1,207 @@
-/* 🔹 Sección completa de noticias */
+/* ===============================
+   SECCIÓN GENERAL
+================================ */
 .noticiasSection {
-  width: 100%;
-  padding: 40px 20px;
-  background: #f5f5f5; /* fondo claro */
-  box-sizing: border-box;
+  padding: 80px 24px;
+  background-color: #f8fafc;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.header {
+  max-width: 900px;
+  margin: 0 auto 60px;
   text-align: center;
 }
 
-/* 🔹 Título de sección */
-.noticiasTitulo {
+.titulo {
   font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 30px;
-  color: #000000;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
 }
 
-/* 🔹 Contenedor principal de noticias (grid) */
-.noticiasContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* responsive */
-  gap: 20px;
-  width: 100%;
-  margin-bottom: 30px;
+.subtitulo {
+  font-size: 1.1rem;
+  color: #475569;
+  line-height: 1.6;
 }
 
-/* 🔹 Cada tarjeta */
-.noticiaCard {
-  background: #82b0c4; /* azul como en tu ejemplo */
-  border-radius: 20px;
-  overflow: hidden;
-  padding: 20px;
+.sinNoticias {
   text-align: center;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #64748b;
+  font-size: 1rem;
 }
 
-/* Hover efecto */
-.noticiaCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* 🔹 Contenedor con proporción fija para la imagen */
-.noticiaImagenContainer {
-  width: 100%;
-  aspect-ratio: 16 / 9;
+/* ===============================
+   CARRUSEL
+================================ */
+.carruselWrapper {
+  max-width: 1150px;
+  margin: 0 auto;
   overflow: hidden;
-  border-radius: 20px;
-  margin-bottom: 15px;
-  position: relative;
 }
 
-/* 🔹 Imagen de la tarjeta */
-.noticiaImagen {
+.carrusel {
+  display: flex;
+  transition: transform 0.7s ease;
+}
+
+/* ===============================
+   TARJETA NOTICIA
+================================ */
+.noticiaCard {
+  min-width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 44% 56%;
+  gap: 32px;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ===============================
+   IMAGEN
+================================ */
+.imagenWrapper {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.imagen {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 20px;
-  display: block;
 }
 
-/* 🔹 Título de la tarjeta */
-.noticiaTituloCard {
-  color: #ffffff;
-  font-size: 1.6rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-/* 🔹 Texto de la tarjeta */
-.noticiaTexto {
-  color: #ffffff;
-  font-size: 1.1rem;
-  line-height: 1.5;
-}
-
-/* 🔹 Contenedor del botón */
-.botonContainer {
-  margin-top: 20px;
-  width: 100%;
+/* ===============================
+   CONTENIDO
+================================ */
+.contenido {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: center;
 }
 
-/* 🔹 Botón "Más noticias" */
-.noticiaBoton {
-  background: #004080; /* azul institucional */
+.cardTitulo {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.descripcion {
+  font-size: 1.05rem;
+  color: #334155;
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+
+.verMas {
+  align-self: flex-start;
+  padding: 10px 22px;
+  background-color: #b91c1c;
   color: #ffffff;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.verMas:hover {
+  background-color: #991b1b;
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   INDICADORES
+================================ */
+.indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.indicador {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
   border: none;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.25s ease;
 }
 
-.noticiaBoton:hover {
-  background: #0059b3;
+.indicador:hover {
+  background-color: #94a3b8;
 }
 
-/* 🔹 Responsive ajustes */
-@media (max-width: 600px) {
-  .noticiaTituloCard {
-    font-size: 1.4rem;
+.activo {
+  background-color: #b91c1c;
+  transform: scale(1.3);
+}
+
+/* ===============================
+   VER TODAS
+================================ */
+.verTodasWrapper {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.verTodasBtn {
+  display: inline-block;
+  padding: 14px 38px;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.verTodasBtn:hover {
+  background-color: #020617;
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 1024px) {
+  .noticiaCard {
+    grid-template-columns: 1fr;
   }
 
-  .noticiaTexto {
-    font-size: 1rem;
+  .imagenWrapper {
+    height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .titulo {
+    font-size: 2.1rem;
   }
 
-  .noticiaBoton {
+  .cardTitulo {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .imagenWrapper {
+    height: 220px;
+  }
+
+  .verMas,
+  .verTodasBtn {
     width: 100%;
-    justify-content: center;
-  }
-
-  .botonContainer {
-    justify-content: center;
+    text-align: center;
   }
 }

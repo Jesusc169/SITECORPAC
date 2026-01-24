@@ -1,6 +1,7 @@
 // app/layout.tsx
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "@/styles/global.css"; // tus estilos globales
 
 import Script from "next/script";
 import { Metadata } from "next";
@@ -24,7 +25,7 @@ export default function RootLayout({
       <body>
         {children}
 
-        {/* Bootstrap JS con bundle (Popper incluido) */}
+        {/* 🔹 Bootstrap JS Bundle (incluye Popper.js) para dropdowns, modals, tooltips, etc. */}
         <Script
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           strategy="afterInteractive"

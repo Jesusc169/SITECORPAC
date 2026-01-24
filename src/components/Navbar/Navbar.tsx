@@ -2,7 +2,6 @@
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 
-
 export default function Navbar() {
   return (
     <nav className={`navbar navbar-expand-lg ${styles.navbarCustom}`}>
@@ -111,7 +110,6 @@ export default function Navbar() {
               <a className={`nav-link ${styles.navLink}`} href="#">
                 Legislación laboral
               </a>
-              
               <ul className={`dropdown-menu ${styles.dropdownMenu}`}>
                 <li>
                   <Link
@@ -132,12 +130,19 @@ export default function Navbar() {
                 <li>
                   <Link
                     className={`dropdown-item ${styles.dropdownItem}`}
+                    href="/legislacion/ley-relaciones"
+                  >
+                    Ley de relaciones colectivas de trabajo
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropdownItem}`}
                     href="/legislacion/estatuto"
                   >
                     Estatuto del SITECORPAC
                   </Link>
                 </li>
-                
                 <li>
                   <Link
                     className={`dropdown-item ${styles.dropdownItem}`}
@@ -149,6 +154,12 @@ export default function Navbar() {
               </ul>
             </li>
 
+            {/* 🔹 Noticias */}
+            <li className="nav-item">
+              <Link className={`nav-link ${styles.navLink}`} href="/noticias">
+                Noticias
+              </Link>
+            </li>
 
             {/* 🔹 Login */}
             <li className="nav-item">
@@ -157,15 +168,16 @@ export default function Navbar() {
               </Link>
             </li>
 
-
-            {/* 🔹 Únete */}
+            {/* 🔹 Únete al SITE (botón que abre WhatsApp) */}
             <li className="nav-item">
-              <Link
+              <a
                 className={`btn btn-primary ${styles.btnUnete}`}
-                href="/unete"
+                href="https://wa.me/51941361585?text=Hola,%20quiero%20unirme%20al%20SITECORPAC"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 Únete al SITE
-              </Link>
+              </a>
             </li>
           </ul>
         </div>

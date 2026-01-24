@@ -1,103 +1,128 @@
-/* Estilo general para el contenedor principal */
-.main-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Asegura que la página ocupe al menos la altura de la ventana */
-}
-
-/* Contenido principal de la página */
-.main-content {
-  flex: 1;
-  /* Aquí puedes agregar más estilos si es necesario */
-}
-
-/* Estilos del Footer */
+/* ===============================
+   FOOTER GENERAL
+================================ */
 .footer {
-  background-color: #82b0c4;
-  color: #000;
-  padding: 20px 40px;
-  width: 100%;
-  position: relative; /* Asegura que se posicione dentro del flujo normal */
+  background-color: #0f172a;
+  color: #e5e7eb;
+  padding: 70px 24px 40px;
 }
 
-.footerTitulo {
-  color: white;
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin-bottom: 30px;
-  text-align: left;
+/* Contenedor */
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Grilla principal */
-.footerGrid {
+/* ===============================
+   HEADER
+================================ */
+.header {
+  margin-bottom: 48px;
+}
+
+.titulo {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.descripcion {
+  font-size: 1.05rem;
+  color: #cbd5f5;
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+/* ===============================
+   GRID
+================================ */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
 }
 
-/* Caja individual de contacto (modificable por separado) */
-.contactoBox {
-  background-color: #d6e4eb;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease;
-}
-
-.contactoBox:hover {
-  transform: translateY(-5px);
-}
-
-/* Contenido de cada ítem */
-.contactoItem {
+/* ===============================
+   TARJETAS
+================================ */
+.card {
+  background-color: #1e293b;
+  border-radius: 14px;
+  padding: 22px 24px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 1.25rem;
+  gap: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Íconos */
-.contactoItem i {
-  font-size: 1.6rem;
-  color: #000;
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
 }
 
-/* Enlaces */
+/* ÍCONOS */
+.card i {
+  font-size: 1.8rem;
+  color: #38bdf8;
+}
+
+/* Texto */
+.label {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.text {
+  font-size: 1.05rem;
+  color: #e5e7eb;
+}
+
+/* Links */
 .link {
-  color: black;
-  text-decoration: none;
+  font-size: 1.05rem;
+  color: #ffffff;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .link:hover {
   text-decoration: underline;
 }
 
-/* Responsive */
+/* ===============================
+   FOOTER BOTTOM
+================================ */
+.footerBottom {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #334155;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
 @media (max-width: 600px) {
-  .footer {
-    padding: 40px 20px;
+  .titulo {
+    font-size: 1.9rem;
   }
 
-  .footerTitulo {
-    text-align: center;
-    font-size: 1.8rem;
+  .descripcion {
+    font-size: 0.95rem;
   }
 
-  .footerGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .card {
+    padding: 18px;
   }
 
-  .contactoItem {
-    font-size: 1.1rem;
-  }
-
-  .contactoItem i {
-    font-size: 1.4rem;
-  }
-
-  .contactoBox {
-    padding: 15px;
+  .card i {
+    font-size: 1.5rem;
   }
 }

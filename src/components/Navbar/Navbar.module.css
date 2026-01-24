@@ -1,53 +1,101 @@
-/* Fondo del navbar */
+/* ===============================
+   FONDO DEL NAVBAR
+================================ */
 .navbarCustom {
-  background-color: #e6f4fa;
+  background-color: #e6f4fa; /* azul claro institucional */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* sutil sombra */
+  padding: 0.5rem 0;
 }
 
-/* Lista principal de navegación -> distribuye equitativamente */
+/* ===============================
+   LISTA PRINCIPAL DE NAVEGACIÓN
+================================ */
 .navbarList {
   display: flex;
-  justify-content: space-between; /* distribuye los ítems */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   padding: 0 60px;
+  gap: 1rem; /* separación entre ítems */
 }
 
-/* Estilo general de links */
+/* ===============================
+   LINKS GENERALES
+================================ */
 .navLink {
-  color: #000000 !important;
+  color: #000000 !important; /* negro institucional */
+  font-weight: 500;
   transition: color 0.2s ease-in-out;
+  text-decoration: none;
 }
 
 .navLink:hover {
-  color: #82b0c4 !important; /* azul corporativo */
+  color: #0077b6 !important; /* azul corporativo más destacado */
 }
 
-/* Dropdown menú */
+/* ===============================
+   DROPDOWN MENÚ
+================================ */
 .dropdownMenu {
   background-color: #f8f9fa;
   border-radius: 8px;
   display: none; /* por defecto oculto */
-  margin-top: 0; /* evita saltos raros */
+  margin-top: 0;
+  padding: 0.5rem 0;
+  min-width: 200px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.dropdownItem {
+  padding: 0.5rem 1rem;
+  color: #000 !important;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .dropdownItem:hover {
-  background-color: #82b0c4;
+  background-color: #0077b6; /* azul corporativo */
   color: #fff !important;
 }
 
-/* Hover para mostrar menú */
+/* Hover para mostrar dropdown */
 .dropdownHover:hover .dropdownMenu {
   display: block;
-  position: absolute; /* se despliega sobre el contenido */
+  position: absolute;
 }
 
-/* Botón Únete */
+/* ===============================
+   BOTÓN ÚNETE
+================================ */
 .btnUnete {
-  background-color: #82b0c4 !important;
+  background-color: #0077b6 !important; /* azul corporativo */
+  color: #fff !important;
   border: none;
-  transition: background-color 0.3s ease-in-out;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
 }
 
 .btnUnete:hover {
-  background-color: #5a8fa7 !important;
+  background-color: #005f87 !important;
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: #fff !important;
+}
+
+/* ===============================
+   RESPONSIVE (opcional)
+================================ */
+@media (max-width: 992px) {
+  .navbarList {
+    flex-direction: column;
+    padding: 0 1rem;
+    gap: 0.5rem;
+  }
+
+  .dropdownMenu {
+    position: static;
+    box-shadow: none;
+  }
 }
