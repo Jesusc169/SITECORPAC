@@ -1,4 +1,4 @@
-import styles from "@/app/actividades/Ferias/ferias.module.css";
+import styles from "@/app/actividades/ferias/ferias.module.css";
 
 /* ======================================================
    Tipos
