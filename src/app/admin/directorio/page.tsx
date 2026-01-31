@@ -1,148 +1,76 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar/Sidebar";
-import ModalAgregarMiembro from "./components/modals/ModalAgregarMiembro";
-import ModalEditarMiembro from "./components/modals/ModalEditarMiembro";
+import React, { useState } from "react";
 import styles from "@/app/admin/directorio/AdministradorDirectorio.module.css";
 
-interface Miembro {
-  id: number;
-  nombre: string;
-  cargo: string;
-  correo: string;
-  telefono: string;
-  fotoUrl?: string | null;
-  periodoInicio: string;
-  periodoFin?: string | null;
+interface ModalAgregarProps {
+  onClose: () => void;
+  onSubmit: (formData: FormData) => Promise<void>;
 }
 
-export default function AdminDirectorioPage() {
-  const [miembros, setMiembros] = useState<Miembro[]>([]);
-  const [showAgregarModal, setShowAgregarModal] = useState(false);
-  const [editarMiembro, setEditarMiembro] = useState<Miembro | null>(null);
+export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarProps) {
+  const [nombre, setNombre] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
 
-  // 🔹 Cargar miembros
-  const fetchMiembros = async () => {
-    try {
-      const res = await fetch("/api/administrador/directorio");
-      if (!res.ok) throw new Error("Error al obtener directorio");
-      const data: Miembro[] = await res.json();
-      setMiembros(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    fetchMiembros();
-  }, []);
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("cargo", cargo);
+    formData.append("correo", correo);
+    formData.append("telefono", telefono);
+    if (foto) formData.append("foto", foto);
 
-  // 🔹 Agregar miembro
-  const handleAgregarMiembro = async (formData: FormData) => {
-    try {
-      const res = await fetch("/api/administrador/directorio", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Error al agregar miembro");
-      const nuevoMiembro = await res.json();
-      setMiembros(prev => [nuevoMiembro, ...prev]);
-      setShowAgregarModal(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // 🔹 Editar miembro (ahora usando FormData también)
-  const handleEditarMiembro = async (id: number, formData: FormData) => {
-    try {
-      const res = await fetch(`/api/administrador/directorio/${id}`, {
-        method: "PUT",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Error al editar miembro");
-      const actualizado = await res.json();
-      setMiembros(prev => prev.map(m => (m.id === id ? actualizado : m)));
-      setEditarMiembro(null);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // 🔹 Eliminar miembro
-  const handleEliminarMiembro = async (id: number) => {
-    if (!confirm("¿Seguro quieres eliminar este miembro?")) return;
-
-    try {
-      const res = await fetch(`/api/administrador/directorio/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Error al eliminar miembro");
-      setMiembros(prev => prev.filter(m => m.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
+    await onSubmit(formData);
   };
 
   return (
-    <div className={styles.container}>
-      <Sidebar />
-
-      <main className={styles.main}>
-        <h1>Directorio de Representantes</h1>
-
-        <button
-          className={styles.btnAgregar}
-          onClick={() => setShowAgregarModal(true)}
-        >
-          + Agregar Miembro
-        </button>
-
-        <div className={styles.listaMiembros}>
-          {miembros.length === 0 ? (
-            <p>No hay miembros registrados.</p>
-          ) : (
-            miembros.map(miembro => (
-              <div key={miembro.id} className={styles.miembroCard}>
-                {miembro.fotoUrl && (
-                  <img src={miembro.fotoUrl} alt={miembro.nombre} className={styles.foto} />
-                )}
-                <div>
-                  <h3>{miembro.nombre}</h3>
-                  <p>{miembro.cargo}</p>
-                  <p>{miembro.correo}</p>
-                  <p>{miembro.telefono}</p>
-                  <p>
-                    {new Date(miembro.periodoInicio).toLocaleDateString()}{" "}
-                    {miembro.periodoFin
-                      ? `- ${new Date(miembro.periodoFin).toLocaleDateString()}`
-                      : ""}
-                  </p>
-                </div>
-                <div className={styles.actions}>
-                  <button onClick={() => setEditarMiembro(miembro)}>Editar</button>
-                  <button onClick={() => handleEliminarMiembro(miembro.id)}>Eliminar</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </main>
-
-      {/* Modals */}
-      {showAgregarModal && (
-        <ModalAgregarMiembro
-          onClose={() => setShowAgregarModal(false)}
-          onSubmit={handleAgregarMiembro}
-        />
-      )}
-
-      {editarMiembro && (
-        <ModalEditarMiembro
-          miembro={editarMiembro}
-          onClose={() => setEditarMiembro(null)}
-          onSubmit={handleEditarMiembro} // Ahora espera FormData
-        />
-      )}
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
+        <h2>Agregar Miembro</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Nombre"
+            value={nombre}
+            onChange={e => setNombre(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Cargo"
+            value={cargo}
+            onChange={e => setCargo(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Correo"
+            value={correo}
+            onChange={e => setCorreo(e.target.value)}
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Teléfono"
+            value={telefono}
+            onChange={e => setTelefono(e.target.value)}
+            required
+          />
+          <input
+            type="file"
+            onChange={e => setFoto(e.target.files ? e.target.files[0] : null)}
+          />
+          <div className={styles.modalActions}>
+            <button type="button" onClick={onClose}>Cancelar</button>
+            <button type="submit">Agregar</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

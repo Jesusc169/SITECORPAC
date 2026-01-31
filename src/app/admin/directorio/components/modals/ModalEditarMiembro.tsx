@@ -16,7 +16,7 @@ interface Miembro {
 interface ModalEditarProps {
   miembro: Miembro;
   onClose: () => void;
-  onSubmit: (id: number, formData: FormData) => void;
+  onSubmit: (id: number, formData: FormData) => Promise<void>; // ⚡ corrijo tipo
 }
 
 export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarProps) {
@@ -28,7 +28,7 @@ export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarP
   const [periodoFin, setPeriodoFin] = useState(miembro.periodoFin?.slice(0, 10) || "");
   const [foto, setFoto] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("nombre", nombre);
@@ -38,7 +38,8 @@ export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarP
     formData.append("periodoInicio", periodoInicio);
     if (periodoFin) formData.append("periodoFin", periodoFin);
     if (foto) formData.append("foto", foto);
-    onSubmit(miembro.id, formData);
+
+    await onSubmit(miembro.id, formData); // ⚡ esperar promesa
   };
 
   return (

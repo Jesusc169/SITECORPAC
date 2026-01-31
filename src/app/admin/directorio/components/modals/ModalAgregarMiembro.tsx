@@ -5,9 +5,10 @@ import styles from "./ModalMiembro.module.css";
 
 interface ModalAgregarProps {
   onClose: () => void;
+  onSubmit?: (formData: FormData) => Promise<void>; // ⚡ agregado para tipado
 }
 
-export default function ModalAgregar({ onClose }: ModalAgregarProps) {
+export default function ModalAgregar({ onClose, onSubmit }: ModalAgregarProps) {
   const [nombre, setNombre] = useState("");
   const [cargo, setCargo] = useState("");
   const [correo, setCorreo] = useState("");
@@ -33,15 +34,21 @@ export default function ModalAgregar({ onClose }: ModalAgregarProps) {
     if (foto) formData.append("foto", foto);
 
     try {
-      const res = await fetch("/api/administrador/directorio", { // POST sin ID
-        method: "POST",
-        body: formData,
-      });
+      if (onSubmit) {
+        // ⚡ si la página pasa onSubmit, usamos esa función
+        await onSubmit(formData);
+      } else {
+        // ⚡ fallback: POST directo al API
+        const res = await fetch("/api/administrador/directorio", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!res.ok) throw new Error("Error al agregar miembro");
+        if (!res.ok) throw new Error("Error al agregar miembro");
+        const data = await res.json();
+        console.log("Miembro agregado:", data);
+      }
 
-      const data = await res.json();
-      console.log("Miembro agregado:", data);
       onClose(); // cerrar modal
     } catch (err: any) {
       console.error(err);
