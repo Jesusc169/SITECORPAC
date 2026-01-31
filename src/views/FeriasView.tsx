@@ -1,19 +1,21 @@
+"use client";
+
 import styles from "@/app/actividades/ferias/ferias.module.css";
 
 /* ======================================================
    Tipos
 ====================================================== */
-interface Empresa {
+export interface Empresa {
   id: number;
   nombre: string;
   logo_url: string;
 }
 
-interface EventoFeriaEmpresa {
+export interface EventoFeriaEmpresa {
   empresa: Empresa;
 }
 
-interface EventoFeriaFecha {
+export interface EventoFeriaFecha {
   id: number;
   fecha: string;
   hora_inicio: string;
@@ -22,7 +24,7 @@ interface EventoFeriaFecha {
   zona?: string | null;
 }
 
-interface EventoFeria {
+export interface EventoFeria {
   id: number;
   titulo: string;
   descripcion: string;
@@ -32,13 +34,14 @@ interface EventoFeria {
   evento_feria_fecha: EventoFeriaFecha[];
 }
 
-interface FeriasViewProps {
+export interface FeriasViewProps {
   data: EventoFeria[];
-  aniosDisponibles: number[];
-  anioSeleccionado: number | null;
-  onChangeAnio: (anio: number | null) => void;
+  empresasDisponibles?: Empresa[]; // opcional si solo usas empresas del carrusel
+  aniosDisponibles?: number[]; // opcional si usas filtros por año
+  anioSeleccionado?: number | null; // opcional
+  onChangeAnio?: (anio: number | null) => void; // opcional
   loading: boolean;
-  transitioning: boolean;
+  transitioning?: boolean; // opcional
 }
 
 /* ======================================================
@@ -64,14 +67,15 @@ function formatFecha(fecha: string) {
 ====================================================== */
 export default function FeriasView({
   data,
+  empresasDisponibles,
   aniosDisponibles,
   anioSeleccionado,
   onChangeAnio,
   loading,
-  transitioning,
+  transitioning = false,
 }: FeriasViewProps) {
   /* 🔹 Empresas únicas para el carrusel */
-  const empresas = Array.isArray(data)
+  const empresas = empresasDisponibles || Array.isArray(data)
     ? Array.from(
         new Map(
           data
@@ -133,28 +137,30 @@ export default function FeriasView({
       {/* ======================================================
           FILTROS POR AÑO
       ====================================================== */}
-      <div className={styles.filtros}>
-        {aniosDisponibles.map(anio => (
-          <button
-            key={anio}
-            onClick={() => onChangeAnio(anio)}
-            className={`${styles.filtroBtn} ${
-              anioSeleccionado === anio ? styles.activo : ""
-            }`}
-          >
-            Año {anio}
-          </button>
-        ))}
+      {aniosDisponibles && onChangeAnio && (
+        <div className={styles.filtros}>
+          {aniosDisponibles.map(anio => (
+            <button
+              key={anio}
+              onClick={() => onChangeAnio(anio)}
+              className={`${styles.filtroBtn} ${
+                anioSeleccionado === anio ? styles.activo : ""
+              }`}
+            >
+              Año {anio}
+            </button>
+          ))}
 
-        {anioSeleccionado !== null && (
-          <button
-            className={styles.filtroReset}
-            onClick={() => onChangeAnio(null)}
-          >
-            Ver todas
-          </button>
-        )}
-      </div>
+          {anioSeleccionado !== null && (
+            <button
+              className={styles.filtroReset}
+              onClick={() => onChangeAnio(null)}
+            >
+              Ver todas
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ======================================================
           ESTADOS
