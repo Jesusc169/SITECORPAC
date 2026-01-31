@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Esta función maneja la ruta POST /api/ferias/[id]/duplicate
-export async function POST(
-  _request: Request, 
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request) {
   try {
-    // Obtener el ID de la feria desde los params
-    const feriaId = Number(params.id);
+    // Obtener el ID de la feria desde la URL
+    const url = new URL(request.url);
+    const feriaId = Number(url.pathname.split("/").slice(-2, -1)[0]); // toma el penúltimo segmento
+
     if (isNaN(feriaId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
