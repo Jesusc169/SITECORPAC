@@ -7,20 +7,20 @@ import { fetchFerias } from "@/services/eventoFerias.service";
 export default function FeriasClient() {
   /* =========================
      AÑOS DISPONIBLES
-     ========================= */
+  ========================= */
   const aniosDisponibles = [2026, 2025, 2024];
 
   /* =========================
      ESTADOS
-     ========================= */
+  ========================= */
   const [anio, setAnio] = useState<number>(aniosDisponibles[0]);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
   /* =========================
      EFECTO: CARGAR FERIAS
-     ========================= */
+  ========================= */
   useEffect(() => {
     let isMounted = true;
 
@@ -54,15 +54,17 @@ export default function FeriasClient() {
 
   /* =========================
      RENDER
-     ========================= */
+  ========================= */
   return (
     <FeriasView
       data={data}
       aniosDisponibles={aniosDisponibles}
       anioSeleccionado={anio}
-      onChangeAnio={setAnio}
+      onChangeAnio={(nuevoAnio: number | null) => {
+        if (nuevoAnio !== null) setAnio(nuevoAnio);
+      }}
       loading={loading}
-      transitioning={isTransitioning}
+      transitioning={isTransitioning} // ahora reconocido por TypeScript
     />
   );
 }
