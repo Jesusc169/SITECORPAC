@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "extends": ["next", "next/core-web-vitals", "eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    // 🔹 Permitir 'any' temporalmente
+    "@typescript-eslint/no-explicit-any": "off",
+
+    // 🔹 Mantener warnings de <img> pero no como error
+    "@next/next/no-img-element": "warn",
+
+    // 🔹 Variables no usadas como warning, no error
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+
+    // 🔹 Otros ajustes opcionales de ESLint
+    "react/react-in-jsx-scope": "off"
+  }
+}
