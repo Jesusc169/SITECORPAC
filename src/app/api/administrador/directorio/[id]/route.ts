@@ -5,7 +5,7 @@ import path from "path";
 
 /* =========================
    Utilidad para fechas
-   ========================= */
+========================= */
 function parseLocalDate(dateStr: string) {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day, 12, 0, 0);
@@ -13,14 +13,13 @@ function parseLocalDate(dateStr: string) {
 
 /* =========================
    PUT - Editar miembro
-   ========================= */
-export async function PUT(
-  request: Request,
-  context: { params: { id: string } }
-) {
+========================= */
+export async function PUT(request: Request) {
   try {
-    const { params } = context;
-    const id = Number(params.id);
+    const url = new URL(request.url);
+    const idStr = url.pathname.split("/").pop();
+    const id = Number(idStr);
+
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
@@ -35,9 +34,7 @@ export async function PUT(
     const periodoFin = formData.get("periodoFin") as string | null;
     const foto = formData.get("foto") as File | null;
 
-    const miembro = await prisma.directorio.findUnique({
-      where: { id },
-    });
+    const miembro = await prisma.directorio.findUnique({ where: { id } });
 
     if (!miembro) {
       return NextResponse.json(
@@ -50,7 +47,7 @@ export async function PUT(
 
     /* =========================
        Manejo de foto
-       ========================= */
+    ========================= */
     if (foto && foto.size > 0) {
       const buffer = Buffer.from(await foto.arrayBuffer());
       const extension = foto.name.split(".").pop();
@@ -79,9 +76,8 @@ export async function PUT(
 
     /* =========================
        Data dinámica
-       ========================= */
-    const data: Record<string, unknown> = {};
-
+    ========================= */
+    const data: any = {};
     if (nombre !== null) data.nombre = nombre;
     if (cargo !== null) data.cargo = cargo;
     if (correo !== null) data.correo = correo;
@@ -107,21 +103,18 @@ export async function PUT(
 
 /* =========================
    DELETE - Eliminar miembro
-   ========================= */
-export async function DELETE(
-  request: Request,
-  context: { params: { id: string } }
-) {
+========================= */
+export async function DELETE(request: Request) {
   try {
-    const { params } = context;
-    const id = Number(params.id);
+    const url = new URL(request.url);
+    const idStr = url.pathname.split("/").pop();
+    const id = Number(idStr);
+
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const miembro = await prisma.directorio.findUnique({
-      where: { id },
-    });
+    const miembro = await prisma.directorio.findUnique({ where: { id } });
 
     if (!miembro) {
       return NextResponse.json(
