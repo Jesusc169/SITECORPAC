@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import fs from "fs";
+import path from "path";
 
 // 🔥 cache 60s (CLAVE para 1k usuarios)
 export const revalidate = 60;
@@ -49,9 +51,6 @@ export async function GET(req: Request) {
 /* =========================
    POST – CREAR FERIA (SE QUEDA IGUAL)
 ========================= */
-import fs from "fs";
-import path from "path";
-
 export async function POST(req: Request) {
   try {
     const form = await req.formData();
@@ -73,7 +72,7 @@ export async function POST(req: Request) {
 
     let imagePath: string | null = null;
 
-    if (imagen) {
+    if (imagen && imagen.size > 0) {
       const buffer = Buffer.from(await imagen.arrayBuffer());
       const fileName = `${Date.now()}-${imagen.name}`;
       const uploadDir = path.join(process.cwd(), "public/uploads/ferias");
