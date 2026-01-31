@@ -2,51 +2,45 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 /* =========================
-   GET – listar fechas de un evento de feria
+   GET – obtener una fecha específica
    ========================= */
-export async function GET(
-  _: Request,
-  context: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }: { params: { fechaId: string } }) {
   try {
-    const eventoFeriaId = Number(context.params.id);
-    if (isNaN(eventoFeriaId)) {
+    const id = Number(params.fechaId);
+    if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const fechas = await prisma.evento_feria_fecha.findMany({
-      where: { feria_id: eventoFeriaId }, // ⚡ usar feria_id según tu modelo
-      orderBy: { fecha: "asc" },
+    const fecha = await prisma.evento_feria_fecha.findUnique({
+      where: { id },
     });
 
-    return NextResponse.json(fechas);
+    if (!fecha) {
+      return NextResponse.json({ error: "Fecha no encontrada" }, { status: 404 });
+    }
+
+    return NextResponse.json(fecha);
   } catch (error) {
-    console.error("Error al obtener fechas:", error);
-    return NextResponse.json(
-      { error: "Error al obtener fechas" },
-      { status: 500 }
-    );
+    console.error("Error al obtener fecha:", error);
+    return NextResponse.json({ error: "Error al obtener fecha" }, { status: 500 });
   }
 }
 
 /* =========================
-   POST – crear nueva fecha
+   PUT – editar fecha
    ========================= */
-export async function POST(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { fechaId: string } }) {
   try {
-    const eventoFeriaId = Number(context.params.id);
-    if (isNaN(eventoFeriaId)) {
+    const id = Number(params.fechaId);
+    if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
     const body = await request.json();
 
-    const nuevaFecha = await prisma.evento_feria_fecha.create({
+    const fecha = await prisma.evento_feria_fecha.update({
+      where: { id },
       data: {
-        feria_id: eventoFeriaId, // ⚡ usar feria_id según tu modelo
         fecha: new Date(body.fecha),
         hora_inicio: body.hora_inicio,
         hora_fin: body.hora_fin,
@@ -55,12 +49,28 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(nuevaFecha);
+    return NextResponse.json(fecha);
   } catch (error) {
-    console.error("Error al crear fecha:", error);
-    return NextResponse.json(
-      { error: "Error al crear fecha" },
-      { status: 500 }
-    );
+    console.error("Error al actualizar fecha:", error);
+    return NextResponse.json({ error: "Error al actualizar fecha" }, { status: 500 });
+  }
+}
+
+/* =========================
+   DELETE – eliminar fecha
+   ========================= */
+export async function DELETE(request: Request, { params }: { params: { fechaId: string } }) {
+  try {
+    const id = Number(params.fechaId);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
+
+    await prisma.evento_feria_fecha.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error al eliminar fecha:", error);
+    return NextResponse.json({ error: "Error al eliminar fecha" }, { status: 500 });
   }
 }
