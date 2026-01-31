@@ -16,9 +16,10 @@ function parseLocalDate(dateStr: string) {
    ========================= */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    const { params } = context;
     const id = Number(params.id);
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -79,7 +80,7 @@ export async function PUT(
     /* =========================
        Data dinámica
        ========================= */
-    const data: any = {};
+    const data: Record<string, unknown> = {};
 
     if (nombre !== null) data.nombre = nombre;
     if (cargo !== null) data.cargo = cargo;
@@ -109,9 +110,10 @@ export async function PUT(
    ========================= */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    const { params } = context;
     const id = Number(params.id);
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
