@@ -14,18 +14,30 @@ export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarP
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    const formData = new FormData();
-    formData.append("nombre", nombre);
-    formData.append("cargo", cargo);
-    formData.append("correo", correo);
-    formData.append("telefono", telefono);
-    if (foto) formData.append("foto", foto);
+    try {
+      const formData = new FormData();
+      formData.append("nombre", nombre);
+      formData.append("cargo", cargo);
+      formData.append("correo", correo);
+      formData.append("telefono", telefono);
+      if (foto) formData.append("foto", foto);
 
-    await onSubmit(formData);
+      await onSubmit(formData); // ⚡ mantiene tu lógica
+      onClose(); // cerrar modal al finalizar
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Ocurrió un error al agregar el miembro");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,9 +77,16 @@ export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarP
             type="file"
             onChange={e => setFoto(e.target.files ? e.target.files[0] : null)}
           />
+
+          {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
+
           <div className={styles.modalActions}>
-            <button type="button" onClick={onClose}>Cancelar</button>
-            <button type="submit">Agregar</button>
+            <button type="button" onClick={onClose} disabled={loading}>
+              Cancelar
+            </button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Agregando..." : "Agregar"}
+            </button>
           </div>
         </form>
       </div>
