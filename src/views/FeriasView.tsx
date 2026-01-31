@@ -2,7 +2,7 @@ import styles from "@/app/actividades/ferias/ferias.module.css";
 
 /* ======================================================
    Tipos
-   ====================================================== */
+====================================================== */
 interface Empresa {
   id: number;
   nombre: string;
@@ -38,11 +38,12 @@ interface FeriasViewProps {
   anioSeleccionado: number | null;
   onChangeAnio: (anio: number | null) => void;
   loading: boolean;
+  transitioning: boolean;
 }
 
 /* ======================================================
    Helpers
-   ====================================================== */
+====================================================== */
 function formatHora(hora: string) {
   const [h, m] = hora.split(":").map(Number);
   const ampm = h >= 12 ? "PM" : "AM";
@@ -60,13 +61,14 @@ function formatFecha(fecha: string) {
 
 /* ======================================================
    Componente
-   ====================================================== */
+====================================================== */
 export default function FeriasView({
   data,
   aniosDisponibles,
   anioSeleccionado,
   onChangeAnio,
   loading,
+  transitioning,
 }: FeriasViewProps) {
   /* 🔹 Empresas únicas para el carrusel */
   const empresas = Array.isArray(data)
@@ -83,12 +85,12 @@ export default function FeriasView({
     <main className={styles.main}>
       {/* ======================================================
           TÍTULO
-          ====================================================== */}
+      ====================================================== */}
       <h1>Ferias</h1>
 
       {/* ======================================================
           INTRODUCCIÓN
-          ====================================================== */}
+      ====================================================== */}
       <p className={styles.intro}>
         El SITECORPAC promueve espacios de integración comercial donde empresas y
         emprendedores ofrecen productos a precios preferenciales dentro de las
@@ -98,7 +100,7 @@ export default function FeriasView({
 
       {/* ======================================================
           IMAGEN GENERAL
-          ====================================================== */}
+      ====================================================== */}
       <img
         src="/images/ferias/feria-colinda.jpeg"
         alt="Ferias institucionales"
@@ -107,7 +109,7 @@ export default function FeriasView({
 
       {/* ======================================================
           EMPRESAS AFILIADAS
-          ====================================================== */}
+      ====================================================== */}
       {empresas.length > 0 && (
         <>
           <h2 className={styles.subtitulo}>Empresas afiliadas</h2>
@@ -130,7 +132,7 @@ export default function FeriasView({
 
       {/* ======================================================
           FILTROS POR AÑO
-          ====================================================== */}
+      ====================================================== */}
       <div className={styles.filtros}>
         {aniosDisponibles.map(anio => (
           <button
@@ -156,17 +158,18 @@ export default function FeriasView({
 
       {/* ======================================================
           ESTADOS
-          ====================================================== */}
-      {loading && <p className={styles.loading}>Cargando ferias…</p>}
+      ====================================================== */}
+      {(loading || transitioning) && <p className={styles.loading}>Cargando ferias…</p>}
 
-      {!loading && data.length === 0 && (
+      {!loading && !transitioning && data.length === 0 && (
         <p className={styles.empty}>No hay ferias para este año.</p>
       )}
 
       {/* ======================================================
           TARJETAS DE FERIAS
-          ====================================================== */}
+      ====================================================== */}
       {!loading &&
+        !transitioning &&
         data.map(feria => (
           <section key={feria.id} className={styles.feria}>
             {/* Imagen */}
@@ -190,19 +193,16 @@ export default function FeriasView({
                 {feria.evento_feria_fecha.map(fecha => (
                   <div key={fecha.id} className={styles.feriaBloqueFecha}>
                     <div className={styles.feriaDato}>
-                      📅 <strong>Fecha:</strong>{" "}
-                      {formatFecha(fecha.fecha)}
+                      📅 <strong>Fecha:</strong> {formatFecha(fecha.fecha)}
                     </div>
 
                     <div className={styles.feriaDato}>
-                      🕘 <strong>Hora:</strong>{" "}
-                      {formatHora(fecha.hora_inicio)} –{" "}
+                      🕘 <strong>Hora:</strong> {formatHora(fecha.hora_inicio)} –{" "}
                       {formatHora(fecha.hora_fin)}
                     </div>
 
                     <div className={styles.feriaDato}>
-                      📍 <strong>Lugar:</strong>{" "}
-                      {fecha.ubicacion}
+                      📍 <strong>Lugar:</strong> {fecha.ubicacion}
                       {fecha.zona && ` – ${fecha.zona}`}
                     </div>
                   </div>
@@ -211,9 +211,7 @@ export default function FeriasView({
                 {/* Empresas */}
                 <div className={styles.feriaDato}>
                   🏢 <strong>Empresas:</strong>{" "}
-                  {feria.evento_feria_empresa
-                    .map(e => e.empresa.nombre)
-                    .join(", ")}
+                  {feria.evento_feria_empresa.map(e => e.empresa.nombre).join(", ")}
                 </div>
               </div>
             </div>
