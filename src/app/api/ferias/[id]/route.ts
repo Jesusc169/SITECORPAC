@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
-// cache corto para detalle
+// Cache corto para detalle
 export const revalidate = 30;
 
 /* ===========================
@@ -11,8 +11,10 @@ export const revalidate = 30;
 =========================== */
 export async function GET(req: Request) {
   try {
+    // Extraer ID de la URL
     const url = new URL(req.url);
-    const id = Number(url.pathname.split("/").slice(-2, -1)[0]);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = Number(parts[parts.length - 1]); // [id] siempre al final
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -70,9 +72,10 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   try {
     const url = new URL(req.url);
-    const id = Number(url.pathname.split("/").slice(-2, -1)[0]);
-    const form = await req.formData();
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = Number(parts[parts.length - 1]);
 
+    const form = await req.formData();
     const titulo = String(form.get("titulo") || "");
     const descripcion = String(form.get("descripcion") || "");
     const anio = Number(form.get("anio"));
@@ -137,7 +140,8 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const url = new URL(req.url);
-    const id = Number(url.pathname.split("/").slice(-2, -1)[0]);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = Number(parts[parts.length - 1]);
 
     await prisma.$transaction(async (tx) => {
       await tx.evento_feria_fecha.deleteMany({ where: { feria_id: id } });
