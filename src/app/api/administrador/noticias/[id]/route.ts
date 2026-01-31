@@ -1,24 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-interface Context {
-  params: {
-    id: string;
-  };
-}
-
 /* =====================================================
    GET → Obtener noticia por ID
 ===================================================== */
-export async function GET(_: Request, { params }: Context) {
+export async function GET(request: Request) {
   try {
-    const id = Number(params.id);
+    // Obtener ID desde la URL
+    const url = new URL(request.url);
+    const id = Number(url.pathname.split("/").pop());
 
     if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "ID inválido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
     }
 
     const noticia = await prisma.noticia.findUnique({
@@ -26,33 +19,27 @@ export async function GET(_: Request, { params }: Context) {
     });
 
     if (!noticia) {
-      return NextResponse.json(
-        { message: "Noticia no encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Noticia no encontrada" }, { status: 404 });
     }
 
     return NextResponse.json(noticia);
   } catch (error) {
-    return NextResponse.json(
-      { message: "Error al obtener la noticia" },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ message: "Error al obtener la noticia" }, { status: 500 });
   }
 }
 
 /* =====================================================
    PUT → Actualizar noticia
 ===================================================== */
-export async function PUT(request: Request, { params }: Context) {
+export async function PUT(request: Request) {
   try {
-    const id = Number(params.id);
+    // Obtener ID desde la URL
+    const url = new URL(request.url);
+    const id = Number(url.pathname.split("/").pop());
 
     if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "ID inválido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
     }
 
     const body = await request.json();
@@ -72,25 +59,22 @@ export async function PUT(request: Request, { params }: Context) {
 
     return NextResponse.json(noticiaActualizada);
   } catch (error) {
-    return NextResponse.json(
-      { message: "Error al actualizar la noticia" },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ message: "Error al actualizar la noticia" }, { status: 500 });
   }
 }
 
 /* =====================================================
    DELETE → Eliminar noticia
 ===================================================== */
-export async function DELETE(_: Request, { params }: Context) {
+export async function DELETE(request: Request) {
   try {
-    const id = Number(params.id);
+    // Obtener ID desde la URL
+    const url = new URL(request.url);
+    const id = Number(url.pathname.split("/").pop());
 
     if (isNaN(id)) {
-      return NextResponse.json(
-        { message: "ID inválido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
     }
 
     await prisma.noticia.delete({
@@ -99,9 +83,7 @@ export async function DELETE(_: Request, { params }: Context) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json(
-      { message: "Error al eliminar la noticia" },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ message: "Error al eliminar la noticia" }, { status: 500 });
   }
 }
