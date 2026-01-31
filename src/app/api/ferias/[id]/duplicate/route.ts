@@ -1,17 +1,29 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request, context: { params: { id: string } }) {
+// Esta función maneja la ruta POST /api/ferias/[id]/duplicate
+export async function POST(
+  _request: Request, 
+  { params }: { params: { id: string } }
+) {
   try {
-    const feriaId = Number(context.params.id);
-    if (isNaN(feriaId)) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    // Obtener el ID de la feria desde los params
+    const feriaId = Number(params.id);
+    if (isNaN(feriaId)) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
 
+    // Buscar la feria original
     const feriaOriginal = await prisma.evento_feria.findUnique({
       where: { id: feriaId },
       include: { evento_feria_fecha: true, evento_feria_empresa: true },
     });
-    if (!feriaOriginal) return NextResponse.json({ error: "Feria no encontrada" }, { status: 404 });
 
+    if (!feriaOriginal) {
+      return NextResponse.json({ error: "Feria no encontrada" }, { status: 404 });
+    }
+
+    // Crear una nueva feria duplicando los datos de la original
     const nuevaFeria = await prisma.evento_feria.create({
       data: {
         titulo: `${feriaOriginal.titulo} (Copia)`,
