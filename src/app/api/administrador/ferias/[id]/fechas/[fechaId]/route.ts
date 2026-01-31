@@ -4,15 +4,16 @@ import prisma from "@/lib/prisma";
 /* =========================
    GET – obtener una fecha específica
    ========================= */
-export async function GET(request: Request, { params }: { params: { fechaId: string } }) {
+export async function GET(request: Request) {
   try {
-    const id = Number(params.fechaId);
-    if (isNaN(id)) {
+    const url = new URL(request.url);
+    const fechaId = Number(url.pathname.split("/").pop());
+    if (isNaN(fechaId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
     const fecha = await prisma.evento_feria_fecha.findUnique({
-      where: { id },
+      where: { id: fechaId },
     });
 
     if (!fecha) {
@@ -29,17 +30,18 @@ export async function GET(request: Request, { params }: { params: { fechaId: str
 /* =========================
    PUT – editar fecha
    ========================= */
-export async function PUT(request: Request, { params }: { params: { fechaId: string } }) {
+export async function PUT(request: Request) {
   try {
-    const id = Number(params.fechaId);
-    if (isNaN(id)) {
+    const url = new URL(request.url);
+    const fechaId = Number(url.pathname.split("/").pop());
+    if (isNaN(fechaId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
     const body = await request.json();
 
     const fecha = await prisma.evento_feria_fecha.update({
-      where: { id },
+      where: { id: fechaId },
       data: {
         fecha: new Date(body.fecha),
         hora_inicio: body.hora_inicio,
@@ -59,14 +61,15 @@ export async function PUT(request: Request, { params }: { params: { fechaId: str
 /* =========================
    DELETE – eliminar fecha
    ========================= */
-export async function DELETE(request: Request, { params }: { params: { fechaId: string } }) {
+export async function DELETE(request: Request) {
   try {
-    const id = Number(params.fechaId);
-    if (isNaN(id)) {
+    const url = new URL(request.url);
+    const fechaId = Number(url.pathname.split("/").pop());
+    if (isNaN(fechaId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    await prisma.evento_feria_fecha.delete({ where: { id } });
+    await prisma.evento_feria_fecha.delete({ where: { id: fechaId } });
 
     return NextResponse.json({ success: true });
   } catch (error) {
