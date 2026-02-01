@@ -109,17 +109,18 @@ model empresa {
 }
 
 model feria {
-  id             Int             @id @default(autoincrement())
-  titulo         String          @db.VarChar(150)
-  descripcion    String          @db.Text
-  mes            String          @db.VarChar(20)
-  anio           Int
-  imagen_portada String?         @db.VarChar(255)
-  estado         Boolean?        @default(true)
-  created_at     DateTime?       @default(now()) @db.DateTime(0)
-  feria_empresa  feria_empresa[]
-  feria_fecha    feria_fecha[]
-  ubicacion      ubicacion[]
+  id              Int               @id @default(autoincrement())
+  titulo          String            @db.VarChar(150)
+  descripcion     String            @db.Text
+  mes             String            @db.VarChar(20)
+  anio            Int
+  imagen_portada  String?           @db.VarChar(255)
+  estado          Boolean?          @default(true)
+  created_at      DateTime?         @default(now()) @db.DateTime(0)
+  feria_empresa   feria_empresa[]
+  feria_fecha     feria_fecha[]
+  feria_historial feria_historial[]
+  ubicacion       ubicacion[]
 }
 
 model feria_empresa {
@@ -275,6 +276,18 @@ model ley_relaciones_colectivas {
   imagen      String?   @db.VarChar(255)
   estado      Int?      @default(1) @db.TinyInt
   created_at  DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model feria_historial {
+  id       Int      @id @default(autoincrement())
+  feria_id Int
+  accion   String   @db.VarChar(255)
+  usuario  String   @db.VarChar(100)
+  detalle  String?  @db.Text
+  fecha    DateTime @default(now()) @db.DateTime(0)
+  feria    feria    @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_feria_historial_feria")
+
+  @@index([feria_id], map: "idx_feria_historial_feria")
 }
 
 enum sorteo_estado {
