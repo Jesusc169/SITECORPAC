@@ -1,21 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import SorteosAdminView from "./SorteosAdminView";
+import SorteosAdminView, { Sorteo } from "./SorteosAdminView";
 
 export default function SorteosAdminClient() {
-  const [sorteos, setSorteos] = useState([]);
+  const [sorteos, setSorteos] = useState<Sorteo[]>([]);
   const [modal, setModal] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<Sorteo | null>(null);
 
   const cargar = async () => {
     const res = await fetch("/api/administrador/sorteos");
-    setSorteos(await res.json());
+    const data = await res.json();
+    setSorteos(data);
   };
 
   useEffect(() => {
     cargar();
   }, []);
+
+  const onEliminar = async (id: number) => {
+    await fetch(`/api/administrador/sorteos/${id}`, {
+      method: "DELETE",
+    });
+    await cargar();
+  };
+
+  const onDuplicar = async (id: number) => {
+    await fetch(`/api/administrador/sorteos/${id}/duplicar`, {
+      method: "POST",
+    });
+    await cargar();
+  };
 
   return (
     <SorteosAdminView
@@ -28,20 +43,8 @@ export default function SorteosAdminClient() {
         setSelected(s);
         setModal(true);
       }}
-      onEliminar={async (id) => {
-        await fetch("/api/administrador/sorteos", {
-          method: "DELETE",
-          body: JSON.stringify({ id }),
-        });
-        cargar();
-      }}
-      onDuplicar={async (id) => {
-        await fetch("/api/administrador/sorteos", {
-          method: "PATCH",
-          body: JSON.stringify({ id }),
-        });
-        cargar();
-      }}
+      onEliminar={onEliminar}
+      onDuplicar={onDuplicar}
       modal={modal}
       setModal={setModal}
       selected={selected}
