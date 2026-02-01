@@ -5,14 +5,13 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-// 🟢 Instancia única de Prisma (evita múltiples conexiones en desarrollo)
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: ["query", "error", "warn"], // opcional, útil para depuración
+    log: ["query", "error", "warn"], 
   });
 
-// 🔒 Guardar la instancia global solo en desarrollo
+
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }

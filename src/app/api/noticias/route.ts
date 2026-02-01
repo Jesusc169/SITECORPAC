@@ -5,12 +5,14 @@ export async function GET() {
   try {
     const noticias = await prisma.noticia.findMany({
       orderBy: {
-        fechaPublicacion: "desc",
+        fecha: "desc", // ✅ campo existente en el schema
       },
     });
 
     return NextResponse.json(noticias);
   } catch (error) {
+    console.error("Error al obtener noticias:", error);
+
     return NextResponse.json(
       { error: "Error al obtener noticias" },
       { status: 500 }
