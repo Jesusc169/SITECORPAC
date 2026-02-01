@@ -1,47 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./sorteos.admin.module.css";
 import AdminSorteoModal from "./AdminSorteoModal";
 
-export default function SorteosAdminView() {
-  const [sorteos, setSorteos] = useState<any[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [sorteoEdit, setSorteoEdit] = useState<any>(null);
+// =========================
+// Tipos
+// =========================
+export interface Sorteo {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  lugar: string;
+  fecha_hora: string;
+  anio: number;
+  estado: "ACTIVO" | "INACTIVO";
+}
 
-  const cargarSorteos = async () => {
-    const res = await fetch("/api/administrador/sorteos");
-    const data = await res.json();
-    setSorteos(data);
-  };
+interface SorteosAdminViewProps {
+  sorteos: Sorteo[];
+  onNuevo: () => void;
+  onEditar: (s: Sorteo) => void;
+  onEliminar: (id: number) => Promise<void>;
+  onDuplicar: (id: number) => Promise<void>;
+  modal: boolean;
+  setModal: React.Dispatch<React.SetStateAction<boolean>>;
+  selected: Sorteo | null;
+  onSave: () => Promise<void>;
+}
 
-  useEffect(() => {
-    cargarSorteos();
-  }, []);
-
-  const abrirNuevo = () => {
-    setSorteoEdit(null);
-    setModalOpen(true);
-  };
-
-  const editar = (sorteo: any) => {
-    setSorteoEdit(sorteo);
-    setModalOpen(true);
-  };
-
-  const eliminar = async (id: number) => {
-    if (!confirm("¿Eliminar este sorteo?")) return;
-    await fetch(`/api/administrador/sorteos/${id}`, { method: "DELETE" });
-    cargarSorteos();
-  };
-
-  const duplicar = async (id: number) => {
-    await fetch(`/api/administrador/sorteos/${id}/duplicar`, {
-      method: "POST",
-    });
-    cargarSorteos();
-  };
-
+// =========================
+// Componente
+// =========================
+export default function SorteosAdminView({
+  sorteos,
+  onNuevo,
+  onEditar,
+  onEliminar,
+  onDuplicar,
+  modal,
+  setModal,
+  selected,
+  onSave,
+}: SorteosAdminViewProps) {
   return (
     <section className={styles.container}>
       <header className={styles.header}>
@@ -50,7 +51,7 @@ export default function SorteosAdminView() {
           <p>Gestione los sorteos organizados por el SITECORPAC</p>
         </div>
 
-        <button className={styles.newBtn} onClick={abrirNuevo}>
+        <button className={styles.newBtn} onClick={onNuevo}>
           + Nuevo Sorteo
         </button>
       </header>
@@ -79,9 +80,7 @@ export default function SorteosAdminView() {
                   <td>
                     <span
                       className={`${styles.badge} ${
-                        s.estado === "ACTIVO"
-                          ? styles.active
-                          : styles.inactive
+                        s.estado === "ACTIVO" ? styles.active : styles.inactive
                       }`}
                     >
                       {s.estado}
@@ -91,19 +90,19 @@ export default function SorteosAdminView() {
                     <div className={styles.actions}>
                       <button
                         className={`${styles.actionBtn} ${styles.edit}`}
-                        onClick={() => editar(s)}
+                        onClick={() => onEditar(s)}
                       >
                         ✏️
                       </button>
                       <button
                         className={`${styles.actionBtn} ${styles.duplicate}`}
-                        onClick={() => duplicar(s.id)}
+                        onClick={() => onDuplicar(s.id)}
                       >
                         📄
                       </button>
                       <button
                         className={`${styles.actionBtn} ${styles.delete}`}
-                        onClick={() => eliminar(s.id)}
+                        onClick={() => onEliminar(s.id)}
                       >
                         🗑️
                       </button>
@@ -124,11 +123,11 @@ export default function SorteosAdminView() {
         </div>
       </div>
 
-      {modalOpen && (
+      {modal && (
         <AdminSorteoModal
-          sorteo={sorteoEdit}
-          onClose={() => setModalOpen(false)}
-          onSaved={cargarSorteos}
+          sorteo={selected}
+          onClose={() => setModal(false)}
+          onSaved={onSave}
         />
       )}
     </section>
