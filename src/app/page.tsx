@@ -8,33 +8,40 @@ import WhatsAppIcon from "@/components/WhatsAppIcon/WhatsAppIcon";
 import Footer from "@/components/Footer/Footer";
 
 import { NoticiasController } from "@/controllers/noticiasController";
-import { Noticia } from "@/types/noticia";
+
+/* ✅ Tipo LOCAL (sin archivo extra, sin lógica de negocio) */
+interface Noticia {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  imagen: string;
+  fecha: string;
+}
 
 export default async function HomePage() {
   // 🔹 SSR: obtenemos noticias desde el controlador
   const noticiasRaw = await NoticiasController.obtenerNoticias();
 
-  // 🔹 Normalizamos los datos: imagen null → placeholder
-  const noticias: Noticia[] = noticiasRaw.map(n => ({
-    ...n,
-    imagen: n.imagen ?? "/placeholder.png", // colocar imagen por defecto si null
+  // 🔹 Adaptador (NO cambia lógica del negocio)
+  const noticias: Noticia[] = noticiasRaw.map((n) => ({
+    id: n.id,
+    titulo: n.titulo,
+    descripcion: n.descripcion,
+    imagen: n.imagen ?? "/placeholder.png",
+    fecha: n.fecha.toISOString(),
   }));
 
   return (
     <>
-      {/* 🔹 Cabecera superior */}
       <Cabecera />
-
-      {/* 🔹 Navbar principal */}
       <Navbar />
 
-      {/* 🔹 Imagen principal con frases */}
       <section className={styles.contenedorImagen}>
         <img
           src="/Fondo_principal.png"
           alt="Fondo principal"
           className={styles.imagenFondo}
-          loading="lazy" // lazy loading para mejorar performance
+          loading="lazy"
         />
 
         <div className={styles.textosSobreImagen}>
@@ -45,17 +52,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 🔹 Noticias (carrusel seguro) */}
       <NoticiasHome noticias={noticias} />
 
-      {/* 🔹 Secciones institucionales */}
       <Fundamento />
       <Beneficios />
-
-      {/* 🔹 WhatsApp flotante */}
       <WhatsAppIcon />
-
-      {/* 🔹 Footer */}
       <Footer />
     </>
   );
