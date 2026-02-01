@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./ferias.module.css"; // ajusta la ruta según tu proyecto
+import styles from "@/app/actividades/ferias/ferias.module.css"; 
 
 // =========================
 // Tipos
