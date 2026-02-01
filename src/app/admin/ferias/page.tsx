@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import FeriasView, { Empresa, EventoFeria } from "./FeriasView";
+import FeriasView, { EventoFeria, Empresa } from "@/views/FeriasView";
 import styles from "./ferias.admin.module.css";
 import { prisma } from "@/lib/prisma";
 
@@ -16,7 +16,6 @@ export default function Page() {
     async function fetchData() {
       try {
         setLoading(true);
-
         const feriasRaw = await prisma.evento_feria.findMany({
           where: { estado: true },
           include: {
@@ -27,8 +26,8 @@ export default function Page() {
         });
 
         const empresasSet = new Map<number, Empresa>();
-        feriasRaw.forEach(f =>
-          f.evento_feria_empresa.forEach(e =>
+        feriasRaw.forEach((f) =>
+          f.evento_feria_empresa.forEach((e) =>
             empresasSet.set(e.empresa.id, {
               id: e.empresa.id,
               nombre: e.empresa.nombre,
@@ -37,20 +36,20 @@ export default function Page() {
           )
         );
 
-        const feriasData: EventoFeria[] = feriasRaw.map(f => ({
+        const feriasData: EventoFeria[] = feriasRaw.map((f) => ({
           id: f.id,
           titulo: f.titulo,
           descripcion: f.descripcion,
           anio: f.anio,
           imagen_portada: f.imagen_portada,
-          evento_feria_empresa: f.evento_feria_empresa.map(e => ({
+          evento_feria_empresa: f.evento_feria_empresa.map((e) => ({
             empresa: {
               id: e.empresa.id,
               nombre: e.empresa.nombre,
               logo_url: e.empresa.logo_url,
             },
           })),
-          evento_feria_fecha: f.evento_feria_fecha.map(fecha => ({
+          evento_feria_fecha: f.evento_feria_fecha.map((fecha) => ({
             id: fecha.id,
             fecha: fecha.fecha.toISOString(),
             hora_inicio: fecha.hora_inicio,
