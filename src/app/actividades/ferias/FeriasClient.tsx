@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FeriasView from "@/views/FeriasView";
+import FeriasView from "@/views/FeriasView"; // asegúrate que apunta a la ruta correcta
 import { fetchFerias } from "@/services/eventoFerias.service";
 
 export default function FeriasClient() {
@@ -14,7 +14,7 @@ export default function FeriasClient() {
      ESTADOS
   ========================= */
   const [anio, setAnio] = useState<number>(aniosDisponibles[0]);
-  const [data, setData] = useState<any[]>([]);
+  const [ferias, setFerias] = useState<any[]>([]); // renombrado de `data` a `ferias`
   const [loading, setLoading] = useState<boolean>(true);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
@@ -30,12 +30,12 @@ export default function FeriasClient() {
     fetchFerias(anio)
       .then((res) => {
         if (isMounted) {
-          setData(Array.isArray(res) ? res : []);
+          setFerias(Array.isArray(res) ? res : []); // renombrado
         }
       })
       .catch((err) => {
         console.error("Error cargando ferias:", err);
-        if (isMounted) setData([]);
+        if (isMounted) setFerias([]); // renombrado
       })
       .finally(() => {
         if (isMounted) {
@@ -57,7 +57,7 @@ export default function FeriasClient() {
   ========================= */
   return (
     <FeriasView
-      data={data}
+      feriasList={ferias} // <-- cambio principal: antes era `data={data}`
       aniosDisponibles={aniosDisponibles}
       anioSeleccionado={anio}
       onChangeAnio={(nuevoAnio: number | null) => {
