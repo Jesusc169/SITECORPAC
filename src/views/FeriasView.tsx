@@ -2,9 +2,9 @@
 
 import styles from "@/app/actividades/ferias/ferias.module.css";
 
-/* ======================================================
+/* ==========================
    Tipos
-====================================================== */
+========================== */
 export interface Empresa {
   id: number;
   nombre: string;
@@ -16,7 +16,7 @@ export interface EventoFeriaEmpresa {
 }
 
 export interface EventoFeriaFecha {
-  id: number;
+  id: string | number;
   fecha: string;
   hora_inicio: string;
   hora_fin: string;
@@ -25,7 +25,7 @@ export interface EventoFeriaFecha {
 }
 
 export interface EventoFeria {
-  id: number;
+  id: string | number;
   titulo: string;
   descripcion: string;
   anio: number;
@@ -35,18 +35,18 @@ export interface EventoFeria {
 }
 
 export interface FeriasViewProps {
-  data: EventoFeria[];
-  empresasDisponibles?: Empresa[]; // opcional si solo usas empresas del carrusel
-  aniosDisponibles?: number[]; // opcional si usas filtros por año
-  anioSeleccionado?: number | null; // opcional
-  onChangeAnio?: (anio: number | null) => void; // opcional
+  feriasList: EventoFeria[];
+  empresasList?: Empresa[];
+  aniosDisponibles?: number[];
+  anioSeleccionado?: number | null;
+  onChangeAnio?: (anio: number | null) => void;
   loading: boolean;
-  transitioning?: boolean; // opcional
+  transitioning?: boolean;
 }
 
-/* ======================================================
+/* ==========================
    Helpers
-====================================================== */
+========================== */
 function formatHora(hora: string) {
   const [h, m] = hora.split(":").map(Number);
   const ampm = h >= 12 ? "PM" : "AM";
@@ -62,71 +62,44 @@ function formatFecha(fecha: string) {
   });
 }
 
-/* ======================================================
+/* ==========================
    Componente
-====================================================== */
+========================== */
 export default function FeriasView({
-  data,
-  empresasDisponibles,
+  feriasList,
+  empresasList,
   aniosDisponibles,
   anioSeleccionado,
   onChangeAnio,
   loading,
   transitioning = false,
 }: FeriasViewProps) {
-  /* 🔹 Empresas únicas para el carrusel */
-  const empresas = empresasDisponibles || Array.isArray(data)
+  const empresas = empresasList || Array.isArray(feriasList)
     ? Array.from(
         new Map(
-          data
-            .flatMap(f => f.evento_feria_empresa || [])
-            .map(e => [e.empresa.id, e.empresa])
+          feriasList.flatMap(f => f.evento_feria_empresa || []).map(e => [e.empresa.id, e.empresa])
         ).values()
       )
     : [];
 
   return (
     <main className={styles.main}>
-      {/* ======================================================
-          TÍTULO
-      ====================================================== */}
       <h1>Ferias</h1>
 
-      {/* ======================================================
-          INTRODUCCIÓN
-      ====================================================== */}
       <p className={styles.intro}>
         El SITECORPAC promueve espacios de integración comercial donde empresas y
         emprendedores ofrecen productos a precios preferenciales dentro de las
-        instalaciones de CORPAC, generando beneficios directos para nuestros
-        afiliados.
+        instalaciones de CORPAC.
       </p>
 
-      {/* ======================================================
-          IMAGEN GENERAL
-      ====================================================== */}
-      <img
-        src="/images/ferias/feria-colinda.jpeg"
-        alt="Ferias institucionales"
-        className={styles.portadaGeneral}
-      />
-
-      {/* ======================================================
-          EMPRESAS AFILIADAS
-      ====================================================== */}
       {empresas.length > 0 && (
         <>
           <h2 className={styles.subtitulo}>Empresas afiliadas</h2>
-
           <div className={styles.empresas}>
             <div className={styles.empresasTrack}>
               {[...empresas, ...empresas].map((empresa, index) => (
                 <div className={styles.logoItem} key={index}>
-                  <img
-                    src={empresa.logo_url}
-                    alt={empresa.nombre}
-                    loading="lazy"
-                  />
+                  <img src={empresa.logo_url} alt={empresa.nombre} loading="lazy" />
                 </div>
               ))}
             </div>
@@ -134,79 +107,47 @@ export default function FeriasView({
         </>
       )}
 
-      {/* ======================================================
-          FILTROS POR AÑO
-      ====================================================== */}
       {aniosDisponibles && onChangeAnio && (
         <div className={styles.filtros}>
           {aniosDisponibles.map(anio => (
             <button
               key={anio}
               onClick={() => onChangeAnio(anio)}
-              className={`${styles.filtroBtn} ${
-                anioSeleccionado === anio ? styles.activo : ""
-              }`}
+              className={`${styles.filtroBtn} ${anioSeleccionado === anio ? styles.activo : ""}`}
             >
               Año {anio}
             </button>
           ))}
-
           {anioSeleccionado !== null && (
-            <button
-              className={styles.filtroReset}
-              onClick={() => onChangeAnio(null)}
-            >
+            <button className={styles.filtroReset} onClick={() => onChangeAnio(null)}>
               Ver todas
             </button>
           )}
         </div>
       )}
 
-      {/* ======================================================
-          ESTADOS
-      ====================================================== */}
       {(loading || transitioning) && <p className={styles.loading}>Cargando ferias…</p>}
 
-      {!loading && !transitioning && data.length === 0 && (
-        <p className={styles.empty}>No hay ferias para este año.</p>
-      )}
-
-      {/* ======================================================
-          TARJETAS DE FERIAS
-      ====================================================== */}
       {!loading &&
         !transitioning &&
-        data.map(feria => (
+        feriasList.map(feria => (
           <section key={feria.id} className={styles.feria}>
-            {/* Imagen */}
             <div className={styles.feriaImagen}>
-              <img
-                src={feria.imagen_portada || "/images/ferias/default.jpg"}
-                alt={feria.titulo}
-              />
+              <img src={feria.imagen_portada || "/images/ferias/default.jpg"} alt={feria.titulo} />
             </div>
-
-            {/* Contenido */}
             <div className={styles.feriaContenido}>
-              {/* Nombre */}
               <h3>{feria.titulo}</h3>
-
-              {/* Descripción */}
               <p className={styles.descripcion}>{feria.descripcion}</p>
 
-              {/* Fechas (pueden ser varias) */}
               <div className={styles.feriaDatos}>
                 {feria.evento_feria_fecha.map(fecha => (
                   <div key={fecha.id} className={styles.feriaBloqueFecha}>
                     <div className={styles.feriaDato}>
                       📅 <strong>Fecha:</strong> {formatFecha(fecha.fecha)}
                     </div>
-
                     <div className={styles.feriaDato}>
-                      🕘 <strong>Hora:</strong> {formatHora(fecha.hora_inicio)} –{" "}
-                      {formatHora(fecha.hora_fin)}
+                      🕘 <strong>Hora:</strong> {formatHora(fecha.hora_inicio)} – {formatHora(fecha.hora_fin)}
                     </div>
-
                     <div className={styles.feriaDato}>
                       📍 <strong>Lugar:</strong> {fecha.ubicacion}
                       {fecha.zona && ` – ${fecha.zona}`}
@@ -214,10 +155,8 @@ export default function FeriasView({
                   </div>
                 ))}
 
-                {/* Empresas */}
                 <div className={styles.feriaDato}>
-                  🏢 <strong>Empresas:</strong>{" "}
-                  {feria.evento_feria_empresa.map(e => e.empresa.nombre).join(", ")}
+                  🏢 <strong>Empresas:</strong> {feria.evento_feria_empresa.map(e => e.empresa.nombre).join(", ")}
                 </div>
               </div>
             </div>

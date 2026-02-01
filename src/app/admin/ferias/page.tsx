@@ -2,46 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import FeriasView from "./FeriasView";
+import FeriasView, { Empresa, EventoFeria } from "./FeriasView";
 import styles from "./ferias.admin.module.css";
-
-/* ======================================================
-   Tipos para FeriasView
-====================================================== */
-interface Empresa {
-  id: number;
-  nombre: string;
-  logo_url: string;
-}
-
-interface EventoFeriaEmpresa {
-  empresa: Empresa;
-}
-
-interface EventoFeriaFecha {
-  id: number;
-  fecha: string;
-  hora_inicio: string;
-  hora_fin: string;
-  ubicacion: string;
-  zona?: string | null;
-}
-
-interface EventoFeria {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  anio: number;
-  imagen_portada?: string | null;
-  evento_feria_empresa: EventoFeriaEmpresa[];
-  evento_feria_fecha: EventoFeriaFecha[];
-}
-
-interface FeriasViewProps {
-  data: EventoFeria[];
-  empresasDisponibles: Empresa[];
-  loading: boolean;
-}
+import { prisma } from "@/lib/prisma";
 
 export default function Page() {
   const [ferias, setFerias] = useState<EventoFeria[]>([]);
@@ -49,29 +12,59 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // =========================
-  // Cargar ferias y empresas
-  // =========================
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
 
-        // Ferias
-        const feriasRes = await fetch("/api/administrador/ferias");
-        if (!feriasRes.ok) throw new Error("Error al cargar ferias");
-        const feriasData: EventoFeria[] = await feriasRes.json();
+        const feriasRaw = await prisma.evento_feria.findMany({
+          where: { estado: true },
+          include: {
+            evento_feria_empresa: { include: { empresa: true } },
+            evento_feria_fecha: true,
+          },
+          orderBy: { created_at: "desc" },
+        });
+
+        const empresasSet = new Map<number, Empresa>();
+        feriasRaw.forEach(f =>
+          f.evento_feria_empresa.forEach(e =>
+            empresasSet.set(e.empresa.id, {
+              id: e.empresa.id,
+              nombre: e.empresa.nombre,
+              logo_url: e.empresa.logo_url,
+            })
+          )
+        );
+
+        const feriasData: EventoFeria[] = feriasRaw.map(f => ({
+          id: f.id,
+          titulo: f.titulo,
+          descripcion: f.descripcion,
+          anio: f.anio,
+          imagen_portada: f.imagen_portada,
+          evento_feria_empresa: f.evento_feria_empresa.map(e => ({
+            empresa: {
+              id: e.empresa.id,
+              nombre: e.empresa.nombre,
+              logo_url: e.empresa.logo_url,
+            },
+          })),
+          evento_feria_fecha: f.evento_feria_fecha.map(fecha => ({
+            id: fecha.id,
+            fecha: fecha.fecha.toISOString(),
+            hora_inicio: fecha.hora_inicio,
+            hora_fin: fecha.hora_fin,
+            ubicacion: fecha.ubicacion,
+            zona: fecha.zona,
+          })),
+        }));
+
         setFerias(feriasData);
-
-        // Empresas
-        const empresasRes = await fetch("/api/administrador/empresas");
-        if (!empresasRes.ok) throw new Error("Error al cargar empresas");
-        const empresasData: Empresa[] = await empresasRes.json();
-        setEmpresas(empresasData);
-
+        setEmpresas(Array.from(empresasSet.values()));
       } catch (err: any) {
         console.error(err);
-        setError(err.message || "Error al cargar los datos");
+        setError(err.message || "Error al cargar los datos de ferias");
       } finally {
         setLoading(false);
       }
@@ -80,20 +73,16 @@ export default function Page() {
     fetchData();
   }, []);
 
-  // =========================
-  // Render
-  // =========================
   return (
     <div className={styles.adminWrapper}>
       <Sidebar />
       <div className={styles.panelContainer}>
         {loading && <p>Cargando datos...</p>}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
-
         {!loading && !error && (
           <FeriasView
-            data={ferias}
-            empresasDisponibles={empresas}
+            feriasList={ferias}
+            empresasList={empresas}
             loading={loading}
           />
         )}
