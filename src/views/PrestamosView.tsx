@@ -1,12 +1,14 @@
+"use client";
+
 import styles from "@/app/tramites/prestamos/prestamos.module.css";
 
 /* =========================
-   TIPOS
+   TIPOS (alineados a Prisma)
    ========================= */
 type Cooperativa = {
   id: number;
   nombre: string;
-  logo: string;
+  logo: string | null; // 👈 Prisma permite null
 };
 
 type Requisito = {
@@ -36,7 +38,9 @@ export default function PrestamosView({ data }: PrestamosViewProps) {
 
   return (
     <section className={styles.container}>
-      {/* TÍTULO */}
+      {/* =========================
+         TÍTULO
+         ========================= */}
       <h2 className={styles.titulo}>
         Solicita préstamos a través de Cooperativas
       </h2>
@@ -55,9 +59,10 @@ export default function PrestamosView({ data }: PrestamosViewProps) {
           <div key={c.id} className="col-md-4 mb-4">
             <div className={styles.coopCard}>
               <img
-                src={c.logo}
+                src={c.logo ?? "/images/cooperativas/default.png"} // 👈 fallback seguro
                 alt={`Logo de ${c.nombre}`}
                 className={`img-fluid ${styles.coopLogo}`}
+                loading="lazy"
               />
               <p className="fw-semibold mt-2">{c.nombre}</p>
             </div>
@@ -66,33 +71,34 @@ export default function PrestamosView({ data }: PrestamosViewProps) {
       </div>
 
       {/* =========================
-        REQUISITOS
-        ========================= */}
-        <div className={styles.requisitos}>
+         REQUISITOS
+         ========================= */}
+      <div className={styles.requisitos}>
         <h4 className="fw-bold">Requisitos</h4>
 
         <div className={`row ${styles.requisitosLayout}`}>
-            {/* Imagen a la izquierda */}
-            <div className="col-md-5">
+          {/* Imagen */}
+          <div className="col-md-5">
             <img
-                src="/images/prestamos/requisitos-prestamos.jpg"
-                alt="Requisitos para acceder a préstamos"
-                className={styles.requisitosImagen}
+              src="/images/prestamos/requisitos-prestamos.jpg"
+              alt="Requisitos para acceder a préstamos"
+              className={styles.requisitosImagen}
+              loading="lazy"
             />
-            </div>
+          </div>
 
-            {/* Lista a la derecha */}
-            <div className="col-md-7">
+          {/* Lista */}
+          <div className="col-md-7">
             <ul className="list-group list-group-flush">
-                {requisitos.map((r) => (
+              {requisitos.map((r) => (
                 <li key={r.id} className="list-group-item">
-                    {r.descripcion}
+                  {r.descripcion}
                 </li>
-                ))}
+              ))}
             </ul>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
 
       {/* =========================
          FAQ
