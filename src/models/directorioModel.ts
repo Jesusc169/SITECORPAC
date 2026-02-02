@@ -1,9 +1,11 @@
 import prisma from "@/lib/prisma";
-import type { Directorio } from "@prisma/client";
+import type { directorio } from "@prisma/client";
 
 export const DirectorioModel = {
-  obtenerTodos: async (): Promise<Directorio[]> => {
-    return prisma.directorio.findMany({ orderBy: { nombre: "asc" } });
+  obtenerTodos: async (): Promise<directorio[]> => {
+    return prisma.directorio.findMany({
+      orderBy: { nombre: "asc" },
+    });
   },
 
   crear: async (data: {
@@ -14,15 +16,28 @@ export const DirectorioModel = {
     fotoUrl?: string;
     periodoInicio: Date;
     periodoFin?: Date;
-  }): Promise<Directorio> => {
-    return prisma.directorio.create({ data });
+  }): Promise<directorio> => {
+    return prisma.directorio.create({
+      data: {
+        ...data,
+        orden: 0, // ✅ valor por defecto técnico
+      },
+    });
   },
 
-  actualizar: async (id: number, data: Partial<Directorio>): Promise<Directorio> => {
-    return prisma.directorio.update({ where: { id }, data });
+  actualizar: async (
+    id: number,
+    data: Partial<directorio>
+  ): Promise<directorio> => {
+    return prisma.directorio.update({
+      where: { id },
+      data,
+    });
   },
 
-  eliminar: async (id: number): Promise<Directorio> => {
-    return prisma.directorio.delete({ where: { id } });
+  eliminar: async (id: number): Promise<directorio> => {
+    return prisma.directorio.delete({
+      where: { id },
+    });
   },
 };
