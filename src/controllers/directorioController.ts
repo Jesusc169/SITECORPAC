@@ -1,8 +1,8 @@
 import { DirectorioModel } from "@/models/directorioModel";
-import type { Directorio } from "@prisma/client";
+import type { directorio } from "@prisma/client";
 
 export const DirectorioController = {
-  obtenerDirectorio: (): Promise<Directorio[]> => DirectorioModel.obtenerTodos(),
+  obtenerDirectorio: (): Promise<directorio[]> => DirectorioModel.obtenerTodos(),
 
   crearMiembro: (data: {
     nombre: string;
@@ -12,10 +12,10 @@ export const DirectorioController = {
     fotoUrl?: string;
     periodoInicio: Date;
     periodoFin?: Date;
-  }): Promise<Directorio> => DirectorioModel.crear(data),
+  }): Promise<directorio> => DirectorioModel.crear(data),
 
-  actualizarMiembro: (id: number, data: Partial<Directorio>): Promise<Directorio> =>
+  actualizarMiembro: (id: number, data: Partial<directorio>): Promise<directorio> =>
     DirectorioModel.actualizar(id, data),
 
-  eliminarMiembro: (id: number): Promise<Directorio> => DirectorioModel.eliminar(id),
+  eliminarMiembro: (id: number): Promise<directorio> => DirectorioModel.eliminar(id),
 };
