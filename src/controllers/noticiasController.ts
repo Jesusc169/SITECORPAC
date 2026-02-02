@@ -1,15 +1,15 @@
-// controllers/NoticiasController.ts
+// src/controllers/noticiasController.ts
 import prisma from "@/lib/prisma";
 
 export class NoticiasController {
-  // 🟢 Obtener todas las noticias (para histórico)
+  // 🟢 Obtener todas las noticias
   static async obtenerNoticias() {
     return await prisma.noticia.findMany({
       orderBy: { fecha: "desc" },
     });
   }
 
-  // 🔵 Obtener las últimas N noticias (para la página principal)
+  // 🔵 Obtener últimas noticias
   static async obtenerUltimasNoticias(limit = 3) {
     return await prisma.noticia.findMany({
       orderBy: { fecha: "desc" },
@@ -17,14 +17,14 @@ export class NoticiasController {
     });
   }
 
-  // 🟣 Obtener noticia por ID (para página individual)
+  // 🟣 Obtener noticia por ID
   static async obtenerNoticiaPorId(id: number) {
     return await prisma.noticia.findUnique({
       where: { id },
     });
   }
 
-  // 🟡 Crear noticia
+  // 🟡 Crear noticia (CORREGIDO)
   static async crearNoticia(data: {
     titulo: string;
     descripcion: string;
@@ -33,14 +33,22 @@ export class NoticiasController {
     fecha?: Date;
     autor: string;
   }) {
-    return await prisma.noticia.create({ data });
+    return await prisma.noticia.create({
+      data: {
+        ...data,
+        updatedAt: new Date(), // ✅ FIX CLAVE
+      },
+    });
   }
 
   // 🟠 Actualizar noticia
   static async actualizarNoticia(id: number, data: any) {
     return await prisma.noticia.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        updatedAt: new Date(), // ✅ buena práctica
+      },
     });
   }
 
