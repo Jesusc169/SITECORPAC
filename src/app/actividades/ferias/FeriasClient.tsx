@@ -1,54 +1,81 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FeriasView, { EventoFeria } from "@/views/FeriasView"; // ajusta ruta
+import FeriasView, {
+  EventoFeria,
+  Empresa,
+} from "@/views/FeriasView";
 import { fetchFerias } from "@/services/eventoFerias.service";
 
 export default function FeriasClient() {
   const aniosDisponibles = [2026, 2025, 2024];
 
-  const [anio, setAnio] = useState<number>(aniosDisponibles[0]);
+  const [anio, setAnio] = useState<number | null>(aniosDisponibles[0]);
   const [ferias, setFerias] = useState<EventoFeria[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    setIsTransitioning(true);
-    setLoading(true);
+    let mounted = true;
 
-    fetchFerias(anio)
+    setLoading(true);
+    setTransitioning(true);
+
+    fetchFerias(anio ?? undefined)
       .then((res) => {
-        if (isMounted) setFerias(Array.isArray(res) ? res : []);
+        if (!mounted) return;
+
+        if (!Array.isArray(res)) {
+          setFerias([]);
+          setEmpresas([]);
+          return;
+        }
+
+        setFerias(res);
+
+        // =========================
+        // EXTRAER EMPRESAS ÚNICAS
+        // =========================
+        const empresasMap = new Map<number, Empresa>();
+
+        res.forEach((feria) => {
+          feria.evento_feria_empresa.forEach((rel) => {
+            empresasMap.set(rel.empresa.id, rel.empresa);
+          });
+        });
+
+        setEmpresas(Array.from(empresasMap.values()));
       })
-      .catch((err) => {
-        console.error("Error cargando ferias:", err);
-        if (isMounted) setFerias([]);
+      .catch((error) => {
+        console.error("Error cargando ferias:", error);
+        if (mounted) {
+          setFerias([]);
+          setEmpresas([]);
+        }
       })
       .finally(() => {
-        if (isMounted) {
-          setTimeout(() => {
-            setLoading(false);
-            setIsTransitioning(false);
-          }, 200);
-        }
+        if (!mounted) return;
+        setTimeout(() => {
+          setLoading(false);
+          setTransitioning(false);
+        }, 200);
       });
 
     return () => {
-      isMounted = false;
+      mounted = false;
     };
   }, [anio]);
 
   return (
     <FeriasView
       feriasList={ferias}
+      empresasList={empresas}
       aniosDisponibles={aniosDisponibles}
       anioSeleccionado={anio}
-      onChangeAnio={(nuevoAnio) => {
-        if (nuevoAnio !== null) setAnio(nuevoAnio);
-      }}
+      onChangeAnio={setAnio}
       loading={loading}
-      transitioning={isTransitioning}
+      transitioning={transitioning}
     />
   );
 }

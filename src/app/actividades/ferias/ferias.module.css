@@ -1,113 +1,79 @@
-/* ======================================================
+/* ===============================
    CONTENEDOR PRINCIPAL
-====================================================== */
+================================ */
 .main {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px 70px;
-  background-color: #f5f7fa;
+  padding: 56px 24px;
+  background-color: #ffffff;
 }
 
-/* ======================================================
-   TÍTULO PRINCIPAL – ACTIVIDADES (AZUL INSTITUCIONAL)
-====================================================== */
 .main h1 {
-  font-size: 2.1rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 28px;
-  padding-left: 1rem;
-  border-left: 5px solid #d97706; /* azul institucional – actividades */
-  letter-spacing: 0.3px;
-  line-height: 1.35;
+  color: #1f2937;
+  margin-bottom: 32px;
+  padding-left: 14px;
+  border-left: 6px solid #fdad01; /* naranja institucional */
 }
 
-/* ======================================================
-   INTRODUCCIÓN INSTITUCIONAL
-====================================================== */
-.intro {
-  max-width: 820px;
-  margin: 0 auto 32px;
-  text-align: center;
+/* ===============================
+   TEXTO PROMOCIONAL (INSTITUCIONAL)
+================================ */
+.promocion {
+  max-width: 900px;
+  margin-bottom: 48px;
+}
+
+.promocion h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.promocion p {
   font-size: 1rem;
-  color: #475569;
-  line-height: 1.75;
+  line-height: 1.65;
+  color: #4b5563;
 }
 
-/* ======================================================
-   IMAGEN DE PORTADA GENERAL
-====================================================== */
-.portadaGeneral {
-  width: 100%;
-  max-height: 340px;
-  object-fit: cover;
-  border-radius: 18px;
-  margin-bottom: 44px;
-  background-color: #e5e7eb;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
-/* ======================================================
-   SUBTÍTULOS
-====================================================== */
-.subtitulo {
-  text-align: center;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #020617;
-  margin-bottom: 18px;
-}
-
-/* ======================================================
-   EMPRESAS AFILIADAS – CARRUSEL
-====================================================== */
+/* ===============================
+   CARRUSEL DE EMPRESAS
+================================ */
 .empresas {
-  position: relative;
+  margin: 48px 0;
   overflow: hidden;
-  width: 100%;
-  padding: 18px 0;
-  background-color: #f8fafc;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 36px;
 }
 
 .empresasTrack {
   display: flex;
-  width: max-content;
-  animation: scrollLogos 40s linear infinite;
-}
-
-.empresas:hover .empresasTrack {
-  animation-play-state: paused;
+  gap: 48px;
+  animation: scroll 30s linear infinite;
 }
 
 .logoItem {
-  flex: 0 0 auto;
-  width: 96px;
-  height: 72px;
-  margin: 0 20px;
+  min-width: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logoItem img {
-  max-width: 100%;
-  max-height: 100%;
+  max-height: 56px;
+  max-width: 140px;
   object-fit: contain;
   filter: grayscale(100%);
   opacity: 0.85;
-  transition: transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease;
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 .logoItem img:hover {
   filter: grayscale(0%);
   opacity: 1;
-  transform: scale(1.1);
 }
 
-@keyframes scrollLogos {
+@keyframes scroll {
   from {
     transform: translateX(0);
   }
@@ -116,165 +82,149 @@
   }
 }
 
-/* ======================================================
-   FILTROS POR AÑO – AZUL INSTITUCIONAL
-====================================================== */
+/* ===============================
+   FILTROS
+================================ */
 .filtros {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 10px 0 48px;
+  margin-bottom: 40px;
 }
 
-.filtroBtn {
-  padding: 8px 20px;
+.filtros button {
+  padding: 8px 22px;
   border-radius: 999px;
-  border: 1px solid #c7d2fe;
+  border: 1px solid #e5e7eb;
   background-color: #ffffff;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: #1e293b;
+  color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.filtroBtn:hover {
-  background-color: #eef2ff;
+.filtros button:hover {
+  border-color: #fdad01;
+  color: #fdad01;
 }
 
-.filtroBtn.activo {
-  background-color: #1e40af;
+.filtros .activo {
+  background-color: #fdad01;
+  border-color: #fdad01;
   color: #ffffff;
-  border-color: #1e40af;
-}
-
-.filtroReset {
-  padding: 8px 20px;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background-color: #f8fafc;
-  font-size: 0.9rem;
   font-weight: 600;
-  cursor: pointer;
 }
 
-/* ======================================================
-   TARJETA DE FERIA – ESTILO INSTITUCIONAL
-====================================================== */
+/* ===============================
+   ESTADOS
+================================ */
+.estado {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 32px 0;
+}
+
+/* ===============================
+   TARJETA FERIA
+================================ */
 .feria {
-  display: flex;
-  gap: 28px;
-  align-items: stretch;
-  background-color: #ffffff;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  margin-bottom: 48px;
+  padding: 24px;
   border-radius: 18px;
-  padding: 26px 28px;
-  margin-bottom: 34px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #ffffff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
 }
 
-.feria:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
-}
-
-.feriaImagen {
-  flex: 0 0 230px;
-  height: 160px;
-  border-radius: 14px;
-  overflow: hidden;
-  background-color: #e5e7eb;
-}
-
-.feriaImagen img {
+/* ===============================
+   IMAGEN FERIA
+================================ */
+.feria img {
   width: 100%;
-  height: 100%;
+  height: 220px;
   object-fit: cover;
+  border-radius: 14px;
+  background-color: #f3f4f6;
 }
 
-.feriaContenido {
-  flex: 1;
+/* ===============================
+   CUERPO
+================================ */
+.feriaBody {
   display: flex;
   flex-direction: column;
 }
 
-.feriaContenido h3 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #020617;
-  margin-bottom: 6px;
+.feriaBody h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
 }
 
 .descripcion {
   font-size: 0.95rem;
-  color: #475569;
-  line-height: 1.65;
-  margin-bottom: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
-.feriaDatos {
+/* ===============================
+   FECHAS / DATOS (CLARIDAD)
+================================ */
+.datos {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 24px;
+  gap: 12px 24px;
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.datos p {
+  margin: 0;
+}
+
+.datos p:last-child {
+  grid-column: 1 / -1;
+}
+
+/* ===============================
+   EMPRESAS PARTICIPANTES
+================================ */
+.empresasTexto {
   margin-top: auto;
   padding-top: 14px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #374151;
 }
 
-.feriaDato {
-  display: flex;
-  gap: 8px;
-  font-size: 0.88rem;
-  color: #334155;
-}
-
-.feriaDato strong {
-  font-weight: 600;
-  color: #0f172a;
-}
-
-/* ======================================================
-   MENSAJES
-====================================================== */
-.loading,
-.empty {
-  text-align: center;
-  font-size: 0.95rem;
-  color: #64748b;
-  margin-top: 20px;
-}
-
-/* ======================================================
+/* ===============================
    RESPONSIVE
-====================================================== */
-@media (max-width: 768px) {
-  .main {
-    padding: 28px 16px 60px;
-  }
-
-  .portadaGeneral {
-    max-height: 240px;
-  }
-
-  .logoItem {
-    width: 72px;
-    height: 54px;
-    margin: 0 14px;
-  }
-
+================================ */
+@media (max-width: 900px) {
   .feria {
-    flex-direction: column;
-    padding: 22px 20px;
-  }
-
-  .feriaImagen {
-    width: 100%;
-    height: 190px;
-  }
-
-  .feriaDatos {
     grid-template-columns: 1fr;
+  }
+
+  .feria img {
+    height: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 40px 16px;
+  }
+
+  .main h1 {
+    font-size: 1.8rem;
+  }
+
+  .promocion h2 {
+    font-size: 1.2rem;
   }
 }

@@ -15,7 +15,7 @@ export default function FeriasView() {
 
   /* =========================
      CARGAR FERIAS
-     ========================= */
+  ========================= */
   const fetchFerias = async () => {
     try {
       const res = await fetch("/api/administrador/ferias", {
@@ -34,7 +34,7 @@ export default function FeriasView() {
 
   /* =========================
      CARGAR EMPRESAS
-     ========================= */
+  ========================= */
   const fetchEmpresas = async () => {
     try {
       const res = await fetch("/api/administrador/empresas", {
@@ -59,7 +59,7 @@ export default function FeriasView() {
 
   /* =========================
      ACCIONES
-     ========================= */
+  ========================= */
   const handleNuevaFeria = () => {
     setFeriaSeleccionada(null);
     setShowModal(true);
@@ -102,8 +102,8 @@ export default function FeriasView() {
   };
 
   /* =========================
-     GUARDAR (FERIA + EMPRESAS + FECHAS)
-     ========================= */
+     GUARDAR
+  ========================= */
   const handleSave = async ({
     formData,
     empresas,
@@ -118,7 +118,7 @@ export default function FeriasView() {
 
       /* =========================
          1. FERIA
-         ========================= */
+      ========================= */
       const res = await fetch(
         isEdit
           ? `/api/administrador/ferias/${feriaSeleccionada.id}`
@@ -136,7 +136,7 @@ export default function FeriasView() {
 
       /* =========================
          2. EMPRESAS
-         ========================= */
+      ========================= */
       if (isEdit) {
         await fetch(`/api/administrador/ferias/${feriaId}/empresas`, {
           method: "DELETE",
@@ -153,7 +153,7 @@ export default function FeriasView() {
 
       /* =========================
          3. FECHAS
-         ========================= */
+      ========================= */
       for (const fecha of fechas) {
         if (fecha.id) {
           await fetch(`/api/administrador/fechas/${fecha.id}`, {
@@ -181,7 +181,7 @@ export default function FeriasView() {
 
   /* =========================
      RENDER
-     ========================= */
+  ========================= */
   if (loading) return <p className={styles.loading}>Cargando ferias...</p>;
   if (error) return <p className={styles.error}>Error: {error}</p>;
 
@@ -191,9 +191,7 @@ export default function FeriasView() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Administración de Ferias</h1>
-          <p className={styles.subtitle}>
-            Gestión institucional de ferias
-          </p>
+          <p className={styles.subtitle}>Gestión institucional de ferias</p>
         </div>
 
         <button className={styles.newBtn} onClick={handleNuevaFeria}>
@@ -233,20 +231,15 @@ export default function FeriasView() {
 
               return (
                 <tr key={feria.id}>
-                  {/* NOMBRE */}
                   <td className={styles.nombre}>
                     <strong>{feria.titulo}</strong>
                     {feria.descripcion && (
-                      <p className={styles.descripcion}>
-                        {feria.descripcion}
-                      </p>
+                      <p className={styles.descripcion}>{feria.descripcion}</p>
                     )}
                   </td>
 
-                  {/* AÑO */}
                   <td className={styles.center}>{anioRealizado}</td>
 
-                  {/* FECHAS */}
                   <td>
                     {fechas.length > 0 ? (
                       <div className={styles.fechasStack}>
@@ -255,9 +248,7 @@ export default function FeriasView() {
                             <strong>Fecha {index + 1}:</strong>{" "}
                             {new Date(f.fecha).toLocaleDateString()}
                             <br />
-                            <span className={styles.muted}>
-                              📍 {f.ubicacion}
-                            </span>
+                            <span className={styles.muted}>📍 {f.ubicacion}</span>
                           </div>
                         ))}
                       </div>
@@ -266,7 +257,6 @@ export default function FeriasView() {
                     )}
                   </td>
 
-                  {/* EMPRESAS */}
                   <td>
                     {feria.evento_feria_empresa?.length ? (
                       <ul className={styles.empresasList}>
@@ -279,12 +269,10 @@ export default function FeriasView() {
                     )}
                   </td>
 
-                  {/* ACCIONES */}
                   <td>
                     <div className={styles.actions}>
                       <button
                         className={`${styles.iconBtn} ${styles.edit}`}
-                        title="Editar"
                         onClick={() => handleEdit(feria.id)}
                       >
                         ✏️
@@ -292,7 +280,6 @@ export default function FeriasView() {
 
                       <button
                         className={`${styles.iconBtn} ${styles.duplicate}`}
-                        title="Duplicar"
                         onClick={() => handleDuplicar(feria.id)}
                       >
                         📄
@@ -300,7 +287,6 @@ export default function FeriasView() {
 
                       <button
                         className={`${styles.iconBtn} ${styles.delete}`}
-                        title="Eliminar"
                         onClick={() => handleDelete(feria.id)}
                       >
                         🗑️
