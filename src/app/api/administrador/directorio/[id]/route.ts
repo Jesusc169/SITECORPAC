@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import fs from "fs";
 import path from "path";
+import { promises as fs } from "fs";
 
 /* =========================
    Utilidad para fechas
@@ -46,8 +46,8 @@ export async function PUT(request: Request) {
     let fotoUrl = miembro.fotoUrl;
 
     /* =========================
-       Manejo de foto
-    ========================= */
+       MANEJO FOTO (OPTIMIZADO)
+    ========================== */
     if (foto && foto.size > 0) {
       const buffer = Buffer.from(await foto.arrayBuffer());
       const extension = foto.name.split(".").pop();
@@ -60,23 +60,30 @@ export async function PUT(request: Request) {
         "directorio"
       );
 
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
+      // crear carpeta si no existe (async)
+      await fs.mkdir(uploadPath, { recursive: true });
 
-      fs.writeFileSync(path.join(uploadPath, fileName), buffer);
+      const newFilePath = path.join(uploadPath, fileName);
 
+      // guardar imagen async (NO BLOQUEA VPS)
+      await fs.writeFile(newFilePath, buffer);
+
+      // borrar imagen anterior async
       if (miembro.fotoUrl) {
-        const oldPath = path.join(process.cwd(), "public", miembro.fotoUrl);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        try {
+          const oldPath = path.join(process.cwd(), "public", miembro.fotoUrl);
+          await fs.unlink(oldPath);
+        } catch {
+          // si no existe no pasa nada
+        }
       }
 
       fotoUrl = `/uploads/directorio/${fileName}`;
     }
 
     /* =========================
-       Data dinámica
-    ========================= */
+       DATA DINÁMICA
+    ========================== */
     const data: any = {};
     if (nombre !== null) data.nombre = nombre;
     if (cargo !== null) data.cargo = cargo;
@@ -123,9 +130,12 @@ export async function DELETE(request: Request) {
       );
     }
 
+    // borrar imagen async
     if (miembro.fotoUrl) {
-      const filePath = path.join(process.cwd(), "public", miembro.fotoUrl);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      try {
+        const filePath = path.join(process.cwd(), "public", miembro.fotoUrl);
+        await fs.unlink(filePath);
+      } catch {}
     }
 
     await prisma.directorio.delete({ where: { id } });
