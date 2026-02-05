@@ -1,9 +1,13 @@
-export async function fetchFerias(anio?: number) {
-  const url = anio
-    ? `/api/evento-ferias?anio=${anio}`
-    : `/api/evento-ferias`;
+// src/services/eventoFerias.service.ts
 
-  const res = await fetch(url, {
+import { EventoFeria } from "@/views/FeriasView";
+
+export async function fetchFerias(
+  anio?: number
+): Promise<EventoFeria[]> {
+  const query = anio ? `?anio=${anio}` : "";
+
+  const res = await fetch(`/api/administrador/ferias${query}`, {
     cache: "no-store",
   });
 

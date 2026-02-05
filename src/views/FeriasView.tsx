@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/app/actividades/ferias/ferias.module.css"; 
+import styles from "@/app/actividades/ferias/ferias.module.css";
 
 // =========================
 // Tipos
@@ -8,7 +8,7 @@ import styles from "@/app/actividades/ferias/ferias.module.css";
 export interface Empresa {
   id: number;
   nombre: string;
-  logo_url: string;
+  logo_url: string | null;
 }
 
 export interface EventoFeriaEmpresa {
@@ -67,65 +67,147 @@ function formatFecha(fecha: string) {
 // =========================
 export default function FeriasView({
   feriasList,
-  empresasList,
+  empresasList = [],
   loading,
   transitioning = false,
   aniosDisponibles,
   anioSeleccionado,
   onChangeAnio,
 }: FeriasViewProps) {
-  const empresas = empresasList || [];
-
   return (
     <main className={styles.main}>
       <h1>Ferias</h1>
 
-      {aniosDisponibles && onChangeAnio && (
-        <div className={styles.filtros}>
-          {aniosDisponibles.map((anio) => (
-            <button
-              key={anio}
-              onClick={() => onChangeAnio(anio)}
-              className={anioSeleccionado === anio ? styles.activo : ""}
-            >
-              Año {anio}
-            </button>
-          ))}
-          {anioSeleccionado !== null && (
-            <button onClick={() => onChangeAnio(null)}>Ver todas</button>
-          )}
-        </div>
+      {/* =========================
+          TEXTO PROMOCIONAL
+      ========================== */}
+      <section className={styles.promocion}>
+        <p>
+          El SITECORPAC organiza de manera mensual ferias de venta de comidas con el objetivo de promover la compra y consumo de alimentos saludables. Estas actividades buscan facilitar a los colaboradores el acceso a productos de calidad a precios accesibles, al mismo tiempo que se impulsa y fortalece el desarrollo de emprendimientos y negocios locales.
+        </p>
+      </section>
+
+      {/* =========================
+          CARRUSEL DE EMPRESAS
+      ========================== */}
+      {empresasList.length > 0 && (
+        <section className={styles.empresas}>
+          <div className={styles.empresasTrack}>
+            {[...empresasList, ...empresasList].map(
+              (empresa, index) => (
+                <div
+                  key={`${empresa.id}-${index}`}
+                  className={styles.logoItem}
+                >
+                  <img
+                    src={
+                      empresa.logo_url ||
+                      "/images/empresas/default.png"
+                    }
+                    alt={empresa.nombre}
+                    title={empresa.nombre}
+                    loading="lazy"
+                  />
+                </div>
+              )
+            )}
+          </div>
+        </section>
       )}
 
-      {(loading || transitioning) && <p>Cargando ferias…</p>}
+      {/* =========================
+          FILTRO POR AÑO
+      ========================== */}
+      {aniosDisponibles &&
+        onChangeAnio &&
+        aniosDisponibles.length > 0 && (
+          <div className={styles.filtros}>
+            {aniosDisponibles.map((anio) => (
+              <button
+                key={anio}
+                onClick={() => onChangeAnio(anio)}
+                className={
+                  anioSeleccionado === anio
+                    ? styles.activo
+                    : ""
+                }
+              >
+                Año {anio}
+              </button>
+            ))}
 
-      {!loading && !transitioning && feriasList.length === 0 && (
-        <p>No hay ferias disponibles.</p>
+            {anioSeleccionado !== null && (
+              <button onClick={() => onChangeAnio(null)}>
+                Ver todas
+              </button>
+            )}
+          </div>
+        )}
+
+      {/* =========================
+          ESTADOS
+      ========================== */}
+      {(loading || transitioning) && (
+        <p className={styles.estado}>Cargando ferias…</p>
       )}
 
+      {!loading &&
+        !transitioning &&
+        feriasList.length === 0 && (
+          <p className={styles.estado}>
+            No hay ferias disponibles.
+          </p>
+        )}
+
+      {/* =========================
+          LISTADO DE FERIAS
+      ========================== */}
       {!loading &&
         !transitioning &&
         feriasList.map((feria) => (
           <section key={feria.id} className={styles.feria}>
             <img
-              src={feria.imagen_portada || "/images/ferias/default.jpg"}
+              src={
+                feria.imagen_portada ||
+                "/images/ferias/default.jpg"
+              }
               alt={feria.titulo}
+              loading="lazy"
             />
-            <h3>{feria.titulo}</h3>
-            <p>{feria.descripcion}</p>
 
-            {feria.evento_feria_fecha.map((fecha) => (
-              <div key={fecha.id}>
-                <p>📅 {formatFecha(fecha.fecha)}</p>
-                <p>🕘 {formatHora(fecha.hora_inicio)} - {formatHora(fecha.hora_fin)}</p>
-                <p>📍 {fecha.ubicacion}{fecha.zona ? ` - ${fecha.zona}` : ""}</p>
-              </div>
-            ))}
+            <div className={styles.feriaBody}>
+              <h3>{feria.titulo}</h3>
 
-            <p>
-              🏢 Empresas:{" "}
-              {feria.evento_feria_empresa.map((e) => e.empresa.nombre).join(", ")}
-            </p>
+              <p className={styles.descripcion}>
+                {feria.descripcion}
+              </p>
+
+              {feria.evento_feria_fecha.map((fecha) => (
+                <div
+                  key={fecha.id}
+                  className={styles.datos}
+                >
+                  <p>📅 {formatFecha(fecha.fecha)}</p>
+                  <p>
+                    🕘 {formatHora(fecha.hora_inicio)} –{" "}
+                    {formatHora(fecha.hora_fin)}
+                  </p>
+                  <p>
+                    📍 {fecha.ubicacion}
+                    {fecha.zona
+                      ? ` - ${fecha.zona}`
+                      : ""}
+                  </p>
+                </div>
+              ))}
+
+              <p className={styles.empresasTexto}>
+                🏢 Empresas participantes:{" "}
+                {feria.evento_feria_empresa
+                  .map((e) => e.empresa.nombre)
+                  .join(", ")}
+              </p>
+            </div>
           </section>
         ))}
     </main>

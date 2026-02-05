@@ -1,4 +1,4 @@
-import styles from "./sorteos.module.css";
+import styles from "@/app/actividades/sorteos/sorteos.module.css";
 
 interface SorteoProducto {
   id: number;

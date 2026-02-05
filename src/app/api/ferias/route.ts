@@ -3,18 +3,53 @@ import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
-// 🔥 cache 60s (CLAVE para 1k usuarios)
+// 🔥 cache 60s
 export const revalidate = 60;
 
+/* =====================================================
+   FUNCION SEGURA PARA OBTENER AÑO DESDE FECHA
+===================================================== */
+function obtenerAnioSeguro(fechaTexto: string): number {
+  if (!fechaTexto) return new Date().getFullYear();
+
+  try {
+    // formato ISO: 2026-01-15
+    if (fechaTexto.includes("-") && fechaTexto.length >= 10) {
+      const partes = fechaTexto.split("-");
+      if (partes[0].length === 4) {
+        return Number(partes[0]);
+      }
+    }
+
+    // formato peruano: 15/01/2026
+    if (fechaTexto.includes("/")) {
+      const partes = fechaTexto.split("/");
+      if (partes.length === 3) {
+        return Number(partes[2]);
+      }
+    }
+
+    // fallback JS
+    const fecha = new Date(fechaTexto);
+    if (!isNaN(fecha.getTime())) {
+      return fecha.getFullYear();
+    }
+
+    return new Date().getFullYear();
+  } catch {
+    return new Date().getFullYear();
+  }
+}
+
 /* =========================
-   GET – LISTAR FERIAS (OPTIMIZADO)
+   GET – LISTAR FERIAS
 ========================= */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
     const page = Number(searchParams.get("page") || 1);
-    const limit = 10;
+    const limit = 50;
     const skip = (page - 1) * limit;
     const anio = searchParams.get("anio");
 
@@ -28,13 +63,13 @@ export async function GET(req: Request) {
       },
       skip,
       take: limit,
-      select: {
-        id: true,
-        titulo: true,
-        descripcion: true,
-        anio: true,
-        imagen_portada: true,
-        created_at: true,
+      include: {
+        evento_feria_empresa: {
+          include: {
+            empresa: true,
+          },
+        },
+        evento_feria_fecha: true,
       },
     });
 
@@ -49,7 +84,7 @@ export async function GET(req: Request) {
 }
 
 /* =========================
-   POST – CREAR FERIA (SE QUEDA IGUAL)
+   POST – CREAR FERIA (ARREGLADO)
 ========================= */
 export async function POST(req: Request) {
   try {
@@ -68,7 +103,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const anio = new Date(fechas[0].fecha).getFullYear();
+    /* =====================================================
+       🔥 AÑO CORRECTO DESDE FECHA (NUNCA MÁS 0)
+    ===================================================== */
+    const anio = obtenerAnioSeguro(fechas[0].fecha);
 
     let imagePath: string | null = null;
 
@@ -92,6 +130,7 @@ export async function POST(req: Request) {
         anio,
         imagen_portada: imagePath,
         estado: true,
+
         evento_feria_fecha: {
           create: fechas.map((f: any) => ({
             fecha: new Date(f.fecha),
@@ -101,6 +140,7 @@ export async function POST(req: Request) {
             zona: f.zona || null,
           })),
         },
+
         evento_feria_empresa: {
           create: empresas.map((id: number) => ({
             empresa_id: id,
