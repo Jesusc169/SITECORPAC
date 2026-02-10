@@ -70,6 +70,7 @@ export default function FeriasView() {
       const res = await fetch(`/api/administrador/ferias/${id}`, {
         cache: "no-store",
       });
+
       if (!res.ok) throw new Error("Error al obtener feria");
 
       const data = await res.json();
@@ -81,14 +82,32 @@ export default function FeriasView() {
     }
   };
 
+  /* =========================
+     DUPLICAR FERIA
+  ========================= */
   const handleDuplicar = async (id: number) => {
-    if (!confirm("¿Deseas duplicar esta feria?")) return;
+    if (!confirm("¿Duplicar esta feria?")) return;
 
-    await fetch(`/api/ferias/${id}/duplicate`, {
-      method: "POST",
-    });
+    try {
+      const res = await fetch(
+        `/api/administrador/ferias/${id}/duplicar`,
+        { method: "POST" }
+      );
 
-    await fetchFerias();
+      const text = await res.text(); // 🔥 para debug real
+      console.log("RESPUESTA DUPLICAR:", text);
+
+      if (!res.ok) {
+        alert("❌ Error servidor duplicar:\n" + text);
+        throw new Error(text);
+      }
+
+      alert("✅ Feria duplicada");
+      await fetchFerias();
+    } catch (err) {
+      console.error(err);
+      alert("Error al duplicar feria (ver consola)");
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -102,7 +121,7 @@ export default function FeriasView() {
   };
 
   /* =========================
-     GUARDAR
+     GUARDAR FERIA
   ========================= */
   const handleSave = async ({
     formData,
@@ -116,9 +135,9 @@ export default function FeriasView() {
     try {
       const isEdit = Boolean(feriaSeleccionada?.id);
 
-      /* =========================
-         1. FERIA
-      ========================= */
+      formData.append("empresas", JSON.stringify(empresas));
+      formData.append("fechas", JSON.stringify(fechas));
+
       const res = await fetch(
         isEdit
           ? `/api/administrador/ferias/${feriaSeleccionada.id}`
@@ -130,45 +149,6 @@ export default function FeriasView() {
       );
 
       if (!res.ok) throw new Error("Error al guardar feria");
-
-      const feria = await res.json();
-      const feriaId = feria.id;
-
-      /* =========================
-         2. EMPRESAS
-      ========================= */
-      if (isEdit) {
-        await fetch(`/api/administrador/ferias/${feriaId}/empresas`, {
-          method: "DELETE",
-        });
-      }
-
-      for (const empresaId of empresas) {
-        await fetch(`/api/administrador/ferias/${feriaId}/empresas`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ empresa_id: empresaId }),
-        });
-      }
-
-      /* =========================
-         3. FECHAS
-      ========================= */
-      for (const fecha of fechas) {
-        if (fecha.id) {
-          await fetch(`/api/administrador/fechas/${fecha.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fecha),
-          });
-        } else {
-          await fetch(`/api/administrador/ferias/${feriaId}/fechas`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fecha),
-          });
-        }
-      }
 
       await fetchFerias();
       setShowModal(false);
@@ -187,7 +167,6 @@ export default function FeriasView() {
 
   return (
     <>
-      {/* HEADER */}
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Administración de Ferias</h1>
@@ -199,7 +178,6 @@ export default function FeriasView() {
         </button>
       </div>
 
-      {/* TABLA */}
       <div className={styles.tableWrapper}>
         <table className={styles.adminTable}>
           <thead>
@@ -248,7 +226,9 @@ export default function FeriasView() {
                             <strong>Fecha {index + 1}:</strong>{" "}
                             {new Date(f.fecha).toLocaleDateString()}
                             <br />
-                            <span className={styles.muted}>📍 {f.ubicacion}</span>
+                            <span className={styles.muted}>
+                              📍 {f.ubicacion}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -300,7 +280,6 @@ export default function FeriasView() {
         </table>
       </div>
 
-      {/* MODAL */}
       {showModal && (
         <AdminFeriaModal
           show={showModal}
