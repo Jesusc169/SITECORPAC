@@ -1,20 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import styles from "./sorteos.admin.module.css";
 import AdminSorteoModal from "./AdminSorteoModal";
 
-// =========================
-// Tipos
-// =========================
-export interface Sorteo {
-  id: number;
+/* =========================
+TIPOS
+========================= */
+export interface Premio {
+  id?: number;
   nombre: string;
-  descripcion: string;
-  lugar: string;
+  descripcion?: string;
+  sorteo_id?: number;
+  cantidad?: number;
+}
+
+export interface Sorteo {
+  id?: number; // opcional para crear nuevo
+  nombre: string;
+  descripcion?: string;
+  lugar?: string;
+  imagen?: string; // 🔥 agregado
   fecha_hora: string;
   anio: number;
-  estado: "ACTIVO" | "INACTIVO";
+  estado?: "ACTIVO" | "INACTIVO";
+  premios?: Premio[];
 }
 
 interface SorteosAdminViewProps {
@@ -23,15 +32,17 @@ interface SorteosAdminViewProps {
   onEditar: (s: Sorteo) => void;
   onEliminar: (id: number) => Promise<void>;
   onDuplicar: (id: number) => Promise<void>;
+
   modal: boolean;
   setModal: React.Dispatch<React.SetStateAction<boolean>>;
   selected: Sorteo | null;
-  onSave: () => Promise<void>;
+
+  onSave: (data: any) => Promise<void>;
 }
 
-// =========================
-// Componente
-// =========================
+/* =========================
+COMPONENTE
+========================= */
 export default function SorteosAdminView({
   sorteos,
   onNuevo,
@@ -45,10 +56,11 @@ export default function SorteosAdminView({
 }: SorteosAdminViewProps) {
   return (
     <section className={styles.container}>
+      {/* ================= HEADER ================= */}
       <header className={styles.header}>
         <div>
           <h1>Administración de Sorteos</h1>
-          <p>Gestione los sorteos organizados por el SITECORPAC</p>
+          <p>Gestione los sorteos del sindicato</p>
         </div>
 
         <button className={styles.newBtn} onClick={onNuevo}>
@@ -56,6 +68,7 @@ export default function SorteosAdminView({
         </button>
       </header>
 
+      {/* ================= TABLA ================= */}
       <div className={styles.card}>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -71,49 +84,69 @@ export default function SorteosAdminView({
             </thead>
 
             <tbody>
-              {sorteos.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.nombre}</td>
-                  <td>{s.anio}</td>
-                  <td>{new Date(s.fecha_hora).toLocaleString()}</td>
-                  <td>{s.lugar}</td>
-                  <td>
-                    <span
-                      className={`${styles.badge} ${
-                        s.estado === "ACTIVO" ? styles.active : styles.inactive
-                      }`}
-                    >
-                      {s.estado}
-                    </span>
-                  </td>
-                  <td className={styles.actionsCell}>
-                    <div className={styles.actions}>
-                      <button
-                        className={`${styles.actionBtn} ${styles.edit}`}
-                        onClick={() => onEditar(s)}
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.duplicate}`}
-                        onClick={() => onDuplicar(s.id)}
-                      >
-                        📄
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.delete}`}
-                        onClick={() => onEliminar(s.id)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {sorteos.length > 0 ? (
+                sorteos.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.nombre}</td>
 
-              {sorteos.length === 0 && (
+                    <td>{s.anio ?? "-"}</td>
+
+                    <td>
+                      {s.fecha_hora
+                        ? new Date(s.fecha_hora).toLocaleString("es-PE")
+                        : "-"}
+                    </td>
+
+                    <td>{s.lugar || "SITECORPAC"}</td>
+
+                    <td>
+                      <span
+                        className={`${styles.badge} ${
+                          s.estado === "ACTIVO"
+                            ? styles.active
+                            : styles.inactive
+                        }`}
+                      >
+                        {s.estado || "ACTIVO"}
+                      </span>
+                    </td>
+
+                    {/* ================= ACCIONES ================= */}
+                    <td className={styles.actionsCell}>
+                      <div className={styles.actions}>
+                        {/* EDITAR */}
+                        <button
+                          className={`${styles.actionBtn} ${styles.edit}`}
+                          onClick={() => onEditar(s)}
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+
+                        {/* DUPLICAR */}
+                        <button
+                          className={`${styles.actionBtn} ${styles.duplicate}`}
+                          onClick={() => s.id && onDuplicar(s.id)}
+                          title="Duplicar"
+                        >
+                          📄
+                        </button>
+
+                        {/* ELIMINAR */}
+                        <button
+                          className={`${styles.actionBtn} ${styles.delete}`}
+                          onClick={() => s.id && onEliminar(s.id)}
+                          title="Eliminar"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: 32 }}>
+                  <td colSpan={6} style={{ textAlign: "center", padding: 40 }}>
                     No hay sorteos registrados
                   </td>
                 </tr>
@@ -123,11 +156,13 @@ export default function SorteosAdminView({
         </div>
       </div>
 
+      {/* ================= MODAL ================= */}
       {modal && (
         <AdminSorteoModal
-          sorteo={selected}
+          open={modal}
           onClose={() => setModal(false)}
-          onSaved={onSave}
+          onSave={onSave}
+          initialData={selected}
         />
       )}
     </section>

@@ -35,7 +35,7 @@ export default function Footer() {
             <i className="bi bi-telephone-fill"></i>
             <div>
               <span className={styles.label}>Teléfono</span>
-              <span className={styles.text}>+51 987 654 321</span>
+              <span className={styles.text}>+51 950215616</span>
             </div>
           </div>
 
@@ -45,12 +45,12 @@ export default function Footer() {
             <div>
               <span className={styles.label}>WhatsApp</span>
               <a
-                href="https://wa.me/51940218125"
+                href="https://wa.me/51950215616"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
               >
-                +51 940 218 125
+                +51 950215616
               </a>
             </div>
           </div>

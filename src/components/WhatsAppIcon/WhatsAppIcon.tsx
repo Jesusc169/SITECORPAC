@@ -1,5 +1,5 @@
 // components/WhatsAppIcon.tsx
-import { getWhatsAppLink } from "../../controllers/contact.controller";
+import { getWhatsAppLink } from "@/controllers/contact.controller";
 import styles from "./WhatsAppIcon.module.css";
 
 export default function WhatsAppIcon() {
