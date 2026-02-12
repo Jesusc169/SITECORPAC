@@ -8,10 +8,11 @@ import path from "path";
 ===================================================== */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idParam } = await context.params;
+    const id = Number(idParam);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
@@ -43,10 +44,11 @@ export async function GET(
 ===================================================== */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idParam } = await context.params;
+    const id = Number(idParam);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
@@ -139,10 +141,11 @@ export async function PUT(
 ===================================================== */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idParam } = await context.params;
+    const id = Number(idParam);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
