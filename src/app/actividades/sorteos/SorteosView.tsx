@@ -1,7 +1,7 @@
 import styles from "@/app/actividades/sorteos/sorteos.module.css";
 
 interface SorteoProducto {
-  id: number;
+  id?: number;
   nombre: string;
   descripcion?: string | null;
   cantidad?: number | null;
@@ -15,7 +15,10 @@ interface Sorteo {
   lugar: string;
   fecha_hora: string;
   anio: number;
-  sorteo_producto: SorteoProducto[];
+
+  // 🔥 soporta ambas formas (backend viejo o nuevo)
+  sorteo_producto?: SorteoProducto[];
+  premios?: SorteoProducto[];
 }
 
 interface Props {
@@ -28,9 +31,7 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
 
   return (
     <section className={styles.container}>
-      {/* ===========================
-          CABECERA
-      ============================ */}
+      {/* CABECERA */}
       <header className={styles.header}>
         <h1>Sorteos del SITECORPAC</h1>
         <p>
@@ -39,89 +40,92 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
         </p>
       </header>
 
-      {/* ===========================
-          FILTRO POR AÑO
-      ============================ */}
+      {/* FILTRO */}
       <div className={styles.anios}>
         {aniosDisponibles.map((anio) => (
-          <button
-            key={anio}
-            type="button"
-            onClick={() => onChangeAnio(anio)}
-          >
+          <button key={anio} onClick={() => onChangeAnio(anio)}>
             {anio}
           </button>
         ))}
-
-        <button type="button" onClick={() => onChangeAnio(null)}>
-          Ver todos
-        </button>
+        <button onClick={() => onChangeAnio(null)}>Ver todos</button>
       </div>
 
-      {/* ===========================
-          LISTADO DE SORTEOS
-      ============================ */}
+      {/* VACIO */}
       {sorteos.length === 0 && (
         <p className={styles.empty}>
           No hay sorteos disponibles para este año.
         </p>
       )}
 
+      {/* LISTA */}
       <div className={styles.list}>
-        {sorteos.map((sorteo) => (
-          <article key={sorteo.id} className={styles.card}>
-            {/* Imagen */}
-            {sorteo.imagen ? (
-              <img
-                src={sorteo.imagen}
-                alt={sorteo.nombre}
-                loading="lazy"
-              />
-            ) : (
-              <div className={styles.imagePlaceholder}>
-                Imagen no disponible
+        {sorteos.map((sorteo) => {
+          // 🔥 NORMALIZAR PREMIOS (soporta cualquier backend)
+          const productos =
+            sorteo.sorteo_producto ||
+            sorteo.premios ||
+            [];
+
+          return (
+            <article key={sorteo.id} className={styles.card}>
+              {/* Imagen */}
+              {sorteo.imagen ? (
+                <img
+                  src={sorteo.imagen}
+                  alt={sorteo.nombre}
+                  loading="lazy"
+                />
+              ) : (
+                <div className={styles.imagePlaceholder}>
+                  Imagen no disponible
+                </div>
+              )}
+
+              {/* Contenido */}
+              <div className={styles.content}>
+                <h3>{sorteo.nombre}</h3>
+
+                <p className={styles.descripcion}>
+                  {sorteo.descripcion}
+                </p>
+
+                {/* META */}
+                <div className={styles.meta}>
+                  <span>📍 {sorteo.lugar}</span>
+                  <span>
+                    📅{" "}
+                    {new Date(sorteo.fecha_hora).toLocaleDateString(
+                      "es-PE",
+                      {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </span>
+                </div>
+
+                {/* PREMIOS */}
+                <ul className={styles.productos}>
+                  {productos.length === 0 && (
+                    <li>No hay productos registrados</li>
+                  )}
+
+                  {productos.map((producto, i) => (
+                    <li key={producto.id || i}>
+                      🎁 {producto.nombre}
+                      {producto.cantidad
+                        ? ` (${producto.cantidad})`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            )}
-
-            {/* Contenido */}
-            <div className={styles.content}>
-              <h3>{sorteo.nombre}</h3>
-
-              <p className={styles.descripcion}>
-                {sorteo.descripcion}
-              </p>
-
-              {/* Metadata */}
-              <div className={styles.meta}>
-                <span>📍 {sorteo.lugar}</span>
-                <span>
-                  📅{" "}
-                  {new Date(sorteo.fecha_hora).toLocaleDateString("es-PE", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-
-              {/* Productos */}
-              <ul className={styles.productos}>
-                {sorteo.sorteo_producto.length === 0 && (
-                  <li>No hay productos registrados</li>
-                )}
-
-                {sorteo.sorteo_producto.map((producto) => (
-                  <li key={producto.id}>
-                    🎁 {producto.nombre}
-                    {producto.cantidad && ` (${producto.cantidad})`}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </section>
   );

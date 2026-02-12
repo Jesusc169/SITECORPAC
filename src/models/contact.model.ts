@@ -2,7 +2,7 @@
 
 export const contacto = {
   whatsapp: {
-    numero: "+51940218125", // sin signos ni espacios
+    numero: "+519950215616", 
     mensaje: "Hola, quisiera comunicarme con el SITE",
   },
 };

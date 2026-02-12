@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import fs from "fs/promises";
+import path from "path";
 
 /* =====================================================
    GET → Obtener noticia por ID
 ===================================================== */
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Obtener ID desde la URL
-    const url = new URL(request.url);
-    const id = Number(url.pathname.split("/").pop());
+    const id = Number(params.id);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
@@ -19,40 +22,104 @@ export async function GET(request: Request) {
     });
 
     if (!noticia) {
-      return NextResponse.json({ message: "Noticia no encontrada" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Noticia no encontrada" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(noticia);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: "Error al obtener la noticia" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error al obtener la noticia" },
+      { status: 500 }
+    );
   }
 }
 
 /* =====================================================
-   PUT → Actualizar noticia
+   PUT → Actualizar noticia (PRO con imagen)
 ===================================================== */
-export async function PUT(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Obtener ID desde la URL
-    const url = new URL(request.url);
-    const id = Number(url.pathname.split("/").pop());
+    const id = Number(params.id);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
     }
 
-    const body = await request.json();
+    // Detectar si viene FormData o JSON
+    const contentType = request.headers.get("content-type") || "";
 
+    let titulo = "";
+    let descripcion = "";
+    let contenido = "";
+    let autor = "";
+    let fecha: Date | undefined;
+    let imagenUrl: string | undefined;
+
+    /* ===============================
+       SI VIENE FORM DATA (con imagen)
+    =============================== */
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+
+      titulo = String(formData.get("titulo") || "");
+      descripcion = String(formData.get("descripcion") || "");
+      contenido = String(formData.get("contenido") || "");
+      autor = String(formData.get("autor") || "");
+
+      const fechaStr = formData.get("fecha");
+      if (fechaStr) fecha = new Date(String(fechaStr));
+
+      const imagen = formData.get("imagen") as File | null;
+
+      if (imagen && imagen.size > 0) {
+        const bytes = await imagen.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        const fileName = `${Date.now()}-${imagen.name.replaceAll(" ", "_")}`;
+        const uploadDir = path.join(process.cwd(), "public/uploads");
+
+        await fs.mkdir(uploadDir, { recursive: true });
+
+        const filePath = path.join(uploadDir, fileName);
+        await fs.writeFile(filePath, buffer);
+
+        imagenUrl = `/uploads/${fileName}`;
+      }
+    }
+
+    /* ===============================
+       SI VIENE JSON NORMAL
+    =============================== */
+    else {
+      const body = await request.json();
+
+      titulo = body.titulo;
+      descripcion = body.descripcion;
+      contenido = body.contenido;
+      autor = body.autor;
+      fecha = body.fecha ? new Date(body.fecha) : undefined;
+      imagenUrl = body.imagen;
+    }
+
+    /* ===============================
+       UPDATE DB
+    =============================== */
     const noticiaActualizada = await prisma.noticia.update({
       where: { id },
       data: {
-        titulo: body.titulo,
-        descripcion: body.descripcion,
-        contenido: body.contenido,
-        imagen: body.imagen,
-        fecha: body.fecha ? new Date(body.fecha) : undefined,
-        autor: body.autor,
+        titulo,
+        descripcion,
+        contenido,
+        autor,
+        ...(fecha && { fecha }),
+        ...(imagenUrl && { imagen: imagenUrl }),
         updatedAt: new Date(),
       },
     });
@@ -60,18 +127,22 @@ export async function PUT(request: Request) {
     return NextResponse.json(noticiaActualizada);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: "Error al actualizar la noticia" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error al actualizar la noticia" },
+      { status: 500 }
+    );
   }
 }
 
 /* =====================================================
    DELETE → Eliminar noticia
 ===================================================== */
-export async function DELETE(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Obtener ID desde la URL
-    const url = new URL(request.url);
-    const id = Number(url.pathname.split("/").pop());
+    const id = Number(params.id);
 
     if (isNaN(id)) {
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
@@ -84,6 +155,9 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: "Error al eliminar la noticia" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error al eliminar la noticia" },
+      { status: 500 }
+    );
   }
 }

@@ -1,37 +1,78 @@
 import { NextResponse } from "next/server";
-import {
-  obtenerSorteos,
-  crearSorteo,
-  actualizarSorteo,
-  eliminarSorteo,
-  duplicarSorteo,
-} from "@/services/sorteo.service";
+import { prisma } from "@/lib/prisma";
 
+// =====================================================
+// 📥 GET → LISTAR SORTEOS
+// =====================================================
 export async function GET() {
-  const sorteos = await obtenerSorteos();
-  return NextResponse.json(sorteos);
+  try {
+    const sorteos = await prisma.sorteo.findMany({
+      include: {
+        sorteo_producto: true,
+      },
+      orderBy: {
+        fecha_hora: "desc",
+      },
+    });
+
+    return NextResponse.json(sorteos);
+  } catch (error) {
+    console.error("ERROR LISTAR SORTEOS:", error);
+    return NextResponse.json({ error: "Error listando" }, { status: 500 });
+  }
 }
 
+// =====================================================
+// ➕ POST → CREAR SORTEO
+// =====================================================
 export async function POST(req: Request) {
-  const data = await req.json();
-  const sorteo = await crearSorteo(data);
-  return NextResponse.json(sorteo);
-}
+  try {
+    const body = await req.json();
 
-export async function PUT(req: Request) {
-  const data = await req.json();
-  const sorteo = await actualizarSorteo(data);
-  return NextResponse.json(sorteo);
-}
+    const {
+      titulo,
+      descripcion,
+      fecha_hora,
+      lugar,
+      imagen,
+      premios = [],
+      anio,
+    } = body;
 
-export async function DELETE(req: Request) {
-  const { id } = await req.json();
-  await eliminarSorteo(id);
-  return NextResponse.json({ ok: true });
-}
+    const fechaHora = fecha_hora ? new Date(fecha_hora) : new Date();
 
-export async function PATCH(req: Request) {
-  const { id } = await req.json();
-  const sorteo = await duplicarSorteo(id);
-  return NextResponse.json(sorteo);
+    const nuevo = await prisma.sorteo.create({
+      data: {
+        nombre: titulo,
+        descripcion,
+        imagen,
+        lugar,
+        fecha_hora: fechaHora,
+        anio: anio || fechaHora.getFullYear(),
+        estado: "ACTIVO",
+      },
+    });
+
+    // insertar premios
+    if (premios.length > 0) {
+      await prisma.sorteo_producto.createMany({
+        data: premios.map((p: any) => ({
+          sorteo_id: nuevo.id,
+          nombre: p.nombre,
+          descripcion: p.descripcion || "",
+          cantidad: Number(p.cantidad) || 1,
+        })),
+      });
+    }
+
+    const completo = await prisma.sorteo.findUnique({
+      where: { id: nuevo.id },
+      include: { sorteo_producto: true },
+    });
+
+    return NextResponse.json(completo);
+  } catch (error) {
+    console.error("ERROR CREAR:", error);
+    return NextResponse.json({ error: "Error creando" }, { status: 500 });
+  }
 }
