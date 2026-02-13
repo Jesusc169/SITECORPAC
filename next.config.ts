@@ -3,10 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "50mb", 
-    },
+  async headers() {
+    return [
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate",
+          },
+        ],
+      },
+    ];
   },
 };
 
