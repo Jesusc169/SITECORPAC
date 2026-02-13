@@ -172,7 +172,7 @@ export default function Navbar() {
             <li className="nav-item">
               <a
                 className={`btn btn-primary ${styles.btnUnete}`}
-                href="https://wa.me/51941361585?text=Hola,%20quiero%20unirme%20al%20SITECORPAC"
+                href="https://wa.me/51950215616?text=Hola,%20quiero%20unirme%20al%20SITECORPAC"
                 target="_blank"
                 rel="noopener noreferrer"
               >
