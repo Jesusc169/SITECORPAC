@@ -13,10 +13,12 @@
 node_modules/
 
 # ======================
-# NEXT.JS
+# NEXT.JS BUILD
 # ======================
 .next/
 out/
+dist/
+build/
 
 # ======================
 # PRISMA
@@ -32,6 +34,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
 # ======================
 # SISTEMA
@@ -44,9 +47,24 @@ Thumbs.db
 # ======================
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # ======================
-# SUBIDAS / ARCHIVOS PRIVADOS
+# ARCHIVOS DE PRODUCCION (SUBIDOS POR ADMIN)
+# ⚠️ MUY IMPORTANTE → NO TOCAR
 # ======================
+
+# uploads genericos
 public/uploads/
+
+# documentos privados
 public/documentos/
+
+# imagenes dinamicas (noticias, sorteos, etc)
+public/images/sorteos/
+public/images/noticias/
+public/images/ferias/
+
+# opcional: cualquier imagen generada en prod
+public/images/temp/
