@@ -25,18 +25,15 @@ export default function AdminDirectorioPage() {
   const [editarMiembro, setEditarMiembro] = useState<Miembro | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Cargar miembros desde MySQL (API)
+  // 🔹 Cargar miembros desde API
   const fetchMiembros = async () => {
     try {
       setLoading(true);
-
       const res = await fetch("/api/administrador/directorio", {
         method: "GET",
-        cache: "no-store", // 🔥 importante para que siempre lea BD real
+        cache: "no-store", // 🔥 siempre trae desde MySQL real
       });
-
       if (!res.ok) throw new Error("Error al obtener directorio");
-
       const data: Miembro[] = await res.json();
       setMiembros(data);
     } catch (error) {
@@ -57,11 +54,10 @@ export default function AdminDirectorioPage() {
         method: "POST",
         body: formData,
       });
-
       if (!res.ok) throw new Error("Error al agregar miembro");
 
       setShowAgregarModal(false);
-      await fetchMiembros(); // 🔥 refresca desde MySQL real
+      await fetchMiembros(); // 🔥 refresca real
     } catch (error) {
       console.error(error);
       alert("Error al agregar miembro");
@@ -75,7 +71,6 @@ export default function AdminDirectorioPage() {
         method: "PUT",
         body: formData,
       });
-
       if (!res.ok) throw new Error("Error al editar miembro");
 
       setEditarMiembro(null);
@@ -89,12 +84,10 @@ export default function AdminDirectorioPage() {
   // 🔹 Eliminar miembro
   const handleEliminarMiembro = async (id: number) => {
     if (!confirm("¿Seguro quieres eliminar este miembro?")) return;
-
     try {
       const res = await fetch(`/api/administrador/directorio/${id}`, {
         method: "DELETE",
       });
-
       if (!res.ok) throw new Error("Error al eliminar miembro");
 
       await fetchMiembros(); // 🔥 refresca real
@@ -127,11 +120,10 @@ export default function AdminDirectorioPage() {
             ) : (
               miembros.map(miembro => (
                 <div key={miembro.id} className={styles.miembroCard}>
-                  
                   {/* FOTO */}
                   {miembro.fotoUrl ? (
                     <img
-                      src={`${miembro.fotoUrl}?t=${Date.now()}`} 
+                      src={`${miembro.fotoUrl}?t=${Date.now()}`} // 🔥 evita cache
                       alt={miembro.nombre}
                       className={styles.foto}
                     />
@@ -153,12 +145,8 @@ export default function AdminDirectorioPage() {
                   </div>
 
                   <div className={styles.actions}>
-                    <button onClick={() => setEditarMiembro(miembro)}>
-                      Editar
-                    </button>
-                    <button onClick={() => handleEliminarMiembro(miembro.id)}>
-                      Eliminar
-                    </button>
+                    <button onClick={() => setEditarMiembro(miembro)}>Editar</button>
+                    <button onClick={() => handleEliminarMiembro(miembro.id)}>Eliminar</button>
                   </div>
                 </div>
               ))
