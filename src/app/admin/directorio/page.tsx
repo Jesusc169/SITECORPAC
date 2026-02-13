@@ -23,16 +23,26 @@ export default function AdminDirectorioPage() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [showAgregarModal, setShowAgregarModal] = useState(false);
   const [editarMiembro, setEditarMiembro] = useState<Miembro | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 Cargar miembros desde API
+  // 🔹 Cargar miembros desde MySQL (API)
   const fetchMiembros = async () => {
     try {
-      const res = await fetch("/api/administrador/directorio");
+      setLoading(true);
+
+      const res = await fetch("/api/administrador/directorio", {
+        method: "GET",
+        cache: "no-store", // 🔥 importante para que siempre lea BD real
+      });
+
       if (!res.ok) throw new Error("Error al obtener directorio");
+
       const data: Miembro[] = await res.json();
       setMiembros(data);
     } catch (error) {
-      console.error(error);
+      console.error("Error cargando miembros:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,12 +57,14 @@ export default function AdminDirectorioPage() {
         method: "POST",
         body: formData,
       });
+
       if (!res.ok) throw new Error("Error al agregar miembro");
-      const nuevoMiembro = await res.json();
-      setMiembros(prev => [nuevoMiembro, ...prev]);
+
       setShowAgregarModal(false);
+      await fetchMiembros(); // 🔥 refresca desde MySQL real
     } catch (error) {
       console.error(error);
+      alert("Error al agregar miembro");
     }
   };
 
@@ -63,12 +75,14 @@ export default function AdminDirectorioPage() {
         method: "PUT",
         body: formData,
       });
+
       if (!res.ok) throw new Error("Error al editar miembro");
-      const actualizado = await res.json();
-      setMiembros(prev => prev.map(m => (m.id === id ? actualizado : m)));
+
       setEditarMiembro(null);
+      await fetchMiembros(); // 🔥 refresca real
     } catch (error) {
       console.error(error);
+      alert("Error al editar miembro");
     }
   };
 
@@ -77,11 +91,16 @@ export default function AdminDirectorioPage() {
     if (!confirm("¿Seguro quieres eliminar este miembro?")) return;
 
     try {
-      const res = await fetch(`/api/administrador/directorio/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/administrador/directorio/${id}`, {
+        method: "DELETE",
+      });
+
       if (!res.ok) throw new Error("Error al eliminar miembro");
-      setMiembros(prev => prev.filter(m => m.id !== id));
+
+      await fetchMiembros(); // 🔥 refresca real
     } catch (error) {
       console.error(error);
+      alert("Error al eliminar");
     }
   };
 
@@ -99,38 +118,56 @@ export default function AdminDirectorioPage() {
           + Agregar Miembro
         </button>
 
-        <div className={styles.listaMiembros}>
-          {miembros.length === 0 ? (
-            <p>No hay miembros registrados.</p>
-          ) : (
-            miembros.map(miembro => (
-              <div key={miembro.id} className={styles.miembroCard}>
-                {miembro.fotoUrl && (
-                  <img src={miembro.fotoUrl} alt={miembro.nombre} className={styles.foto} />
-                )}
-                <div>
-                  <h3>{miembro.nombre}</h3>
-                  <p>{miembro.cargo}</p>
-                  <p>{miembro.correo}</p>
-                  <p>{miembro.telefono}</p>
-                  <p>
-                    {new Date(miembro.periodoInicio).toLocaleDateString()}{" "}
-                    {miembro.periodoFin
-                      ? `- ${new Date(miembro.periodoFin).toLocaleDateString()}`
-                      : ""}
-                  </p>
+        {loading ? (
+          <p>Cargando...</p>
+        ) : (
+          <div className={styles.listaMiembros}>
+            {miembros.length === 0 ? (
+              <p>No hay miembros registrados.</p>
+            ) : (
+              miembros.map(miembro => (
+                <div key={miembro.id} className={styles.miembroCard}>
+                  
+                  {/* FOTO */}
+                  {miembro.fotoUrl ? (
+                    <img
+                      src={`${miembro.fotoUrl}?t=${Date.now()}`} 
+                      alt={miembro.nombre}
+                      className={styles.foto}
+                    />
+                  ) : (
+                    <div className={styles.sinFoto}>Sin foto</div>
+                  )}
+
+                  <div>
+                    <h3>{miembro.nombre}</h3>
+                    <p>{miembro.cargo}</p>
+                    <p>{miembro.correo}</p>
+                    <p>{miembro.telefono}</p>
+                    <p>
+                      {new Date(miembro.periodoInicio).toLocaleDateString()}{" "}
+                      {miembro.periodoFin
+                        ? `- ${new Date(miembro.periodoFin).toLocaleDateString()}`
+                        : ""}
+                    </p>
+                  </div>
+
+                  <div className={styles.actions}>
+                    <button onClick={() => setEditarMiembro(miembro)}>
+                      Editar
+                    </button>
+                    <button onClick={() => handleEliminarMiembro(miembro.id)}>
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.actions}>
-                  <button onClick={() => setEditarMiembro(miembro)}>Editar</button>
-                  <button onClick={() => handleEliminarMiembro(miembro.id)}>Eliminar</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        )}
       </main>
 
-      {/* 🔹 Modales */}
+      {/* 🔹 Modal agregar */}
       {showAgregarModal && (
         <ModalAgregarMiembro
           onClose={() => setShowAgregarModal(false)}
@@ -138,6 +175,7 @@ export default function AdminDirectorioPage() {
         />
       )}
 
+      {/* 🔹 Modal editar */}
       {editarMiembro && (
         <ModalEditarMiembro
           miembro={editarMiembro}
