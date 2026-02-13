@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // validar tipo imagen
+    // Validar que sea imagen
     if (!file.type.startsWith("image/")) {
       return NextResponse.json(
         { error: "Solo se permiten imágenes" },
@@ -27,29 +27,24 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // nombre limpio sin espacios
+    // Limpiar nombre y generar único
     const cleanName = file.name.replace(/\s+/g, "_");
-
-    // nombre único
     const fileName = `${Date.now()}-${cleanName}`;
 
-    // ruta destino REAL
-    const uploadDir = path.join(
-      process.cwd(),
-      "public/images/sorteos"
-    );
+    // Carpeta de producción
+    const uploadDir = path.join("/var/www/sitecorpac/uploads/directorio");
 
-    // asegurar carpeta
+    // Asegurar que la carpeta exista
     await mkdir(uploadDir, { recursive: true });
 
-    // ruta final archivo
+    // Ruta final del archivo
     const filePath = path.join(uploadDir, fileName);
 
-    // guardar archivo
+    // Guardar archivo
     await writeFile(filePath, buffer);
 
-    // url pública que guardarás en BD
-    const urlPublica = `/images/sorteos/${fileName}`;
+    // URL pública que se guardará en la BD
+    const urlPublica = `/uploads/directorio/${fileName}`;
 
     return NextResponse.json({
       ok: true,
@@ -58,7 +53,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("ERROR SUBIENDO IMAGEN:", error);
-
     return NextResponse.json(
       { error: "Error subiendo imagen" },
       { status: 500 }
