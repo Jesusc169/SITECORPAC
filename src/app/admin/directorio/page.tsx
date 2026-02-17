@@ -20,14 +20,21 @@ interface Miembro {
 }
 
 /* =========================
-   Normalizar URL imagen
+   Normalizar URL imagen (FIX PROD)
    ========================= */
 function getFotoUrl(url?: string | null, refreshKey?: number) {
   if (!url) return "";
 
-  let finalUrl = url.startsWith("/") ? url : `/${url}`;
+  let finalUrl = url;
 
-  // evita cache navegador
+  // si no es absoluta -> convertir a dominio real
+  if (!url.startsWith("http")) {
+    finalUrl = url.startsWith("/")
+      ? `https://sitecorpac.com${url}`
+      : `https://sitecorpac.com/${url}`;
+  }
+
+  // evitar cache navegador
   if (refreshKey !== undefined) {
     finalUrl += `?v=${refreshKey}`;
   }
