@@ -4,7 +4,12 @@ import path from "path";
 import { promises as fs } from "fs";
 
 /* =========================
-   Utilidad para fechas
+   RUTA REAL PRODUCCIÓN
+========================= */
+const UPLOAD_DIR = "/var/www/sitecorpac/uploads/directorio";
+
+/* =========================
+   Utilidad fechas
 ========================= */
 function parseLocalDate(dateStr: string) {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -12,7 +17,7 @@ function parseLocalDate(dateStr: string) {
 }
 
 /* =========================
-   PUT - Editar miembro
+   PUT - EDITAR MIEMBRO
 ========================= */
 export async function PUT(request: Request) {
   try {
@@ -46,32 +51,28 @@ export async function PUT(request: Request) {
     let fotoUrl = miembro.fotoUrl;
 
     /* =========================
-       MANEJO FOTO (OPTIMIZADO)
+       SUBIR FOTO NUEVA
     ========================== */
     if (foto && foto.size > 0) {
       const buffer = Buffer.from(await foto.arrayBuffer());
       const extension = foto.name.split(".").pop();
       const fileName = `directorio-${Date.now()}.${extension}`;
 
-      const uploadPath = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "directorio"
-      );
+      // crear carpeta si no existe
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
-      // crear carpeta si no existe (async)
-      await fs.mkdir(uploadPath, { recursive: true });
+      const newFilePath = path.join(UPLOAD_DIR, fileName);
 
-      const newFilePath = path.join(uploadPath, fileName);
-
-      // guardar imagen async (NO BLOQUEA VPS)
+      // guardar imagen
       await fs.writeFile(newFilePath, buffer);
 
-      // borrar imagen anterior async
+      // borrar imagen anterior
       if (miembro.fotoUrl) {
         try {
-          const oldPath = path.join(process.cwd(), "public", miembro.fotoUrl);
+          const oldPath = path.join(
+            "/var/www/sitecorpac",
+            miembro.fotoUrl
+          );
           await fs.unlink(oldPath);
         } catch {
           // si no existe no pasa nada
@@ -109,7 +110,7 @@ export async function PUT(request: Request) {
 }
 
 /* =========================
-   DELETE - Eliminar miembro
+   DELETE - ELIMINAR MIEMBRO
 ========================= */
 export async function DELETE(request: Request) {
   try {
@@ -130,10 +131,13 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // borrar imagen async
+    // borrar imagen física
     if (miembro.fotoUrl) {
       try {
-        const filePath = path.join(process.cwd(), "public", miembro.fotoUrl);
+        const filePath = path.join(
+          "/var/www/sitecorpac",
+          miembro.fotoUrl
+        );
         await fs.unlink(filePath);
       } catch {}
     }

@@ -16,10 +16,10 @@ interface Miembro {
 interface ModalEditarProps {
   miembro: Miembro;
   onClose: () => void;
-  onSubmit: (id: number, formData: FormData) => Promise<void>; // ⚡ corrijo tipo
+  onSubmit: (id: number, formData: FormData) => Promise<void>;
 }
 
-export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarProps) {
+export default function ModalEditarMiembro({ miembro, onClose, onSubmit }: ModalEditarProps) {
   const [nombre, setNombre] = useState(miembro.nombre);
   const [cargo, setCargo] = useState(miembro.cargo);
   const [correo, setCorreo] = useState(miembro.correo);
@@ -30,6 +30,7 @@ export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append("nombre", nombre);
     formData.append("cargo", cargo);
@@ -39,13 +40,14 @@ export default function ModalEditar({ miembro, onClose, onSubmit }: ModalEditarP
     if (periodoFin) formData.append("periodoFin", periodoFin);
     if (foto) formData.append("foto", foto);
 
-    await onSubmit(miembro.id, formData); // ⚡ esperar promesa
+    await onSubmit(miembro.id, formData);
   };
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <h2>Editar Miembro</h2>
+
         <form className={styles.form} onSubmit={handleSubmit}>
           <label>Nombre</label>
           <input value={nombre} onChange={e => setNombre(e.target.value)} required />
