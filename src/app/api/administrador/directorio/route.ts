@@ -1,24 +1,28 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import fs from "fs";
 import path from "path";
+import { promises as fs } from "fs";
 
 /* =========================
-   Utilidad para fechas (FIX TZ)
-   ========================= */
+   RUTA REAL PRODUCCIÓN
+========================= */
+const UPLOAD_DIR = "/var/www/sitecorpac/uploads/directorio";
+
+/* =========================
+   Utilidad fechas
+========================= */
 function parseLocalDate(dateStr: string) {
   const [year, month, day] = dateStr.split("-").map(Number);
-  // 12:00 evita el desfase de zona horaria
   return new Date(year, month - 1, day, 12, 0, 0);
 }
 
 /* =========================
-   GET - Listar directorio
-   ========================= */
+   GET - LISTAR
+========================= */
 export async function GET() {
   try {
     const miembros = await prisma.directorio.findMany({
-      orderBy: { orden: "asc" }, // 🔥 backend manda el orden
+      orderBy: { orden: "asc" },
     });
 
     return NextResponse.json(miembros);
@@ -32,8 +36,8 @@ export async function GET() {
 }
 
 /* =========================
-   POST - Crear miembro
-   ========================= */
+   POST - CREAR MIEMBRO
+========================= */
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -54,8 +58,8 @@ export async function POST(req: Request) {
     }
 
     /* =========================
-       Obtener último orden
-       ========================= */
+       ORDEN AUTOMÁTICO
+    ========================== */
     const ultimo = await prisma.directorio.findFirst({
       orderBy: { orden: "desc" },
       select: { orden: true },
@@ -64,8 +68,8 @@ export async function POST(req: Request) {
     const nuevoOrden = ultimo ? ultimo.orden + 1 : 1;
 
     /* =========================
-       Guardar foto (opcional)
-       ========================= */
+       SUBIR FOTO
+    ========================== */
     let fotoUrl: string | null = null;
 
     if (foto && foto.size > 0) {
@@ -73,24 +77,20 @@ export async function POST(req: Request) {
       const extension = foto.name.split(".").pop();
       const fileName = `directorio-${Date.now()}.${extension}`;
 
-      const uploadPath = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "directorio"
-      );
+      // crear carpeta si no existe
+      await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
+      const filePath = path.join(UPLOAD_DIR, fileName);
 
-      fs.writeFileSync(path.join(uploadPath, fileName), buffer);
+      // guardar imagen
+      await fs.writeFile(filePath, buffer);
+
       fotoUrl = `/uploads/directorio/${fileName}`;
     }
 
     /* =========================
-       Crear en BD
-       ========================= */
+       CREAR EN BD
+    ========================== */
     const nuevoMiembro = await prisma.directorio.create({
       data: {
         nombre,

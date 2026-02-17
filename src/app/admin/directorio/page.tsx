@@ -24,16 +24,19 @@ export default function AdminDirectorioPage() {
   const [showAgregarModal, setShowAgregarModal] = useState(false);
   const [editarMiembro, setEditarMiembro] = useState<Miembro | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // 🔹 Cargar miembros desde API
   const fetchMiembros = async () => {
     try {
       setLoading(true);
+
       const res = await fetch("/api/administrador/directorio", {
         method: "GET",
-        cache: "no-store", // 🔥 siempre trae desde MySQL real
+        cache: "no-store",
       });
+
       if (!res.ok) throw new Error("Error al obtener directorio");
+
       const data: Miembro[] = await res.json();
       setMiembros(data);
     } catch (error) {
@@ -47,50 +50,57 @@ export default function AdminDirectorioPage() {
     fetchMiembros();
   }, []);
 
-  // 🔹 Agregar miembro
+  // 🔹 Agregar
   const handleAgregarMiembro = async (formData: FormData) => {
     try {
       const res = await fetch("/api/administrador/directorio", {
         method: "POST",
         body: formData,
       });
+
       if (!res.ok) throw new Error("Error al agregar miembro");
 
       setShowAgregarModal(false);
-      await fetchMiembros(); // 🔥 refresca real
+      await fetchMiembros();
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error(error);
       alert("Error al agregar miembro");
     }
   };
 
-  // 🔹 Editar miembro
+  // 🔹 Editar
   const handleEditarMiembro = async (id: number, formData: FormData) => {
     try {
       const res = await fetch(`/api/administrador/directorio/${id}`, {
         method: "PUT",
         body: formData,
       });
+
       if (!res.ok) throw new Error("Error al editar miembro");
 
       setEditarMiembro(null);
-      await fetchMiembros(); // 🔥 refresca real
+      await fetchMiembros();
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error(error);
       alert("Error al editar miembro");
     }
   };
 
-  // 🔹 Eliminar miembro
+  // 🔹 Eliminar
   const handleEliminarMiembro = async (id: number) => {
     if (!confirm("¿Seguro quieres eliminar este miembro?")) return;
+
     try {
       const res = await fetch(`/api/administrador/directorio/${id}`, {
         method: "DELETE",
       });
+
       if (!res.ok) throw new Error("Error al eliminar miembro");
 
-      await fetchMiembros(); // 🔥 refresca real
+      await fetchMiembros();
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error(error);
       alert("Error al eliminar");
@@ -112,20 +122,20 @@ export default function AdminDirectorioPage() {
         </button>
 
         {loading ? (
-          <p>Cargando...</p>
+          <p>Cargando directorio...</p>
         ) : (
           <div className={styles.listaMiembros}>
             {miembros.length === 0 ? (
               <p>No hay miembros registrados.</p>
             ) : (
               miembros.map(miembro => (
-                <div key={miembro.id} className={styles.miembroCard}>
-                  {/* FOTO */}
+                <div key={`${miembro.id}-${refreshKey}`} className={styles.miembroCard}>
                   {miembro.fotoUrl ? (
                     <img
-                      src={`${miembro.fotoUrl}?t=${Date.now()}`} // 🔥 evita cache
+                      src={`${miembro.fotoUrl}?v=${refreshKey}`}
                       alt={miembro.nombre}
                       className={styles.foto}
+                      loading="lazy"
                     />
                   ) : (
                     <div className={styles.sinFoto}>Sin foto</div>
@@ -145,8 +155,13 @@ export default function AdminDirectorioPage() {
                   </div>
 
                   <div className={styles.actions}>
-                    <button onClick={() => setEditarMiembro(miembro)}>Editar</button>
-                    <button onClick={() => handleEliminarMiembro(miembro.id)}>Eliminar</button>
+                    <button onClick={() => setEditarMiembro(miembro)}>
+                      Editar
+                    </button>
+
+                    <button onClick={() => handleEliminarMiembro(miembro.id)}>
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               ))
@@ -155,7 +170,6 @@ export default function AdminDirectorioPage() {
         )}
       </main>
 
-      {/* 🔹 Modal agregar */}
       {showAgregarModal && (
         <ModalAgregarMiembro
           onClose={() => setShowAgregarModal(false)}
@@ -163,7 +177,6 @@ export default function AdminDirectorioPage() {
         />
       )}
 
-      {/* 🔹 Modal editar */}
       {editarMiembro && (
         <ModalEditarMiembro
           miembro={editarMiembro}
