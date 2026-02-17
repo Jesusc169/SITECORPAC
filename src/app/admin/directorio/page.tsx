@@ -19,6 +19,22 @@ interface Miembro {
   periodoFin?: string | null;
 }
 
+/* =========================
+   Normalizar URL imagen
+   ========================= */
+function getFotoUrl(url?: string | null, refreshKey?: number) {
+  if (!url) return "";
+
+  let finalUrl = url.startsWith("/") ? url : `/${url}`;
+
+  // evita cache navegador
+  if (refreshKey !== undefined) {
+    finalUrl += `?v=${refreshKey}`;
+  }
+
+  return finalUrl;
+}
+
 export default function AdminDirectorioPage() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [showAgregarModal, setShowAgregarModal] = useState(false);
@@ -130,9 +146,10 @@ export default function AdminDirectorioPage() {
             ) : (
               miembros.map(miembro => (
                 <div key={`${miembro.id}-${refreshKey}`} className={styles.miembroCard}>
+                  
                   {miembro.fotoUrl ? (
                     <img
-                      src={`${miembro.fotoUrl}?v=${refreshKey}`}
+                      src={getFotoUrl(miembro.fotoUrl, refreshKey)}
                       alt={miembro.nombre}
                       className={styles.foto}
                       loading="lazy"

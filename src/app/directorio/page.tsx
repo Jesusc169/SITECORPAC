@@ -33,6 +33,19 @@ function formatDate(dateStr: string) {
   });
 }
 
+/* =========================
+   Normalizar URL de imagen
+   ========================= */
+function getFotoUrl(foto?: string) {
+  if (!foto) return "";
+
+  // si ya es absoluta (https)
+  if (foto.startsWith("http")) return foto;
+
+  // asegurar que apunte al public del server
+  return foto.startsWith("/") ? foto : `/${foto}`;
+}
+
 export default function DirectorioPage() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +56,7 @@ export default function DirectorioPage() {
   const fetchMiembros = async () => {
     try {
       const res = await fetch("/api/directorio", {
-        cache: "no-store", // 👈 fuerza data fresca en dev
+        cache: "no-store",
       });
 
       if (!res.ok) {
@@ -52,7 +65,7 @@ export default function DirectorioPage() {
 
       const data: Miembro[] = await res.json();
 
-      // 🔥 Orden viene de BD, pero blindamos
+      // mantener orden
       data.sort((a, b) => a.orden - b.orden);
 
       setMiembros(data);
@@ -87,10 +100,10 @@ export default function DirectorioPage() {
                 {/* FOTO */}
                 {m.foto && (
                   <img
-                    src={m.foto}
+                    src={getFotoUrl(m.foto)}
                     alt={`Foto de ${m.nombre}`}
                     className={styles.foto}
-                    loading="lazy" // ⚡ mejora performance
+                    loading="lazy"
                   />
                 )}
 
