@@ -6,9 +6,6 @@ import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 import styles from "./Directorio.module.css";
 
-/* =========================
-   Tipado alineado al API
-   ========================= */
 type Miembro = {
   id: number;
   nombre: string;
@@ -21,9 +18,6 @@ type Miembro = {
   orden: number;
 };
 
-/* =========================
-   Utilidad fechas (FIX TZ)
-   ========================= */
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("es-PE", {
     timeZone: "UTC",
@@ -34,25 +28,22 @@ function formatDate(dateStr: string) {
 }
 
 /* =========================
-   Normalizar URL de imagen
+   FIX URL IMAGEN PROD
    ========================= */
 function getFotoUrl(foto?: string) {
   if (!foto) return "";
 
-  // si ya es absoluta (https)
   if (foto.startsWith("http")) return foto;
 
-  // asegurar que apunte al public del server
-  return foto.startsWith("/") ? foto : `/${foto}`;
+  return foto.startsWith("/")
+    ? `https://sitecorpac.com${foto}`
+    : `https://sitecorpac.com/${foto}`;
 }
 
 export default function DirectorioPage() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* =========================
-     Obtener directorio
-     ========================= */
   const fetchMiembros = async () => {
     try {
       const res = await fetch("/api/directorio", {
@@ -64,10 +55,7 @@ export default function DirectorioPage() {
       }
 
       const data: Miembro[] = await res.json();
-
-      // mantener orden
       data.sort((a, b) => a.orden - b.orden);
-
       setMiembros(data);
     } catch (error) {
       console.error("Error directorio:", error);
@@ -97,7 +85,6 @@ export default function DirectorioPage() {
           <ul className={styles.listaMiembros}>
             {miembros.map((m) => (
               <li key={m.id} className={styles.miembroCard}>
-                {/* FOTO */}
                 {m.foto && (
                   <img
                     src={getFotoUrl(m.foto)}
@@ -109,11 +96,8 @@ export default function DirectorioPage() {
 
                 <div className={styles.info}>
                   <strong>{m.nombre}</strong>
-
                   <span>👔 {m.cargo}</span>
-
                   <span>📧 {m.email}</span>
-
                   <span>📞 {m.telefono}</span>
 
                   <span className={styles.periodo}>
