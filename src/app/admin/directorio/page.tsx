@@ -27,11 +27,14 @@ function getFotoUrl(url?: string | null, refreshKey?: number) {
 
   let finalUrl = url;
 
+  // ⚡ Ajuste a dominio correcto (con www)
+  const domain = "https://www.sitecorpac.com";
+
   // si no es absoluta -> convertir a dominio real
   if (!url.startsWith("http")) {
     finalUrl = url.startsWith("/")
-      ? `https://sitecorpac.com${url}`
-      : `https://sitecorpac.com/${url}`;
+      ? `${domain}${url}`
+      : `${domain}/${url}`;
   }
 
   // evitar cache navegador
@@ -154,10 +157,11 @@ export default function AdminDirectorioPage() {
               miembros.map(miembro => (
                 <div key={`${miembro.id}-${refreshKey}`} className={styles.miembroCard}>
                   
+                  {/* 🔹 Mostrar imagen si existe */}
                   {miembro.fotoUrl ? (
                     <img
                       src={getFotoUrl(miembro.fotoUrl, refreshKey)}
-                      alt={miembro.nombre}
+                      alt={`Foto de ${miembro.nombre}`}
                       className={styles.foto}
                       loading="lazy"
                     />
