@@ -3,7 +3,7 @@ import path from "path";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-
+console.log("🔥 API UPLOAD EJECUTADA");
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
