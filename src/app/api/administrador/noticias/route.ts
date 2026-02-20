@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+
+export const runtime = "nodejs";
 
 /* =====================================================
    GET → Listar todas las noticias (admin)
@@ -47,26 +49,41 @@ export async function POST(request: Request) {
     let imagenPath: string | null = null;
 
     /* ===============================
-       Guardar imagen local (public)
+       Guardar imagen en /uploads/noticias
     =============================== */
     if (imagenFile && imagenFile.size > 0) {
+
+      if (!imagenFile.type.startsWith("image/")) {
+        return NextResponse.json(
+          { message: "Solo se permiten imágenes" },
+          { status: 400 }
+        );
+      }
+
+      if (imagenFile.size > 2 * 1024 * 1024) {
+        return NextResponse.json(
+          { message: "La imagen no puede superar 2MB" },
+          { status: 400 }
+        );
+      }
+
       const bytes = await imagenFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const nombreArchivo = `${Date.now()}-${imagenFile.name.replace(/\s+/g, "_")}`;
-      const rutaImagen = path.join(
-        process.cwd(),
-        "public/images/noticias",
-        nombreArchivo
-      );
+      const nombreArchivo =
+        `noticia-${Date.now()}-${imagenFile.name.replace(/\s+/g, "_")}`;
 
-      await writeFile(rutaImagen, buffer);
-      imagenPath = `/images/noticias/${nombreArchivo}`;
+      const uploadDir = "/var/www/sitecorpac/uploads/noticias";
+
+      await mkdir(uploadDir, { recursive: true });
+
+      const filePath = path.join(uploadDir, nombreArchivo);
+
+      await writeFile(filePath, buffer);
+
+      imagenPath = `/uploads/noticias/${nombreArchivo}`;
     }
 
-    /* ===============================
-       Crear noticia en BD
-    =============================== */
     const nuevaNoticia = await prisma.noticia.create({
       data: {
         titulo,

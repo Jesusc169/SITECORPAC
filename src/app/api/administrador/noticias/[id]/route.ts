@@ -1,165 +1,105 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import fs from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
 
+export const runtime = "nodejs";
+
 /* =====================================================
-   GET → Obtener noticia por ID
+   PUT → Actualizar noticia
 ===================================================== */
-export async function GET(
+export async function PUT(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: idParam } = await context.params;
-    const id = Number(idParam);
+    const id = Number(params.id);
+    const formData = await request.formData();
 
-    if (isNaN(id)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
+    const titulo = formData.get("titulo") as string;
+    const descripcion = formData.get("descripcion") as string;
+    const contenido = formData.get("contenido") as string;
+    const autor = formData.get("autor") as string;
+    const imagenFile = formData.get("imagen") as File | null;
 
-    const noticia = await prisma.noticia.findUnique({
+    const noticiaActual = await prisma.noticia.findUnique({
       where: { id },
     });
 
-    if (!noticia) {
+    if (!noticiaActual) {
       return NextResponse.json(
         { message: "Noticia no encontrada" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(noticia);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Error al obtener la noticia" },
-      { status: 500 }
-    );
-  }
-}
-
-/* =====================================================
-   PUT → Actualizar noticia (PRO con imagen)
-===================================================== */
-export async function PUT(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: idParam } = await context.params;
-    const id = Number(idParam);
-
-    if (isNaN(id)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
-
-    // Detectar si viene FormData o JSON
-    const contentType = request.headers.get("content-type") || "";
-
-    let titulo = "";
-    let descripcion = "";
-    let contenido = "";
-    let autor = "";
-    let fecha: Date | undefined;
-    let imagenUrl: string | undefined;
+    let imagenPath = noticiaActual.imagen;
 
     /* ===============================
-       SI VIENE FORM DATA (con imagen)
+       Si viene nueva imagen
     =============================== */
-    if (contentType.includes("multipart/form-data")) {
-      const formData = await request.formData();
+    if (imagenFile && imagenFile.size > 0) {
 
-      titulo = String(formData.get("titulo") || "");
-      descripcion = String(formData.get("descripcion") || "");
-      contenido = String(formData.get("contenido") || "");
-      autor = String(formData.get("autor") || "");
-
-      const fechaStr = formData.get("fecha");
-      if (fechaStr) fecha = new Date(String(fechaStr));
-
-      const imagen = formData.get("imagen") as File | null;
-
-      if (imagen && imagen.size > 0) {
-        const bytes = await imagen.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const fileName = `${Date.now()}-${imagen.name.replaceAll(" ", "_")}`;
-        const uploadDir = path.join(process.cwd(), "public/uploads");
-
-        await fs.mkdir(uploadDir, { recursive: true });
-
-        const filePath = path.join(uploadDir, fileName);
-        await fs.writeFile(filePath, buffer);
-
-        imagenUrl = `/uploads/${fileName}`;
+      if (!imagenFile.type.startsWith("image/")) {
+        return NextResponse.json(
+          { message: "Solo se permiten imágenes" },
+          { status: 400 }
+        );
       }
+
+      if (imagenFile.size > 2 * 1024 * 1024) {
+        return NextResponse.json(
+          { message: "Máximo 2MB" },
+          { status: 400 }
+        );
+      }
+
+      const bytes = await imagenFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const nombreArchivo =
+        `noticia-${Date.now()}-${imagenFile.name.replace(/\s+/g, "_")}`;
+
+      const uploadDir = "/var/www/sitecorpac/uploads/noticias";
+      await mkdir(uploadDir, { recursive: true });
+
+      const filePath = path.join(uploadDir, nombreArchivo);
+      await writeFile(filePath, buffer);
+
+      /* 🔥 Eliminar imagen anterior si existe */
+      if (noticiaActual.imagen) {
+        const rutaAnterior = path.join(
+          "/var/www/sitecorpac",
+          noticiaActual.imagen
+        );
+        try {
+          await unlink(rutaAnterior);
+        } catch {
+          // Si no existe, no pasa nada
+        }
+      }
+
+      imagenPath = `/uploads/noticias/${nombreArchivo}`;
     }
 
-    /* ===============================
-       SI VIENE JSON NORMAL
-    =============================== */
-    else {
-      const body = await request.json();
-
-      titulo = body.titulo;
-      descripcion = body.descripcion;
-      contenido = body.contenido;
-      autor = body.autor;
-      fecha = body.fecha ? new Date(body.fecha) : undefined;
-      imagenUrl = body.imagen;
-    }
-
-    /* ===============================
-       UPDATE DB
-    =============================== */
     const noticiaActualizada = await prisma.noticia.update({
       where: { id },
       data: {
         titulo,
         descripcion,
-        contenido,
+        contenido: contenido || null,
         autor,
-        ...(fecha && { fecha }),
-        ...(imagenUrl && { imagen: imagenUrl }),
+        imagen: imagenPath,
         updatedAt: new Date(),
       },
     });
 
     return NextResponse.json(noticiaActualizada);
+
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "Error al actualizar la noticia" },
-      { status: 500 }
-    );
-  }
-}
-
-/* =====================================================
-   DELETE → Eliminar noticia
-===================================================== */
-export async function DELETE(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: idParam } = await context.params;
-    const id = Number(idParam);
-
-    if (isNaN(id)) {
-      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-    }
-
-    await prisma.noticia.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Error al eliminar la noticia" },
+      { message: "Error al actualizar noticia" },
       { status: 500 }
     );
   }
