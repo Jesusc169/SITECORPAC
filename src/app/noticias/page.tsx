@@ -1,4 +1,7 @@
 // src/app/noticias/page.tsx
+
+export const dynamic = "force-dynamic";
+
 import { NoticiasController } from "@/controllers/noticiasController";
 import NoticiasPageView from "@/views/NoticiasPageView";
 
