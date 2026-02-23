@@ -9,12 +9,12 @@ export const runtime = "nodejs";
    GET → Obtener sorteo por ID
 ========================================================= */
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
-    const sorteoId = Number(id);
+    const params = await context.params;
+    const sorteoId = Number(params.id);
 
     if (!sorteoId || isNaN(sorteoId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -46,18 +46,18 @@ export async function GET(
    PUT → Editar sorteo
 ========================================================= */
 export async function PUT(
-  req: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
-    const sorteoId = Number(id);
+    const params = await context.params;
+    const sorteoId = Number(params.id);
 
     if (!sorteoId || isNaN(sorteoId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const formData = await req.formData();
+    const formData = await request.formData();
 
     const nombre = formData.get("nombre")?.toString().trim() || "";
     const descripcion = formData.get("descripcion")?.toString().trim() || "";
@@ -79,8 +79,6 @@ export async function PUT(
       premios = [];
     }
 
-    /* ================= VALIDACIONES ================= */
-
     if (!nombre || !descripcion || !lugar || !fecha_hora) {
       return NextResponse.json(
         { error: "Campos obligatorios incompletos" },
@@ -91,8 +89,6 @@ export async function PUT(
     if (!anio || isNaN(anio)) {
       anio = new Date(fecha_hora).getFullYear();
     }
-
-    /* ================= IMAGEN (OPCIONAL) ================= */
 
     let imagenPath: string | undefined;
     const file = formData.get("imagen") as File | null;
@@ -114,8 +110,6 @@ export async function PUT(
 
       imagenPath = `/uploads/sorteos/${fileName}`;
     }
-
-    /* ================= UPDATE ================= */
 
     const actualizado = await prisma.sorteo.update({
       where: { id: sorteoId },
@@ -153,12 +147,12 @@ export async function PUT(
    DELETE → Eliminar sorteo
 ========================================================= */
 export async function DELETE(
-  req: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
-    const sorteoId = Number(id);
+    const params = await context.params;
+    const sorteoId = Number(params.id);
 
     if (!sorteoId || isNaN(sorteoId)) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
