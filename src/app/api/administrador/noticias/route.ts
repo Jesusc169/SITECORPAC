@@ -81,7 +81,6 @@ export async function POST(request: Request) {
       const uploadDir = path.join(
         process.cwd(),
         "public",
-        "images",
         "uploads",
         "noticias"
       );
@@ -91,7 +90,7 @@ export async function POST(request: Request) {
       const filePath = path.join(uploadDir, nombreArchivo);
       await writeFile(filePath, buffer);
 
-      imagenPath = `/images/uploads/noticias/${nombreArchivo}`;
+      imagenPath = `/uploads/noticias/${nombreArchivo}`;
     }
 
     const now = new Date();
