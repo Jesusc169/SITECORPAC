@@ -5,10 +5,8 @@ import SorteosAdminView, { Sorteo } from "./SorteosAdminView";
 import AdminSorteoModal from "./AdminSorteoModal";
 import {
   fetchSorteos,
-  crearSorteo,
-  actualizarSorteo,
-  duplicarSorteo,
   eliminarSorteo,
+  duplicarSorteo,
 } from "@/services/sorteo.service";
 
 /* =========================================
@@ -19,14 +17,12 @@ const mapSorteoToFrontend = (s: any): Sorteo => ({
   nombre: s.nombre ?? "",
   descripcion: s.descripcion ?? "",
   lugar: s.lugar ?? "Sede principal SITECORPAC",
-  imagen: s.imagen ?? "", // 🔥 ahora sí existe en interface Sorteo
+  imagen: s.imagen ?? "",
   anio: s.anio ?? new Date().getFullYear(),
   estado: s.estado ?? "ACTIVO",
-
   fecha_hora: s.fecha_hora
     ? new Date(s.fecha_hora).toISOString()
     : new Date().toISOString(),
-
   premios:
     s.sorteo_producto?.map((p: any) => ({
       id: p.id,
@@ -47,17 +43,12 @@ export default function SorteosAdminClient() {
   const [loadingSave, setLoadingSave] = useState(false);
 
   /* =========================================
-  CARGAR SORTEOS
+  CARGAR
   ========================================= */
   const cargar = async () => {
-    try {
-      const data = await fetchSorteos();
-      const mapped = (data || []).map(mapSorteoToFrontend);
-      setSorteos(mapped);
-    } catch (err) {
-      console.error("Error cargando sorteos:", err);
-      alert("Error cargando sorteos");
-    }
+    const data = await fetchSorteos();
+    const mapped = (data || []).map(mapSorteoToFrontend);
+    setSorteos(mapped);
   };
 
   useEffect(() => {
@@ -65,35 +56,43 @@ export default function SorteosAdminClient() {
   }, []);
 
   /* =========================================
-  GUARDAR (crear o editar)
+  GUARDAR (🔥 CORREGIDO)
   ========================================= */
-  const onSave = async (data: any) => {
+  const onSave = async (id: number | null, formData: FormData) => {
     if (loadingSave) return;
     setLoadingSave(true);
 
     try {
-      let backend;
+      const isEdit = !!id;
 
-      if (data.id) {
-        // ✏️ EDITAR
-        backend = await actualizarSorteo(data);
-        const actualizado = mapSorteoToFrontend(backend);
+      const url = isEdit
+        ? `/api/administrador/sorteos/${id}`
+        : `/api/administrador/sorteos`;
 
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Error guardando");
+
+      const backend = await res.json();
+      const mapped = mapSorteoToFrontend(backend);
+
+      if (isEdit) {
         setSorteos((prev) =>
-          prev.map((s) => (s.id === actualizado.id ? actualizado : s))
+          prev.map((s) => (s.id === mapped.id ? mapped : s))
         );
       } else {
-        // 🆕 CREAR
-        backend = await crearSorteo(data);
-        const nuevo = mapSorteoToFrontend(backend);
-
-        setSorteos((prev) => [nuevo, ...prev]);
+        setSorteos((prev) => [mapped, ...prev]);
       }
 
       setSelected(null);
       setModalOpen(false);
     } catch (err) {
-      console.error("Error guardando sorteo:", err);
+      console.error(err);
       alert("Error guardando sorteo");
     } finally {
       setLoadingSave(false);
@@ -106,28 +105,17 @@ export default function SorteosAdminClient() {
   const onEliminar = async (id: number) => {
     if (!confirm("¿Eliminar sorteo?")) return;
 
-    try {
-      await eliminarSorteo(id);
-      setSorteos((prev) => prev.filter((s) => s.id !== id));
-    } catch (err) {
-      console.error("Error eliminando:", err);
-      alert("Error eliminando sorteo");
-    }
+    await eliminarSorteo(id);
+    setSorteos((prev) => prev.filter((s) => s.id !== id));
   };
 
   /* =========================================
   DUPLICAR
   ========================================= */
   const onDuplicar = async (id: number) => {
-    try {
-      const backend = await duplicarSorteo(id);
-      const nuevo = mapSorteoToFrontend(backend);
-
-      setSorteos((prev) => [nuevo, ...prev]);
-    } catch (err) {
-      console.error("Error duplicando:", err);
-      alert("Error duplicando sorteo");
-    }
+    const backend = await duplicarSorteo(id);
+    const nuevo = mapSorteoToFrontend(backend);
+    setSorteos((prev) => [nuevo, ...prev]);
   };
 
   /* =========================================

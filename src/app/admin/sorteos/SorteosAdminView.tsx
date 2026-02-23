@@ -15,11 +15,11 @@ export interface Premio {
 }
 
 export interface Sorteo {
-  id?: number; // opcional para crear nuevo
+  id?: number;
   nombre: string;
   descripcion?: string;
   lugar?: string;
-  imagen?: string; // 🔥 agregado
+  imagen?: string;
   fecha_hora: string;
   anio: number;
   estado?: "ACTIVO" | "INACTIVO";
@@ -37,7 +37,8 @@ interface SorteosAdminViewProps {
   setModal: React.Dispatch<React.SetStateAction<boolean>>;
   selected: Sorteo | null;
 
-  onSave: (data: any) => Promise<void>;
+  // 🔥 CORRECCIÓN DE FIRMA
+  onSave: (id: number | null, formData: FormData) => Promise<void>;
 }
 
 /* =========================

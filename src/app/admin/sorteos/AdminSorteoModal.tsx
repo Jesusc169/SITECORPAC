@@ -12,35 +12,48 @@ interface Premio {
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (id: number | null, formData: FormData) => Promise<void>;
   initialData?: any;
 }
 
-export default function AdminSorteoModal({ open, onClose, onSave, initialData }: Props) {
+export default function AdminSorteoModal({
+  open,
+  onClose,
+  onSave,
+  initialData,
+}: Props) {
   const emptyForm = {
-    id: null,
+    id: null as number | null,
     titulo: "",
     descripcion: "",
     fecha: "",
     hora: "",
     imagen: "",
+    imagenFile: null as File | null,
     premios: [] as Premio[],
   };
 
   const [form, setForm] = useState(emptyForm);
 
+  /* =========================================================
+     CARGAR DATOS PARA EDITAR
+  ========================================================= */
   useEffect(() => {
     if (initialData) {
-      const fechaISO = initialData.fecha_hora ? new Date(initialData.fecha_hora).toISOString() : "";
+      const fechaISO = initialData.fecha_hora
+        ? new Date(initialData.fecha_hora).toISOString()
+        : "";
+
       setForm({
         id: initialData.id ?? null,
-        titulo: initialData.titulo ?? initialData.nombre ?? "",
+        titulo: initialData.nombre ?? "",
         descripcion: initialData.descripcion ?? "",
         fecha: fechaISO ? fechaISO.split("T")[0] : "",
         hora: fechaISO ? fechaISO.split("T")[1].slice(0, 5) : "",
         imagen: initialData.imagen ?? "",
+        imagenFile: null,
         premios:
-          initialData.premios?.map((p: any) => ({
+          initialData.sorteo_producto?.map((p: any) => ({
             nombre: p.nombre ?? "",
             descripcion: p.descripcion ?? "",
             cantidad: p.cantidad ?? 1,
@@ -53,20 +66,42 @@ export default function AdminSorteoModal({ open, onClose, onSave, initialData }:
 
   if (!open) return null;
 
-  const handleChange = (e: any) => {
+  /* =========================================================
+     MANEJO DE CAMPOS
+  ========================================================= */
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForm((prev: any) => ({ ...prev, [name]: value ?? "" }));
+    setForm((prev) => ({ ...prev, [name]: value ?? "" }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setForm((prev) => ({
+      ...prev,
+      imagenFile: file,
+      imagen: URL.createObjectURL(file),
+    }));
+  };
+
+  /* =========================================================
+     PREMIOS
+  ========================================================= */
   const addPremio = () =>
-    setForm((prev: any) => ({
+    setForm((prev) => ({
       ...prev,
       premios: [...prev.premios, { nombre: "", descripcion: "", cantidad: 1 }],
     }));
 
   const updatePremio = (i: number, field: string, value: any) => {
     const nuevos = [...form.premios];
-    nuevos[i] = { ...nuevos[i], [field]: field === "cantidad" ? Number(value) : value };
+    nuevos[i] = {
+      ...nuevos[i],
+      [field]: field === "cantidad" ? Number(value) : value,
+    };
     setForm({ ...form, premios: nuevos });
   };
 
@@ -76,43 +111,36 @@ export default function AdminSorteoModal({ open, onClose, onSave, initialData }:
     setForm({ ...form, premios: nuevos });
   };
 
-  const handleUpload = async (e: any) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const body = new FormData();
-      body.append("file", file);
-
-      const res = await fetch("/api/upload", { method: "POST", body });
-      const data = await res.json();
-
-      if (data?.url) setForm((prev: any) => ({ ...prev, imagen: data.url }));
-      else alert("Error subiendo imagen");
-    } catch (err) {
-      console.error(err);
-      alert("Error subiendo imagen");
-    }
-  };
-
+  /* =========================================================
+     GUARDAR
+  ========================================================= */
   const handleSave = async () => {
     try {
-      const fechaHora = form.fecha && form.hora ? `${form.fecha}T${form.hora}:00` : new Date().toISOString();
-      const anio = form.fecha ? new Date(form.fecha).getFullYear() : new Date().getFullYear();
+      if (!form.titulo || !form.descripcion || !form.fecha || !form.hora) {
+        alert("Completa todos los campos obligatorios");
+        return;
+      }
 
-      const payload = {
-        id: form.id,
-        titulo: form.titulo,
-        descripcion: form.descripcion,
-        lugar: "Sede principal SITECORPAC",
-        fecha_hora: fechaHora,
-        imagen: form.imagen || null,
-        premios: form.premios || [],
-        anio, // 💡 nunca será null
-        nombre: form.titulo,
-      };
+      const fechaHora = `${form.fecha}T${form.hora}:00`;
+      const anio = new Date(form.fecha).getFullYear();
 
-      await onSave(payload);
+      const formData = new FormData();
+
+      formData.append("nombre", form.titulo);
+      formData.append("descripcion", form.descripcion);
+      formData.append("lugar", "Sede principal SITECORPAC");
+      formData.append("fecha_hora", fechaHora);
+      formData.append("anio", anio.toString());
+      formData.append("estado", "ACTIVO");
+      formData.append("premios", JSON.stringify(form.premios || []));
+
+      if (form.imagenFile) {
+        formData.append("imagen", form.imagenFile);
+      }
+
+      // 🔥 CORRECCIÓN CLAVE
+      await onSave(form.id, formData);
+
       onClose();
     } catch (error) {
       console.error(error);
@@ -120,6 +148,9 @@ export default function AdminSorteoModal({ open, onClose, onSave, initialData }:
     }
   };
 
+  /* =========================================================
+     UI
+  ========================================================= */
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
@@ -131,48 +162,107 @@ export default function AdminSorteoModal({ open, onClose, onSave, initialData }:
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label>Título</label>
-              <input name="titulo" value={form.titulo || ""} onChange={handleChange} />
+              <input
+                name="titulo"
+                value={form.titulo}
+                onChange={handleChange}
+              />
             </div>
 
             <div className={styles.formGroup}>
               <label>Fecha</label>
-              <input type="date" name="fecha" value={form.fecha || ""} onChange={handleChange} />
+              <input
+                type="date"
+                name="fecha"
+                value={form.fecha}
+                onChange={handleChange}
+              />
             </div>
 
             <div className={styles.formGroup}>
               <label>Hora</label>
-              <input type="time" name="hora" value={form.hora || ""} onChange={handleChange} />
+              <input
+                type="time"
+                name="hora"
+                value={form.hora}
+                onChange={handleChange}
+              />
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label>Descripción</label>
-              <textarea name="descripcion" value={form.descripcion || ""} onChange={handleChange} />
+              <textarea
+                name="descripcion"
+                value={form.descripcion}
+                onChange={handleChange}
+              />
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label>Imagen del sorteo</label>
-              <input type="file" onChange={handleUpload} />
-              {form.imagen && <img src={form.imagen} className={styles.previewImg} alt="preview" />}
+              <input type="file" onChange={handleFileChange} />
+              {form.imagen && (
+                <img
+                  src={form.imagen}
+                  className={styles.previewImg}
+                  alt="preview"
+                />
+              )}
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label>Premios</label>
+
               {form.premios.map((p, i) => (
                 <div key={i} className={styles.premioBox}>
-                  <input placeholder="Nombre" value={p.nombre || ""} onChange={(e) => updatePremio(i, "nombre", e.target.value)} />
-                  <input placeholder="Descripción" value={p.descripcion || ""} onChange={(e) => updatePremio(i, "descripcion", e.target.value)} />
-                  <input type="number" value={p.cantidad || 1} onChange={(e) => updatePremio(i, "cantidad", e.target.value)} />
-                  <button className={styles.deleteBtn} onClick={() => deletePremio(i)}>✕</button>
+                  <input
+                    placeholder="Nombre"
+                    value={p.nombre}
+                    onChange={(e) =>
+                      updatePremio(i, "nombre", e.target.value)
+                    }
+                  />
+                  <input
+                    placeholder="Descripción"
+                    value={p.descripcion}
+                    onChange={(e) =>
+                      updatePremio(i, "descripcion", e.target.value)
+                    }
+                  />
+                  <input
+                    type="number"
+                    value={p.cantidad}
+                    onChange={(e) =>
+                      updatePremio(i, "cantidad", e.target.value)
+                    }
+                  />
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => deletePremio(i)}
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
-              <button onClick={addPremio} className={styles.secondaryBtn} style={{ marginTop: 12 }}>+ Agregar premio</button>
+
+              <button
+                onClick={addPremio}
+                className={styles.secondaryBtn}
+                style={{ marginTop: 12 }}
+              >
+                + Agregar premio
+              </button>
             </div>
           </div>
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.secondaryBtn} onClick={onClose}>Cancelar</button>
-          <button className={styles.primaryBtn} onClick={handleSave}>Guardar Sorteo</button>
+          <button className={styles.secondaryBtn} onClick={onClose}>
+            Cancelar
+          </button>
+          <button className={styles.primaryBtn} onClick={handleSave}>
+            Guardar Sorteo
+          </button>
         </div>
       </div>
     </div>
