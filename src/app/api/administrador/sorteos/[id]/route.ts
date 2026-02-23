@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+
+export const runtime = "nodejs";
 
 /* =========================================================
    GET → Obtener sorteo por ID
 ========================================================= */
 export async function GET(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -44,7 +46,7 @@ export async function GET(
    PUT → Editar sorteo
 ========================================================= */
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -151,7 +153,7 @@ export async function PUT(
    DELETE → Eliminar sorteo
 ========================================================= */
 export async function DELETE(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
