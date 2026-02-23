@@ -23,6 +23,8 @@ interface Noticia {
 function formatearFecha(fecha: string) {
   const date = new Date(fecha);
 
+  if (isNaN(date.getTime())) return "Fecha inválida";
+
   return date.toLocaleDateString("es-PE", {
     timeZone: "America/Lima",
     day: "2-digit",
@@ -45,11 +47,29 @@ export default function NoticiasView() {
 
   const cargarNoticias = async () => {
     try {
-      const res = await fetch("/api/administrador/noticias");
+      const res = await fetch("/api/administrador/noticias", {
+        method: "GET",
+        cache: "no-store", // importante en Next 16
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Error backend:", text);
+        return;
+      }
+
       const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        console.error("Respuesta inesperada:", data);
+        setNoticias([]);
+        return;
+      }
+
       setNoticias(data);
+
     } catch (error) {
-      console.error("Error al cargar noticias", error);
+      console.error("Error al cargar noticias:", error);
     }
   };
 
@@ -106,6 +126,7 @@ export default function NoticiasView() {
                   >
                     Editar
                   </button>
+
                   <button
                     className={styles.danger}
                     onClick={() => {
