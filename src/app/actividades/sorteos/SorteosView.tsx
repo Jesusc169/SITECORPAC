@@ -43,14 +43,16 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
       {/* FILTRO */}
       <div className={styles.anios}>
         {aniosDisponibles.map((anio) => (
-          <button key={anio} onClick={() => onChangeAnio(anio)}>
+          <button key={`anio-${anio}`} onClick={() => onChangeAnio(anio)}>
             {anio}
           </button>
         ))}
-        <button onClick={() => onChangeAnio(null)}>Ver todos</button>
+        <button key="ver-todos" onClick={() => onChangeAnio(null)}>
+          Ver todos
+        </button>
       </div>
 
-      {/* VACIO */}
+      {/* VACÍO */}
       {sorteos.length === 0 && (
         <p className={styles.empty}>
           No hay sorteos disponibles para este año.
@@ -60,18 +62,37 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
       {/* LISTA */}
       <div className={styles.list}>
         {sorteos.map((sorteo) => {
-          // 🔥 NORMALIZAR PREMIOS (soporta cualquier backend)
+          // 🔥 NORMALIZAR PREMIOS
           const productos =
-            sorteo.sorteo_producto ||
-            sorteo.premios ||
+            sorteo.sorteo_producto ??
+            sorteo.premios ??
             [];
 
+          // 🔥 FECHA SEGURA
+          const fecha = new Date(sorteo.fecha_hora);
+          const fechaValida = !isNaN(fecha.getTime());
+
+          // 🔥 LUGAR SEGURO
+          const lugarMostrado =
+            sorteo.lugar && sorteo.lugar.trim() !== ""
+              ? sorteo.lugar
+              : "Lugar no especificado";
+
+          // 🔥 IMAGEN SEGURA (FIX DEFINITIVO)
+          const imagenSrc =
+            sorteo.imagen && sorteo.imagen.trim() !== ""
+              ? sorteo.imagen.startsWith("http") ||
+                sorteo.imagen.startsWith("/")
+                ? sorteo.imagen
+                : `/${sorteo.imagen}`
+              : null;
+
           return (
-            <article key={sorteo.id} className={styles.card}>
+            <article key={`sorteo-${sorteo.id}`} className={styles.card}>
               {/* Imagen */}
-              {sorteo.imagen ? (
+              {imagenSrc ? (
                 <img
-                  src={sorteo.imagen}
+                  src={imagenSrc}
                   alt={sorteo.nombre}
                   loading="lazy"
                 />
@@ -86,35 +107,43 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
                 <h3>{sorteo.nombre}</h3>
 
                 <p className={styles.descripcion}>
-                  {sorteo.descripcion}
+                  {sorteo.descripcion || "Sin descripción disponible."}
                 </p>
 
                 {/* META */}
                 <div className={styles.meta}>
-                  <span>📍 {sorteo.lugar}</span>
+                  <span>📍 {lugarMostrado}</span>
+
                   <span>
                     📅{" "}
-                    {new Date(sorteo.fecha_hora).toLocaleDateString(
-                      "es-PE",
-                      {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
+                    {fechaValida
+                      ? fecha.toLocaleDateString("es-PE", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "Fecha no disponible"}
                   </span>
                 </div>
 
                 {/* PREMIOS */}
                 <ul className={styles.productos}>
                   {productos.length === 0 && (
-                    <li>No hay productos registrados</li>
+                    <li key={`empty-${sorteo.id}`}>
+                      No hay productos registrados
+                    </li>
                   )}
 
-                  {productos.map((producto, i) => (
-                    <li key={producto.id || i}>
+                  {productos.map((producto, index) => (
+                    <li
+                      key={
+                        producto.id
+                          ? `prod-${producto.id}`
+                          : `prod-${sorteo.id}-${index}`
+                      }
+                    >
                       🎁 {producto.nombre}
                       {producto.cantidad
                         ? ` (${producto.cantidad})`

@@ -28,48 +28,69 @@ export default function SorteosClient() {
   const [sorteos, setSorteos] = useState<Sorteo[]>([]);
   const [todos, setTodos] = useState<Sorteo[]>([]);
 
+  /* =========================================
+     CARGAR TODOS LOS SORTEOS
+  ========================================= */
   useEffect(() => {
     cargarSorteos();
   }, []);
 
-  useEffect(() => {
-    aplicarFiltro();
-  }, [anio, todos]);
-
-  /* =========================================
-     CARGAR TODOS LOS SORTEOS
-  ========================================= */
   async function cargarSorteos() {
-    const data = await fetchSorteos(null);
+    try {
+      const data = await fetchSorteos(null);
 
-    const ordenados = data.sort(
-      (a: Sorteo, b: Sorteo) =>
-        new Date(b.fecha_hora).getTime() -
-        new Date(a.fecha_hora).getTime()
-    );
+      if (!Array.isArray(data)) {
+        setTodos([]);
+        setSorteos([]);
+        return;
+      }
 
-    setTodos(ordenados);
-    setSorteos(ordenados);
+      const ordenados = [...data].sort((a: Sorteo, b: Sorteo) => {
+        const fechaA = new Date(a.fecha_hora);
+        const fechaB = new Date(b.fecha_hora);
+
+        const timeA = isNaN(fechaA.getTime()) ? 0 : fechaA.getTime();
+        const timeB = isNaN(fechaB.getTime()) ? 0 : fechaB.getTime();
+
+        return timeB - timeA;
+      });
+
+      setTodos(ordenados);
+      setSorteos(ordenados);
+    } catch (error) {
+      console.error("Error cargando sorteos:", error);
+      setTodos([]);
+      setSorteos([]);
+    }
   }
 
   /* =========================================
      FILTRAR POR AÑO + ORDENAR
   ========================================= */
+  useEffect(() => {
+    aplicarFiltro();
+  }, [anio, todos]);
+
   function aplicarFiltro() {
     let lista = [...todos];
 
     if (anio) {
       lista = lista.filter((s) => {
-        const year = new Date(s.fecha_hora).getFullYear();
-        return year === anio;
+        const fecha = new Date(s.fecha_hora);
+        if (isNaN(fecha.getTime())) return false;
+        return fecha.getFullYear() === anio;
       });
     }
 
-    lista.sort(
-      (a, b) =>
-        new Date(b.fecha_hora).getTime() -
-        new Date(a.fecha_hora).getTime()
-    );
+    lista.sort((a, b) => {
+      const fechaA = new Date(a.fecha_hora);
+      const fechaB = new Date(b.fecha_hora);
+
+      const timeA = isNaN(fechaA.getTime()) ? 0 : fechaA.getTime();
+      const timeB = isNaN(fechaB.getTime()) ? 0 : fechaB.getTime();
+
+      return timeB - timeA;
+    });
 
     setSorteos(lista);
   }
