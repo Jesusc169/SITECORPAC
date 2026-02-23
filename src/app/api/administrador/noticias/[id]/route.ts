@@ -10,10 +10,19 @@ export const runtime = "nodejs";
 ===================================================== */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = Number(params.id);
+    const { id: idParam } = await params;
+    const id = Number(idParam);
+
+    if (!id || isNaN(id)) {
+      return NextResponse.json(
+        { message: "ID inválido" },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
 
     const titulo = formData.get("titulo") as string;
@@ -35,9 +44,6 @@ export async function PUT(
 
     let imagenPath = noticiaActual.imagen;
 
-    /* ===============================
-       Si viene nueva imagen
-    =============================== */
     if (imagenFile && imagenFile.size > 0) {
 
       if (!imagenFile.type.startsWith("image/")) {
@@ -60,26 +66,32 @@ export async function PUT(
       const nombreArchivo =
         `noticia-${Date.now()}-${imagenFile.name.replace(/\s+/g, "_")}`;
 
-      const uploadDir = "/var/www/sitecorpac/uploads/noticias";
+      const uploadDir = path.join(
+        process.cwd(),
+        "public",
+        "images",
+        "uploads",
+        "noticias"
+      );
+
       await mkdir(uploadDir, { recursive: true });
 
       const filePath = path.join(uploadDir, nombreArchivo);
       await writeFile(filePath, buffer);
 
-      /* 🔥 Eliminar imagen anterior si existe */
       if (noticiaActual.imagen) {
         const rutaAnterior = path.join(
-          "/var/www/sitecorpac",
+          process.cwd(),
+          "public",
           noticiaActual.imagen
         );
+
         try {
           await unlink(rutaAnterior);
-        } catch {
-          // Si no existe, no pasa nada
-        }
+        } catch {}
       }
 
-      imagenPath = `/uploads/noticias/${nombreArchivo}`;
+      imagenPath = `/images/uploads/noticias/${nombreArchivo}`;
     }
 
     const noticiaActualizada = await prisma.noticia.update({
@@ -100,6 +112,64 @@ export async function PUT(
     console.error(error);
     return NextResponse.json(
       { message: "Error al actualizar noticia" },
+      { status: 500 }
+    );
+  }
+}
+
+/* =====================================================
+   DELETE → Eliminar noticia
+===================================================== */
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: idParam } = await params;
+    const id = Number(idParam);
+
+    if (!id || isNaN(id)) {
+      return NextResponse.json(
+        { message: "ID inválido" },
+        { status: 400 }
+      );
+    }
+
+    const noticia = await prisma.noticia.findUnique({
+      where: { id },
+    });
+
+    if (!noticia) {
+      return NextResponse.json(
+        { message: "Noticia no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    if (noticia.imagen) {
+      const rutaImagen = path.join(
+        process.cwd(),
+        "public",
+        noticia.imagen
+      );
+
+      try {
+        await unlink(rutaImagen);
+      } catch {}
+    }
+
+    await prisma.noticia.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      message: "Noticia eliminada correctamente",
+    });
+
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Error al eliminar noticia" },
       { status: 500 }
     );
   }
