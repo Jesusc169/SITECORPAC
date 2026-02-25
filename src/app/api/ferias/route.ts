@@ -51,12 +51,20 @@ export async function GET(req: Request) {
     const page = Number(searchParams.get("page") || 1);
     const limit = 50;
     const skip = (page - 1) * limit;
-    const anio = searchParams.get("anio");
+
+    const anioParam = searchParams.get("anio");
+
+    // ✅ VALIDACIÓN SEGURA DEL AÑO
+    let anioFiltro: number | null = null;
+
+    if (anioParam && /^\d{4}$/.test(anioParam)) {
+      anioFiltro = Number(anioParam);
+    }
 
     const ferias = await prisma.evento_feria.findMany({
       where: {
         estado: true,
-        ...(anio ? { anio: Number(anio) } : {}),
+        ...(anioFiltro ? { anio: anioFiltro } : {}),
       },
       orderBy: {
         created_at: "desc",
@@ -84,7 +92,7 @@ export async function GET(req: Request) {
 }
 
 /* =========================
-   POST – CREAR FERIA (ARREGLADO)
+   POST – CREAR FERIA
 ========================= */
 export async function POST(req: Request) {
   try {
@@ -103,9 +111,6 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =====================================================
-       🔥 AÑO CORRECTO DESDE FECHA (NUNCA MÁS 0)
-    ===================================================== */
     const anio = obtenerAnioSeguro(fechas[0].fecha);
 
     let imagePath: string | null = null;
