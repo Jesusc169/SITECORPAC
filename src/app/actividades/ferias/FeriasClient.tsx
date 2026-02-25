@@ -34,9 +34,7 @@ export default function FeriasClient() {
 
         setFerias(res);
 
-        // =========================
         // EXTRAER EMPRESAS ÚNICAS
-        // =========================
         const empresasMap = new Map<number, Empresa>();
 
         res.forEach((feria) => {

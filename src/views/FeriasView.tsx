@@ -78,18 +78,18 @@ function ordenarFerias(ferias: EventoFeria[]) {
 }
 
 // =========================
-// AGRUPAR POR AÑO
+// AGRUPAR POR AÑO (usando campo BD)
 // =========================
 function agruparPorAnio(ferias: EventoFeria[]) {
   const grupos: Record<number, EventoFeria[]> = {};
 
   ferias.forEach((feria) => {
-    const fecha = feria.evento_feria_fecha?.[0]?.fecha;
-    if (!fecha) return;
+    const anio = feria.anio;
 
-    const anio = new Date(fecha).getFullYear();
+    if (!grupos[anio]) {
+      grupos[anio] = [];
+    }
 
-    if (!grupos[anio]) grupos[anio] = [];
     grupos[anio].push(feria);
   });
 
@@ -108,9 +108,10 @@ export default function FeriasView({
   anioSeleccionado,
   onChangeAnio,
 }: FeriasViewProps) {
-
   const feriasOrdenadas = ordenarFerias(feriasList);
+
   const feriasAgrupadas = agruparPorAnio(feriasOrdenadas);
+
   const aniosOrdenados = Object.keys(feriasAgrupadas)
     .map(Number)
     .sort((a, b) => b - a);
@@ -118,13 +119,6 @@ export default function FeriasView({
   return (
     <main className={styles.main}>
       <h1>Ferias</h1>
-
-      {/* TEXTO */}
-      <section className={styles.promocion}>
-        <p>
-          El SITECORPAC organiza de manera mensual ferias de venta de comidas con el objetivo de promover la compra y consumo de alimentos saludables. Estas actividades buscan facilitar a los colaboradores el acceso a productos de calidad a precios accesibles, al mismo tiempo que se impulsa y fortalece el desarrollo de emprendimientos y negocios locales.
-        </p>
-      </section>
 
       {/* EMPRESAS */}
       {empresasList.length > 0 && (
@@ -145,7 +139,7 @@ export default function FeriasView({
       )}
 
       {/* FILTRO AÑO */}
-      {aniosDisponibles && onChangeAnio && aniosDisponibles.length > 0 && (
+      {aniosDisponibles && onChangeAnio && (
         <div className={styles.filtros}>
           {aniosDisponibles.map((anio) => (
             <button
@@ -158,7 +152,9 @@ export default function FeriasView({
           ))}
 
           {anioSeleccionado !== null && (
-            <button onClick={() => onChangeAnio(null)}>Ver todas</button>
+            <button onClick={() => onChangeAnio(null)}>
+              Ver todas
+            </button>
           )}
         </div>
       )}
@@ -172,9 +168,7 @@ export default function FeriasView({
         <p className={styles.estado}>No hay ferias disponibles.</p>
       )}
 
-      {/* =========================
-          LISTADO AGRUPADO POR AÑO
-      ========================= */}
+      {/* LISTADO AGRUPADO POR AÑO */}
       {!loading &&
         !transitioning &&
         aniosOrdenados.map((anio) => (
@@ -192,7 +186,9 @@ export default function FeriasView({
                 <div className={styles.feriaBody}>
                   <h3>{feria.titulo}</h3>
 
-                  <p className={styles.descripcion}>{feria.descripcion}</p>
+                  <p className={styles.descripcion}>
+                    {feria.descripcion}
+                  </p>
 
                   {feria.evento_feria_fecha.map((fecha) => (
                     <div key={fecha.id} className={styles.datos}>

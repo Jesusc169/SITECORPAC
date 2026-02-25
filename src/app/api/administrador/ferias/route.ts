@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import fs from "fs";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 /* =========================
@@ -40,8 +40,12 @@ export async function POST(req: Request) {
     const anioRaw = formData.get("anio");
     const imagenFile = formData.get("imagen_portada") as File | null;
 
-    const empresas = JSON.parse(formData.get("empresas") as string || "[]");
-    const fechas = JSON.parse(formData.get("fechas") as string || "[]");
+    const empresas = JSON.parse(
+      (formData.get("empresas") as string) || "[]"
+    );
+    const fechas = JSON.parse(
+      (formData.get("fechas") as string) || "[]"
+    );
 
     const anio = Number(anioRaw);
 
@@ -64,16 +68,24 @@ export async function POST(req: Request) {
       const bytes = await imagenFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const fileName = `${Date.now()}-${imagenFile.name}`;
-      const uploadDir = path.join(process.cwd(), "public/uploads/ferias");
+      // 🔥 nombre limpio sin espacios
+      const cleanName = imagenFile.name.replace(/\s+/g, "_");
+      const fileName = `${Date.now()}-${cleanName}`;
 
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+      const uploadDir = path.join(
+        process.cwd(),
+        "public",
+        "uploads",
+        "ferias"
+      );
+
+      // 🔥 crea carpeta si no existe
+      await mkdir(uploadDir, { recursive: true });
 
       const fullPath = path.join(uploadDir, fileName);
-      fs.writeFileSync(fullPath, buffer);
+      await writeFile(fullPath, buffer);
 
+      // 🔥 ruta pública que usará el frontend
       imagePath = `/uploads/ferias/${fileName}`;
     }
 
@@ -104,7 +116,6 @@ export async function POST(req: Request) {
         },
       },
 
-      // 🔥 IMPORTANTE: devolver relaciones
       include: {
         evento_feria_fecha: true,
         evento_feria_empresa: {
