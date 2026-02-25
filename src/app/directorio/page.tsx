@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import Cabecera from "../../components/Cabecera/Cabecera";
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
@@ -83,15 +84,20 @@ export default function DirectorioPage() {
           <p>No hay registros por mostrar.</p>
         ) : (
           <ul className={styles.listaMiembros}>
-            {miembros.map((m) => (
+            {miembros.map((m, index) => (
               <li key={m.id} className={styles.miembroCard}>
                 {m.foto && (
-                  <img
-                    src={getFotoUrl(m.foto)}
-                    alt={`Foto de ${m.nombre}`}
-                    className={styles.foto}
-                    loading="lazy"
-                  />
+                  <div className={styles.fotoWrapper}>
+                    <Image
+                      src={getFotoUrl(m.foto)}
+                      alt={`Foto de ${m.nombre}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 300px"
+                      priority={index < 4} 
+                      loading={index < 4 ? "eager" : "lazy"}
+                      className={styles.foto}
+                    />
+                  </div>
                 )}
 
                 <div className={styles.info}>

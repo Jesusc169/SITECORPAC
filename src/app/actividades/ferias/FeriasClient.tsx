@@ -8,14 +8,55 @@ import FeriasView, {
 import { fetchFerias } from "@/services/eventoFerias.service";
 
 export default function FeriasClient() {
-  const aniosDisponibles = [2026, 2025, 2024];
-
-  const [anio, setAnio] = useState<number | null>(aniosDisponibles[0]);
+  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
+  const [anio, setAnio] = useState<number | null>(null);
   const [ferias, setFerias] = useState<EventoFeria[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
 
+  /* =====================================================
+     🔥 PRIMERA CARGA → Obtener años reales desde BD
+  ===================================================== */
+  useEffect(() => {
+    let mounted = true;
+
+    fetchFerias()
+      .then((res) => {
+        if (!mounted) return;
+
+        if (!Array.isArray(res)) {
+          setFerias([]);
+          setEmpresas([]);
+          return;
+        }
+
+        // Extraer años únicos reales
+        const aniosUnicos = Array.from(
+          new Set(res.map((f) => f.anio))
+        ).sort((a, b) => b - a);
+
+        setAniosDisponibles(aniosUnicos);
+
+        // Seleccionar el primer año disponible automáticamente
+        if (aniosUnicos.length > 0) {
+          setAnio(aniosUnicos[0]);
+        } else {
+          setAnio(null);
+        }
+      })
+      .catch((error) => {
+        console.error("Error cargando ferias:", error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  /* =====================================================
+     🔥 CARGA POR AÑO (incluye "Ver todas")
+  ===================================================== */
   useEffect(() => {
     let mounted = true;
 
@@ -26,15 +67,9 @@ export default function FeriasClient() {
       .then((res) => {
         if (!mounted) return;
 
-        if (!Array.isArray(res)) {
-          setFerias([]);
-          setEmpresas([]);
-          return;
-        }
-
         setFerias(res);
 
-        // EXTRAER EMPRESAS ÚNICAS
+        // Extraer empresas únicas
         const empresasMap = new Map<number, Empresa>();
 
         res.forEach((feria) => {

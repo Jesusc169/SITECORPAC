@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import styles from "./ferias.admin.module.css";
 import AdminFeriaModal from "./AdminFeriaModal";
 
@@ -58,6 +58,26 @@ export default function FeriasView() {
   }, []);
 
   /* =========================
+     🔥 ORDEN DESCENDENTE AUTOMÁTICO
+     Más reciente primero
+  ========================= */
+  const feriasOrdenadas = useMemo(() => {
+    return [...ferias].sort((a, b) => {
+      const fechaA =
+        a.evento_feria_fecha?.[0]?.fecha
+          ? new Date(a.evento_feria_fecha[0].fecha).getTime()
+          : 0;
+
+      const fechaB =
+        b.evento_feria_fecha?.[0]?.fecha
+          ? new Date(b.evento_feria_fecha[0].fecha).getTime()
+          : 0;
+
+      return fechaB - fechaA; // DESCENDENTE
+    });
+  }, [ferias]);
+
+  /* =========================
      ACCIONES
   ========================= */
   const handleNuevaFeria = () => {
@@ -82,9 +102,6 @@ export default function FeriasView() {
     }
   };
 
-  /* =========================
-     DUPLICAR FERIA
-  ========================= */
   const handleDuplicar = async (id: number) => {
     if (!confirm("¿Duplicar esta feria?")) return;
 
@@ -94,7 +111,7 @@ export default function FeriasView() {
         { method: "POST" }
       );
 
-      const text = await res.text(); // 🔥 para debug real
+      const text = await res.text();
       console.log("RESPUESTA DUPLICAR:", text);
 
       if (!res.ok) {
@@ -120,9 +137,6 @@ export default function FeriasView() {
     await fetchFerias();
   };
 
-  /* =========================
-     GUARDAR FERIA
-  ========================= */
   const handleSave = async ({
     formData,
     empresas,
@@ -191,7 +205,7 @@ export default function FeriasView() {
           </thead>
 
           <tbody>
-            {ferias.length === 0 && (
+            {feriasOrdenadas.length === 0 && (
               <tr>
                 <td colSpan={5} className={styles.empty}>
                   No hay ferias registradas
@@ -199,7 +213,7 @@ export default function FeriasView() {
               </tr>
             )}
 
-            {ferias.map((feria) => {
+            {feriasOrdenadas.map((feria) => {
               const fechas = feria.evento_feria_fecha || [];
 
               const anioRealizado =
