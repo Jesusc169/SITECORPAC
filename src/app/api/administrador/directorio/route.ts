@@ -6,7 +6,10 @@ import { promises as fs } from "fs";
 /* =========================
    RUTA REAL PRODUCCIÓN
 ========================= */
-const UPLOAD_DIR = "/var/www/sitecorpac/uploads/directorio";
+const UPLOAD_DIR = path.join(
+  process.cwd(),
+  "public/uploads/directorio"
+);
 
 /* =========================
    Utilidad fechas
