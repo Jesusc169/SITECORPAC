@@ -9,7 +9,10 @@ import Footer from "@/components/Footer/Footer";
 
 import { NoticiasController } from "@/controllers/noticiasController";
 
-/* ✅ Tipo LOCAL (sin archivo extra, sin lógica de negocio) */
+/* 🔥 IMPORTANTE: evita que Next la deje estática */
+export const dynamic = "force-dynamic";
+
+/* ✅ Tipo LOCAL */
 interface Noticia {
   id: number;
   titulo: string;
@@ -19,10 +22,9 @@ interface Noticia {
 }
 
 export default async function HomePage() {
-  // 🔹 SSR: obtenemos noticias desde el controlador
+  // 🔹 Ahora se ejecutará en cada request en producción
   const noticiasRaw = await NoticiasController.obtenerNoticias();
 
-  // 🔹 Adaptador (NO cambia lógica del negocio)
   const noticias: Noticia[] = noticiasRaw.map((n) => ({
     id: n.id,
     titulo: n.titulo,
@@ -41,7 +43,6 @@ export default async function HomePage() {
           src="/Fondo_principal.png"
           alt="Fondo principal"
           className={styles.imagenFondo}
-          loading="lazy"
         />
 
         <div className={styles.textosSobreImagen}>
