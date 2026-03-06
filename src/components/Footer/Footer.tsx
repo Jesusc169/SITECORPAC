@@ -16,6 +16,7 @@ export default function Footer() {
 
         {/* GRID DE CONTACTO */}
         <div className={styles.grid}>
+          
           {/* Email */}
           <div className={styles.card}>
             <i className="bi bi-envelope-fill"></i>
@@ -70,6 +71,23 @@ export default function Footer() {
               </a>
             </div>
           </div>
+
+          {/* Soporte técnico */}
+          <div className={styles.card}>
+            <i className="bi bi-headset"></i>
+            <div>
+              <span className={styles.label}>Soporte técnico</span>
+              <a
+                href="https://wa.me/51941361585"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                +51 941 361 585
+              </a>
+            </div>
+          </div>
+
         </div>
 
         {/* FOOTER LEGAL */}
