@@ -8,16 +8,16 @@
     #82b0c4 0%,
     #6b9fb6 100%
   );
-  padding: 22px 24px;
+  padding: 22px 18px;
 }
 
 /* Contenedor */
 .contenedor {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 30px;
   flex-wrap: wrap;
 }
 
@@ -27,22 +27,22 @@
 .marca {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* Logo */
 .logo {
-  width: 64px;
-  height: 64px;
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
   object-fit: cover;
   background: #ffffff;
-  padding: 4px;
+  padding: 6px;
 }
 
 /* Título principal */
 .titulo {
-  font-size: 2.2rem;
+  font-size: 2.7rem;
   font-weight: 800;
   margin: 0;
   color: #0b2a4a;
@@ -52,11 +52,11 @@
 /* Subtítulo */
 .subtitulo {
   display: block;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #0f172a;
   opacity: 0.85;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* ===============================
@@ -96,12 +96,12 @@
 
 @media (max-width: 480px) {
   .titulo {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
   }
 
   .logo {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
   }
 
   .mensaje {
