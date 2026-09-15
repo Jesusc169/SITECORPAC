@@ -73,6 +73,41 @@
   color: #374151;
 }
 
+.hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: -6px;
+}
+
+.previewBox {
+  text-align: center;
+}
+
+.previewFrame {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #e5e7eb;
+  margin: 0 auto;
+}
+
+.previewFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewAviso {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
 .modalBody input,
 .modalBody textarea,
 .modalBody select {

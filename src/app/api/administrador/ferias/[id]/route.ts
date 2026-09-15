@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -77,15 +77,15 @@ export async function PUT(
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const fileName = `${Date.now()}-${file.name}`;
-      const filePath = path.join(
-        process.cwd(),
-        "public/uploads",
-        fileName
-      );
+      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "ferias");
+
+      await mkdir(uploadDir, { recursive: true });
+
+      const filePath = path.join(uploadDir, fileName);
 
       await writeFile(filePath, buffer);
-      imagen_portada = `/uploads/${fileName}`;
+      imagen_portada = `/uploads/ferias/${fileName}`;
     }
 
     /* =========================

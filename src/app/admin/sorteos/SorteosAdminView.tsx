@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "./sorteos.admin.module.css";
-import AdminSorteoModal from "./AdminSorteoModal";
 
 /* =========================
 TIPOS
@@ -32,13 +31,6 @@ interface SorteosAdminViewProps {
   onEditar: (s: Sorteo) => void;
   onEliminar: (id: number) => Promise<void>;
   onDuplicar: (id: number) => Promise<void>;
-
-  modal: boolean;
-  setModal: React.Dispatch<React.SetStateAction<boolean>>;
-  selected: Sorteo | null;
-
-  // 🔥 CORRECCIÓN DE FIRMA
-  onSave: (id: number | null, formData: FormData) => Promise<void>;
 }
 
 /* =========================
@@ -50,10 +42,6 @@ export default function SorteosAdminView({
   onEditar,
   onEliminar,
   onDuplicar,
-  modal,
-  setModal,
-  selected,
-  onSave,
 }: SorteosAdminViewProps) {
   return (
     <section className={styles.container}>
@@ -156,16 +144,6 @@ export default function SorteosAdminView({
           </table>
         </div>
       </div>
-
-      {/* ================= MODAL ================= */}
-      {modal && (
-        <AdminSorteoModal
-          open={modal}
-          onClose={() => setModal(false)}
-          onSave={onSave}
-          initialData={selected}
-        />
-      )}
     </section>
   );
 }

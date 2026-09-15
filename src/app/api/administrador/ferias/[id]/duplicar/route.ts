@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verificarSesion } from "@/lib/auth";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 export async function POST(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sesion = await verificarSesion();
-    if (!sesion) {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 

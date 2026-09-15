@@ -135,10 +135,6 @@ export default function SorteosAdminClient() {
         }}
         onEliminar={onEliminar}
         onDuplicar={onDuplicar}
-        modal={modalOpen}
-        setModal={setModalOpen}
-        selected={selected}
-        onSave={onSave}
       />
 
       <AdminSorteoModal

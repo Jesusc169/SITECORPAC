@@ -27,6 +27,7 @@ export default function SorteosClient() {
   const [anio, setAnio] = useState<number | null>(null);
   const [sorteos, setSorteos] = useState<Sorteo[]>([]);
   const [todos, setTodos] = useState<Sorteo[]>([]);
+  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
 
   /* =========================================
      CARGAR TODOS LOS SORTEOS
@@ -57,6 +58,16 @@ export default function SorteosClient() {
 
       setTodos(ordenados);
       setSorteos(ordenados);
+
+      const aniosUnicos = Array.from(
+        new Set(
+          ordenados
+            .map((s) => new Date(s.fecha_hora).getFullYear())
+            .filter((a) => !isNaN(a))
+        )
+      ).sort((a, b) => b - a);
+
+      setAniosDisponibles(aniosUnicos);
     } catch (error) {
       console.error("Error cargando sorteos:", error);
       setTodos([]);
@@ -99,6 +110,8 @@ export default function SorteosClient() {
     <SorteosView
       sorteos={sorteos}
       onChangeAnio={setAnio}
+      aniosDisponibles={aniosDisponibles}
+      anioSeleccionado={anio}
     />
   );
 }

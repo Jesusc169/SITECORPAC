@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./sorteos.admin.module.css";
+import { evaluarProporcion } from "@/lib/imagenValidacion";
 
 interface Premio {
   nombre: string;
@@ -34,6 +35,7 @@ export default function AdminSorteoModal({
   };
 
   const [form, setForm] = useState(emptyForm);
+  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
 
   /* =========================================================
      CARGAR DATOS PARA EDITAR
@@ -53,15 +55,18 @@ export default function AdminSorteoModal({
         imagen: initialData.imagen ?? "",
         imagenFile: null,
         premios:
-          initialData.sorteo_producto?.map((p: any) => ({
-            nombre: p.nombre ?? "",
-            descripcion: p.descripcion ?? "",
-            cantidad: p.cantidad ?? 1,
-          })) ?? [],
+          (initialData.premios ?? initialData.sorteo_producto)?.map(
+            (p: any) => ({
+              nombre: p.nombre ?? "",
+              descripcion: p.descripcion ?? "",
+              cantidad: p.cantidad ?? 1,
+            })
+          ) ?? [],
       });
     } else {
       setForm(emptyForm);
     }
+    setAvisoImagen(null);
   }, [initialData]);
 
   if (!open) return null;
@@ -80,11 +85,19 @@ export default function AdminSorteoModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const url = URL.createObjectURL(file);
+
     setForm((prev) => ({
       ...prev,
       imagenFile: file,
-      imagen: URL.createObjectURL(file),
+      imagen: url,
     }));
+
+    const img = new Image();
+    img.onload = () => {
+      setAvisoImagen(evaluarProporcion(img.width, img.height));
+    };
+    img.src = url;
   };
 
   /* =========================================================
@@ -200,13 +213,25 @@ export default function AdminSorteoModal({
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label>Imagen del sorteo</label>
-              <input type="file" onChange={handleFileChange} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <div className={styles.hint}>
+                💡 Usa una foto <strong>horizontal</strong> (apaisada), de al
+                menos 800x500px. Evita fotos verticales o cuadradas, porque
+                se recortarán arriba y abajo.
+              </div>
               {form.imagen && (
                 <img
                   src={form.imagen}
                   className={styles.previewImg}
                   alt="preview"
                 />
+              )}
+              {avisoImagen && (
+                <div className={styles.previewAviso}>{avisoImagen}</div>
               )}
             </div>
 

@@ -24,11 +24,16 @@ interface Sorteo {
 interface Props {
   sorteos: Sorteo[];
   onChangeAnio: (anio: number | null) => void;
+  aniosDisponibles: number[];
+  anioSeleccionado: number | null;
 }
 
-export default function SorteosView({ sorteos, onChangeAnio }: Props) {
-  const aniosDisponibles = [2026, 2025, 2024];
-
+export default function SorteosView({
+  sorteos,
+  onChangeAnio,
+  aniosDisponibles,
+  anioSeleccionado,
+}: Props) {
   return (
     <section className={styles.container}>
       {/* CABECERA */}
@@ -43,11 +48,19 @@ export default function SorteosView({ sorteos, onChangeAnio }: Props) {
       {/* FILTRO */}
       <div className={styles.anios}>
         {aniosDisponibles.map((anio) => (
-          <button key={`anio-${anio}`} onClick={() => onChangeAnio(anio)}>
+          <button
+            key={`anio-${anio}`}
+            onClick={() => onChangeAnio(anio)}
+            className={anioSeleccionado === anio ? styles.activo : ""}
+          >
             {anio}
           </button>
         ))}
-        <button key="ver-todos" onClick={() => onChangeAnio(null)}>
+        <button
+          key="ver-todos"
+          onClick={() => onChangeAnio(null)}
+          className={anioSeleccionado === null ? styles.activo : ""}
+        >
           Ver todos
         </button>
       </div>

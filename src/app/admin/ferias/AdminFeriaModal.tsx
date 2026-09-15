@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./AdminFeriaModal.module.css";
+import { evaluarProporcion } from "@/lib/imagenValidacion";
 
 /* =========================
    TIPOS
@@ -49,6 +50,8 @@ export default function AdminFeriaModal({
   const [descripcion, setDescripcion] = useState("");
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [imagen, setImagen] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
 
   const [empresas, setEmpresas] = useState<number[]>([]);
   const [empresaQuery, setEmpresaQuery] = useState("");
@@ -67,6 +70,8 @@ export default function AdminFeriaModal({
       setDescripcion("");
       setAnio(new Date().getFullYear());
       setImagen(null);
+      setPreview(null);
+      setAvisoImagen(null);
       setEmpresas([]);
       setFechas([]);
       return;
@@ -75,6 +80,9 @@ export default function AdminFeriaModal({
     setTitulo(feriaData.titulo ?? "");
     setDescripcion(feriaData.descripcion ?? "");
     setAnio(feriaData.anio ?? new Date().getFullYear());
+    setImagen(null);
+    setPreview(feriaData.imagen_portada ?? null);
+    setAvisoImagen(null);
 
     setEmpresas(
       Array.isArray(feriaData.evento_feria_empresa)
@@ -209,8 +217,37 @@ export default function AdminFeriaModal({
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setImagen(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setImagen(file);
+              if (!file) return;
+
+              const url = URL.createObjectURL(file);
+              setPreview(url);
+
+              const img = new Image();
+              img.onload = () => {
+                setAvisoImagen(evaluarProporcion(img.width, img.height));
+              };
+              img.src = url;
+            }}
           />
+          <div className={styles.hint}>
+            💡 Usa una foto <strong>horizontal</strong> (apaisada), de al
+            menos 800x500px. Evita fotos verticales o cuadradas, porque se
+            recortarán arriba y abajo.
+          </div>
+
+          {preview && (
+            <div className={styles.previewBox}>
+              <div className={styles.previewFrame}>
+                <img src={preview} alt="Vista previa" />
+              </div>
+              {avisoImagen && (
+                <div className={styles.previewAviso}>{avisoImagen}</div>
+              )}
+            </div>
+          )}
 
           {/* EMPRESAS */}
           <label>Empresas participantes</label>
