@@ -2,8 +2,15 @@
 
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { NoticiasController } from "@/controllers/noticiasController";
 import NoticiasPageView from "@/views/NoticiasPageView";
+
+export const metadata: Metadata = {
+  title: "Noticias | SITECORPAC",
+  description:
+    "Actividades, comunicados y acciones del SITECORPAC en defensa de los trabajadores.",
+};
 
 // Componentes comunes
 import Cabecera from "@/components/Cabecera/Cabecera";

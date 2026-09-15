@@ -17,7 +17,7 @@
   color: #1f2937; /* gris institucional */
   margin-bottom: 3.25rem;
   padding-left: 1rem;
-  border-left: 5px solid #dc2626; /* rojo institucional */
+  border-left: 5px solid var(--sitecorpac-red); /* rojo institucional */
   line-height: 1.35;
   letter-spacing: -0.01em;
 }
@@ -87,7 +87,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: #ffffff;
-  background-color: #dc2626;
+  background-color: var(--sitecorpac-red);
   border-radius: 999px;
   text-decoration: none;
   transition:
@@ -97,7 +97,7 @@
 }
 
 .ctaLink:hover {
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(220, 38, 38, 0.35);
 }

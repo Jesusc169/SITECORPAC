@@ -79,7 +79,7 @@
   height:3px;
   margin:10px auto 0;
   border-radius:10px;
-  background: linear-gradient(90deg,#0a58ca,#2d7df6);
+  background: linear-gradient(90deg,var(--sitecorpac-blue-dark),#2d7df6);
 }
 
 /* =========================================================
@@ -126,7 +126,7 @@
 .form input:focus {
   outline: none;
   background: #fff;
-  border-color: #0a58ca;
+  border-color: var(--sitecorpac-blue-dark);
   box-shadow:
     0 0 0 3px rgba(10,88,202,.15),
     0 6px 18px rgba(10,88,202,.18);
@@ -153,7 +153,7 @@
    🔵 BOTON PRINCIPAL GUARDAR
 ========================================================= */
 .primary {
-  background: linear-gradient(135deg,#0a58ca,#072f7a);
+  background: linear-gradient(135deg,var(--sitecorpac-blue-dark),#072f7a);
   color: #fff;
   border: none;
   padding: .65rem 1.6rem;

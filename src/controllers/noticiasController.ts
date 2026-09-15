@@ -21,6 +21,9 @@ export class NoticiasController {
   static async obtenerNoticiaPorId(id: number) {
     return await prisma.noticia.findUnique({
       where: { id },
+      include: {
+        noticia_pdf: { orderBy: { orden: "asc" } },
+      },
     });
   }
 

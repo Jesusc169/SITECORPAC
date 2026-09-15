@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import path from "path";
 import { promises as fs } from "fs";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 /* =========================
    RUTA REAL PRODUCCIÓN
@@ -24,6 +26,11 @@ function parseLocalDate(dateStr: string) {
 ========================= */
 export async function PUT(request: Request) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "directorio")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const idStr = url.pathname.split("/").pop();
     const id = Number(idStr);
@@ -117,6 +124,11 @@ export async function PUT(request: Request) {
 ========================= */
 export async function DELETE(request: Request) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "directorio")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const idStr = url.pathname.split("/").pop();
     const id = Number(idStr);

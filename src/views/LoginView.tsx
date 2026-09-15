@@ -26,9 +26,6 @@ export default function LoginView() {
         return;
       }
 
-      // ✅ Guardar token en localStorage o cookies
-      localStorage.setItem("token", data.token);
-
       // ✅ Redirigir al dashboard o página principal
       router.push("/dashboard");
     } catch (err) {
@@ -42,16 +39,28 @@ export default function LoginView() {
         <h2 className={styles.title}>Iniciar sesión</h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
+          <label htmlFor="login-email" className={styles.srOnly}>
+            Correo
+          </label>
           <input
+            id="login-email"
+            name="email"
             type="email"
+            autoComplete="email"
             placeholder="Correo"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             className={styles.input}
           />
+          <label htmlFor="login-password" className={styles.srOnly}>
+            Contraseña
+          </label>
           <input
+            id="login-password"
+            name="password"
             type="password"
+            autoComplete="current-password"
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

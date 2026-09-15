@@ -4,6 +4,20 @@
   bottom: 30px;
   right: 30px;
   z-index: 1000;
+  transition: transform 0.25s ease;
+}
+
+/* Se corre hacia arriba mientras el footer está a la vista,
+   para no tapar las tarjetas de contacto */
+.floatingContainer.desplazado {
+  transform: translateY(-72px);
+}
+
+@media (max-width: 480px) {
+  .floatingContainer {
+    bottom: 18px;
+    right: 18px;
+  }
 }
 
 /* Botón circular de WhatsApp */
@@ -67,5 +81,11 @@
   100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsappButton {
+    animation: none;
   }
 }

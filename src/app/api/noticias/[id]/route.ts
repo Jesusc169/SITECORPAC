@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { NoticiasController } from "@/controllers/noticiasController";
 import type { noticia } from "@prisma/client";
+import { verificarSesion } from "@/lib/auth";
 
 // 🔹 GET /api/admin/noticias/[id] → obtener noticia por ID
 export async function GET(req: Request): Promise<NextResponse<noticia | { error: string }>> {
@@ -22,6 +23,11 @@ export async function GET(req: Request): Promise<NextResponse<noticia | { error:
 // 🔹 PUT /api/admin/noticias/[id] → actualizar noticia
 export async function PUT(req: Request): Promise<NextResponse<noticia | { error: string }>> {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(req.url);
     const id = Number(url.pathname.split("/").slice(-1)[0]);
     if (isNaN(id)) return NextResponse.json({ error: "ID inválido" }, { status: 400 });
@@ -39,6 +45,11 @@ export async function PUT(req: Request): Promise<NextResponse<noticia | { error:
 // 🔹 DELETE /api/admin/noticias/[id] → eliminar noticia
 export async function DELETE(req: Request): Promise<NextResponse<{ message: string } | { error: string }>> {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(req.url);
     const id = Number(url.pathname.split("/").slice(-1)[0]);
     if (isNaN(id)) return NextResponse.json({ error: "ID inválido" }, { status: 400 });

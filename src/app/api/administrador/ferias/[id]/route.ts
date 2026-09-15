@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { writeFile } from "fs/promises";
 import path from "path";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 /* =========================
    GET – Feria por ID
@@ -10,6 +12,11 @@ export async function GET(
   _: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
   const { id } = await params;
   const feriaId = Number(id);
 
@@ -38,6 +45,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { id } = await params;
     const feriaId = Number(id);
 
@@ -155,6 +167,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { id } = await params;
     const feriaId = Number(id);
 

@@ -18,7 +18,7 @@
 .titulo {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--sitecorpac-navy);
   margin-bottom: 12px;
 }
 
@@ -41,6 +41,70 @@
   max-width: 1150px;
   margin: 0 auto;
   overflow: hidden;
+  position: relative;
+}
+
+/* ===============================
+   FLECHAS PREV/NEXT
+================================ */
+.flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: var(--sitecorpac-navy);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+}
+
+.flecha:hover {
+  background-color: var(--sitecorpac-red);
+  color: #ffffff;
+}
+
+.flechaIzq {
+  left: -6px;
+}
+
+.flechaDer {
+  right: -6px;
+}
+
+@media (max-width: 640px) {
+  .flecha {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+
+  .flechaIzq {
+    left: 6px;
+  }
+
+  .flechaDer {
+    right: 6px;
+  }
+}
+
+/* ===============================
+   CONTADOR (listas largas de noticias)
+================================ */
+.contador {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .carrusel {
@@ -66,16 +130,15 @@
    IMAGEN
 ================================ */
 .imagenWrapper {
+  position: relative;
   width: 100%;
-  height: 320px;
+  aspect-ratio: 3 / 2;
   border-radius: 12px;
   overflow: hidden;
   background-color: #e5e7eb;
 }
 
 .imagen {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
@@ -91,7 +154,7 @@
 .cardTitulo {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--sitecorpac-navy);
   margin-bottom: 12px;
 }
 
@@ -105,7 +168,7 @@
 .verMas {
   align-self: flex-start;
   padding: 10px 22px;
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
   color: #ffffff;
   font-weight: 600;
   border-radius: 10px;
@@ -114,7 +177,7 @@
 }
 
 .verMas:hover {
-  background-color: #991b1b;
+  background-color: var(--sitecorpac-red-dark);
   transform: translateY(-2px);
 }
 
@@ -143,7 +206,7 @@
 }
 
 .activo {
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
   transform: scale(1.3);
 }
 
@@ -158,7 +221,7 @@
 .verTodasBtn {
   display: inline-block;
   padding: 14px 38px;
-  background-color: #0f172a;
+  background-color: var(--sitecorpac-navy);
   color: #ffffff;
   font-weight: 600;
   border-radius: 999px;
@@ -178,10 +241,6 @@
   .noticiaCard {
     grid-template-columns: 1fr;
   }
-
-  .imagenWrapper {
-    height: 280px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -195,10 +254,6 @@
 }
 
 @media (max-width: 480px) {
-  .imagenWrapper {
-    height: 220px;
-  }
-
   .verMas,
   .verTodasBtn {
     width: 100%;

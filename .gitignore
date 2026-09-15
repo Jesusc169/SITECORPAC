@@ -28,6 +28,11 @@ prisma/*.db
 prisma/*.db-journal
 
 # ======================
+# TYPESCRIPT
+# ======================
+*.tsbuildinfo
+
+# ======================
 # LOGS
 # ======================
 npm-debug.log*

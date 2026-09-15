@@ -5,8 +5,17 @@ import "@/styles/global.css"; // tus estilos globales
 
 import Script from "next/script";
 import { Metadata } from "next";
+import { Archivo } from "next/font/google";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-archivo",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sitecorpac.com"),
   title: "SITECORPAC",
   description: "Sindicato de Trabajadores de CORPAC",
   icons: {
@@ -20,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={archivo.variable}>
       <head />
       <body>
         {children}

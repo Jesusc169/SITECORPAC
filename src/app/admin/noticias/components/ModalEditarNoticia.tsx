@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { evaluarProporcion } from "@/lib/imagenValidacion";
+
+interface NoticiaPdf {
+  id: number;
+  url: string;
+  nombre: string;
+}
 
 interface Noticia {
   id: number;
@@ -9,6 +16,7 @@ interface Noticia {
   contenido?: string;
   autor: string;
   imagen?: string | null;
+  noticia_pdf?: NoticiaPdf[];
 }
 
 interface Props {
@@ -30,6 +38,11 @@ export default function ModalEditarNoticia({
   const [imagenActual, setImagenActual] = useState<string | null>(null);
   const [imagenNueva, setImagenNueva] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+
+  const [pdfsExistentes, setPdfsExistentes] = useState<NoticiaPdf[]>([]);
+  const [pdfsAEliminar, setPdfsAEliminar] = useState<number[]>([]);
+  const [pdfsNuevos, setPdfsNuevos] = useState<File[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -40,6 +53,19 @@ export default function ModalEditarNoticia({
     setAutor(noticia.autor);
     setImagenActual(noticia.imagen || null);
     setPreview(noticia.imagen || null);
+    setPdfsExistentes(noticia.noticia_pdf || []);
+    setPdfsAEliminar([]);
+    setPdfsNuevos([]);
+
+    if (noticia.imagen) {
+      const img = new Image();
+      img.onload = () => {
+        setAvisoImagen(evaluarProporcion(img.width, img.height));
+      };
+      img.src = noticia.imagen;
+    } else {
+      setAvisoImagen(null);
+    }
   }, [noticia]);
 
   const handleImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +73,43 @@ export default function ModalEditarNoticia({
     if (!file) return;
 
     setImagenNueva(file);
-    setPreview(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+
+    const img = new Image();
+    img.onload = () => {
+      setAvisoImagen(evaluarProporcion(img.width, img.height));
+    };
+    img.src = url;
+  };
+
+  const pdfsExistentesActivos = pdfsExistentes.filter(
+    (p) => !pdfsAEliminar.includes(p.id)
+  );
+  const pdfsActivosCount = pdfsExistentesActivos.length + pdfsNuevos.length;
+
+  const handlePdfsNuevos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nuevos = Array.from(e.target.files || []);
+    if (!nuevos.length) return;
+
+    setPdfsNuevos((prev) => {
+      const maxNuevos = 5 - pdfsExistentesActivos.length;
+      const combinados = [...prev, ...nuevos];
+      if (combinados.length > maxNuevos) {
+        alert("Máximo 5 documentos PDF por noticia.");
+      }
+      return combinados.slice(0, Math.max(0, maxNuevos));
+    });
+
+    e.target.value = "";
+  };
+
+  const quitarPdfExistente = (id: number) => {
+    setPdfsAEliminar((prev) => [...prev, id]);
+  };
+
+  const quitarPdfNuevo = (index: number) => {
+    setPdfsNuevos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const actualizarNoticia = async () => {
@@ -65,6 +127,9 @@ export default function ModalEditarNoticia({
       if (imagenNueva) {
         formData.append("imagen", imagenNueva);
       }
+
+      formData.append("pdfsEliminar", JSON.stringify(pdfsAEliminar));
+      pdfsNuevos.forEach((file) => formData.append("pdfs", file));
 
       const res = await fetch(`/api/administrador/noticias/${noticia.id}`, {
         method: "PUT",
@@ -151,19 +216,113 @@ export default function ModalEditarNoticia({
                   accept="image/*"
                   onChange={handleImagen}
                 />
+                <div className="form-text">
+                  💡 Usa una foto <strong>horizontal</strong> (apaisada), de
+                  al menos 800x500px. Evita fotos verticales o cuadradas,
+                  porque se recortarán arriba y abajo.
+                </div>
               </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label fw-semibold">
+                Documentos PDF (opcional, máximo 5)
+              </label>
+              <input
+                type="file"
+                className="form-control"
+                accept="application/pdf"
+                multiple
+                disabled={pdfsActivosCount >= 5}
+                onChange={handlePdfsNuevos}
+              />
+
+              {pdfsExistentesActivos.length > 0 && (
+                <ul className="list-group mt-2">
+                  {pdfsExistentesActivos.map((p) => (
+                    <li
+                      key={p.id}
+                      className="list-group-item d-flex justify-content-between align-items-center py-1 small"
+                    >
+                      📄{" "}
+                      <a
+                        href={p.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-truncate mx-1"
+                      >
+                        {p.nombre}
+                      </a>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger py-0 px-2"
+                        onClick={() => quitarPdfExistente(p.id)}
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {pdfsNuevos.length > 0 && (
+                <ul className="list-group mt-2">
+                  {pdfsNuevos.map((file, i) => (
+                    <li
+                      key={`${file.name}-${i}`}
+                      className="list-group-item d-flex justify-content-between align-items-center py-1 small"
+                    >
+                      📄 {file.name} <span className="badge bg-success">nuevo</span>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger py-0 px-2"
+                        onClick={() => quitarPdfNuevo(i)}
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {pdfsActivosCount === 0 && (
+                <div className="text-muted small mt-1">
+                  Sin PDFs adjuntos actualmente
+                </div>
+              )}
             </div>
 
             {/* PREVIEW */}
             {preview && (
               <div className="mt-4 text-center">
-                <p className="fw-semibold mb-2">Vista previa</p>
-                <img
-                  src={preview}
-                  alt="preview"
-                  className="img-fluid rounded shadow"
-                  style={{ maxHeight: "260px" }}
-                />
+                <p className="fw-semibold mb-2">
+                  Vista previa (así se verá recortada en la noticia)
+                </p>
+                <div
+                  className="rounded shadow mx-auto"
+                  style={{
+                    width: "100%",
+                    maxWidth: "420px",
+                    aspectRatio: "3 / 2",
+                    overflow: "hidden",
+                    backgroundColor: "#e5e7eb",
+                  }}
+                >
+                  <img
+                    src={preview}
+                    alt="preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+                {avisoImagen && (
+                  <div className="alert alert-warning mt-2 py-2 small mb-0">
+                    {avisoImagen}
+                  </div>
+                )}
               </div>
             )}
 

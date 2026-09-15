@@ -20,22 +20,17 @@ interface Miembro {
 }
 
 /* =========================
-   Normalizar URL imagen (FIX PROD)
+   Normalizar URL imagen (relativa:
+   funciona igual en local y en producción)
    ========================= */
 function getFotoUrl(url?: string | null, refreshKey?: number) {
   if (!url) return "";
 
-  let finalUrl = url;
-
-  // ⚡ Ajuste a dominio correcto (con www)
-  const domain = "https://www.sitecorpac.com";
-
-  // si no es absoluta -> convertir a dominio real
-  if (!url.startsWith("http")) {
-    finalUrl = url.startsWith("/")
-      ? `${domain}${url}`
-      : `${domain}/${url}`;
-  }
+  let finalUrl = url.startsWith("http")
+    ? url
+    : url.startsWith("/")
+      ? url
+      : `/${url}`;
 
   // evitar cache navegador
   if (refreshKey !== undefined) {

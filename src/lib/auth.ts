@@ -1,64 +1,45 @@
-import { prisma } from "../lib/prisma";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import prisma from "@/lib/prisma";
 
-// ✅ Registro
-export async function register(req: NextRequest) {
+export interface SesionUsuario {
+  id: number;
+  email: string;
+  rol: string;
+}
+
+/**
+ * Verifica la cookie de sesión (JWT httpOnly) de la petición actual.
+ * Devuelve los datos del usuario si es válida, o null si no hay
+ * sesión o el token es inválido/expiró.
+ *
+ * Usar al inicio de cada endpoint de /api/administrador/*:
+ *   const sesion = await verificarSesion();
+ *   if (!sesion) return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+ */
+export async function verificarSesion(): Promise<SesionUsuario | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return null;
+
   try {
-    const { nombre, email, password, rol } = await req.json();
-
-    // 1. verificar si ya existe
-    const userExist = await prisma.user.findUnique({ where: { email } });
-    if (userExist) {
-      return NextResponse.json({ error: "El usuario ya existe" }, { status: 400 });
-    }
-
-    // 2. encriptar contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 3. guardar en DB
-    const newUser = await prisma.user.create({
-      data: {
-        nombre,
-        email,
-        password: hashedPassword,
-        rol, // 👈 tu campo en prisma
-      },
-    });
-
-    return NextResponse.json({ message: "Usuario registrado", user: newUser }, { status: 201 });
-  } catch (err) {
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+    return jwt.verify(token, process.env.JWT_SECRET as string) as SesionUsuario;
+  } catch {
+    return null;
   }
 }
 
-// ✅ Login
-export async function login(req: NextRequest) {
-  try {
-    const { email, password } = await req.json();
+/**
+ * Igual que verificarSesion(), pero trae el usuario fresco desde la
+ * base de datos (rol y permisos actuales) en vez de confiar en lo
+ * que decía el JWT al momento de loguearse. Úsalo cuando necesites
+ * revisar permisos, para que un cambio de privilegios aplique al
+ * instante sin esperar a que la persona vuelva a iniciar sesión.
+ */
+export async function obtenerUsuarioActual() {
+  const sesion = await verificarSesion();
+  if (!sesion) return null;
 
-    // 1. buscar usuario
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 400 });
-    }
-
-    // 2. comparar password
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 400 });
-    }
-
-    // 3. generar token JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email, rol: user.rol },
-      process.env.JWT_SECRET as string, // 👈 definido en tu .env
-      { expiresIn: "1d" }
-    );
-
-    return NextResponse.json({ message: "Login exitoso", token });
-  } catch (err) {
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
-  }
+  return prisma.user.findUnique({ where: { id: sesion.id } });
 }

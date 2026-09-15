@@ -1,11 +1,17 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
+import { verificarSesion } from "@/lib/auth";
 
 export const runtime = "nodejs";
-console.log("🔥 API UPLOAD EJECUTADA");
+
 export async function POST(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get("foto") as File;
 
@@ -31,9 +37,12 @@ export async function POST(req: Request) {
     const cleanName = file.name.replace(/\s+/g, "_");
     const fileName = `directorio-${Date.now()}-${cleanName}`;
 
-    // 🔥 RUTA CORRECTA (LA QUE SIRVE NEXT PUBLIC)
-    const uploadDir =
-      "/home/sitecorpac/SITECORPAC/public/uploads/directorio";
+    const uploadDir = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "directorio"
+    );
 
     // Crear carpeta si no existe
     await mkdir(uploadDir, { recursive: true });

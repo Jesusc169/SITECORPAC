@@ -32,15 +32,27 @@ model directorio {
 }
 
 model noticia {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   titulo      String
   descripcion String
-  contenido   String?  @db.Text
+  contenido   String?       @db.Text
   imagen      String?
-  fecha       DateTime @default(now())
-  createdAt   DateTime @default(now())
+  fecha       DateTime      @default(now())
+  createdAt   DateTime      @default(now())
   updatedAt   DateTime
   autor       String
+  noticia_pdf noticia_pdf[]
+}
+
+model noticia_pdf {
+  id         Int     @id @default(autoincrement())
+  noticia_id Int
+  url        String  @db.VarChar(255)
+  nombre     String  @db.VarChar(255)
+  orden      Int?    @default(1)
+  noticia    noticia @relation(fields: [noticia_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_noticia_pdf")
+
+  @@index([noticia_id], map: "fk_noticia_pdf")
 }
 
 model prestamo_faq {
@@ -64,6 +76,7 @@ model user {
   email     String   @unique(map: "User_email_key")
   password  String
   rol       String
+  permisos  Json?
   createdAt DateTime @default(now())
 }
 

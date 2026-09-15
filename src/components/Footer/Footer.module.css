@@ -2,7 +2,7 @@
    FOOTER GENERAL
 ================================ */
 .footer {
-  background-color: #0f172a;
+  background-color: var(--sitecorpac-navy);
   color: #e5e7eb;
   padding: 70px 24px 40px;
 }

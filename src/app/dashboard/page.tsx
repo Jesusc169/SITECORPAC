@@ -2,8 +2,17 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import styles from "@/styles/Dashboard.module.css";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
+  // 🔐 Verificación de sesión propia de la página: no depende del
+  // middleware, así que protege /dashboard aunque el middleware falle.
+  const cookieStore = await cookies();
+  if (!cookieStore.get("token")?.value) {
+    redirect("/login");
+  }
+
   /* ===============================
      MÉTRICAS
   ================================ */

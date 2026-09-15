@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verificarSesion } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -16,6 +17,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const data = await req.json();
 
     const creado = await prisma.sorteo.create({
@@ -46,6 +52,11 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const data = await req.json();
     const actualizado = await prisma.sorteo.update({
       where: { id: data.id },
@@ -69,6 +80,11 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const data = await req.json();
     await prisma.sorteo.delete({ where: { id: data.id } });
     return NextResponse.json({ ok: true });

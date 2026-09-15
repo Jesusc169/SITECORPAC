@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
+import { verificarSesion } from "@/lib/auth";
 
 // Cache corto para detalle
 export const revalidate = 30;
@@ -71,6 +72,11 @@ export async function GET(req: Request) {
 =========================== */
 export async function PUT(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const id = Number(parts[parts.length - 1]);
@@ -139,6 +145,11 @@ export async function PUT(req: Request) {
 =========================== */
 export async function DELETE(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const id = Number(parts[parts.length - 1]);

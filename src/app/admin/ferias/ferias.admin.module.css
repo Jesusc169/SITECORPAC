@@ -194,15 +194,15 @@
 
 /* DUPLICAR (azul corporativo) */
 .duplicate {
-  background: #1d4ed8;
+  background: var(--sitecorpac-blue);
 }
 .duplicate:hover {
-  background: #1e40af;
+  background: var(--sitecorpac-blue-dark);
 }
 
 /* ELIMINAR (rojo serio) */
 .delete {
-  background: #991b1b;
+  background: var(--sitecorpac-red-dark);
 }
 .delete:hover {
   background: #7f1d1d;
@@ -221,7 +221,7 @@
 .error {
   padding: 40px;
   text-align: center;
-  color: #b91c1c;
+  color: var(--sitecorpac-red);
   font-weight: 600;
 }
 

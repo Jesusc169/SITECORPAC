@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./NoticiasGrid.module.css";
 
@@ -31,7 +32,14 @@ export default function NoticiasGrid({ noticias }: { noticias: Noticia[] }) {
     <div className={styles.grid}>
       {noticias.map((n) => (
         <article key={n.id} className={styles.card}>
-          <img src={n.imagen} alt={n.titulo} />
+          <div className={styles.imagenWrapper}>
+            <Image
+              src={n.imagen}
+              alt={n.titulo}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
 
           <div className={styles.body}>
             {n.fechaPublicacion && (

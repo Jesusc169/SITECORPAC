@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import path from "path";
 import { promises as fs } from "fs";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 /* =========================
    RUTA REAL PRODUCCIÓN
@@ -24,6 +26,11 @@ function parseLocalDate(dateStr: string) {
 ========================= */
 export async function GET() {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "directorio")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const miembros = await prisma.directorio.findMany({
       orderBy: { orden: "asc" },
     });
@@ -43,6 +50,11 @@ export async function GET() {
 ========================= */
 export async function POST(req: Request) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "directorio")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const formData = await req.formData();
 
     const nombre = formData.get("nombre") as string;

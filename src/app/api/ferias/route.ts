@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
+import { verificarSesion } from "@/lib/auth";
 
 // 🔥 cache 60s
 export const revalidate = 60;
@@ -96,6 +97,11 @@ export async function GET(req: Request) {
 ========================= */
 export async function POST(req: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const form = await req.formData();
 
     const titulo = String(form.get("titulo") || "");

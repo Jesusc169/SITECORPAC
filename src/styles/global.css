@@ -1,3 +1,18 @@
+/* ===============================
+   PALETA INSTITUCIONAL SITECORPAC
+   Fuente única de verdad para los colores
+   de marca. Antes de usar un hex nuevo,
+   revisar si ya existe una variable aquí.
+================================ */
+:root {
+  --sitecorpac-navy: #0f172a;
+  --sitecorpac-red: #b91c1c;
+  --sitecorpac-red-dark: #991b1b;
+  --sitecorpac-blue: #1d4ed8;
+  --sitecorpac-blue-light: #2563eb;
+  --sitecorpac-blue-dark: #1e40af;
+}
+
 /* Reset básico */
 body {
   margin: 0;
@@ -6,4 +21,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   min-height: 100vh;
+}
+
+/* ===============================
+   TIPOGRAFÍA DE MARCA
+   Archivo (Google Fonts) para títulos
+   y botones. El cuerpo de texto se
+   mantiene en Arial — es legible y
+   no era el problema.
+================================ */
+h1, h2, h3,
+.btn,
+button {
+  font-family: var(--font-archivo), Arial, Helvetica, sans-serif;
+  letter-spacing: -0.01em;
 }

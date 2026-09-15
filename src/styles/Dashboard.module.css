@@ -40,7 +40,7 @@
 
 .header h1 {
   font-size: 1.8rem;
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   margin-bottom: 0.5rem;
 }
 
@@ -79,13 +79,13 @@
 .statNumber {
   font-size: 2rem;
   font-weight: bold;
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   margin: 0.5rem 0 1rem 0;
 }
 
 /* Enlaces */
 .link {
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   text-decoration: none;
   font-weight: 500;
 }
@@ -115,7 +115,7 @@
 
 .activityList li {
   margin-bottom: 0.75rem;
-  border-left: 4px solid #0d6efd;
+  border-left: 4px solid var(--sitecorpac-blue);
   padding-left: 0.75rem;
   color: #555;
   line-height: 1.4;

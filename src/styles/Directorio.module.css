@@ -25,16 +25,16 @@
 .main h1 {
   margin-bottom: 2rem;
   font-size: 2.2rem;
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   font-weight: 600;
-  border-bottom: 2px solid #0d6efd;
+  border-bottom: 2px solid var(--sitecorpac-blue);
   display: inline-block;
   padding-bottom: 0.3rem;
 }
 
 /* Botón para agregar miembro */
 .btnAgregar {
-  background-color: #0d6efd;
+  background-color: var(--sitecorpac-blue);
   color: #fff;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -89,7 +89,7 @@
   height: 120px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid #0d6efd;
+  border: 2px solid var(--sitecorpac-blue);
   margin-bottom: 1rem;
 }
 
@@ -98,7 +98,7 @@
   margin: 0.3rem 0 0.1rem;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   text-align: center;
 }
 
@@ -124,7 +124,7 @@
 .miembroCard a {
   margin-top: 0.8rem;
   font-size: 0.95rem;
-  color: #0d6efd;
+  color: var(--sitecorpac-blue);
   text-decoration: underline;
   transition: color 0.2s;
 }

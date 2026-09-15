@@ -17,7 +17,10 @@ export function middleware(request: NextRequest) {
   }
 
   // 🔐 BLOQUEO TOTAL DEL ADMIN
-  if (pathname.startsWith("/admin") && !token) {
+  if (
+    (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) &&
+    !token
+  ) {
     return NextResponse.redirect(
       new URL("/login", request.url)
     );
@@ -27,5 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

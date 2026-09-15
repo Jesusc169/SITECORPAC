@@ -31,8 +31,14 @@ export default function Navbar() {
             </li>
 
             {/* 🔹 Quiénes somos */}
-            <li className={`nav-item dropdown ${styles.dropdownHover}`}>
-              <a className={`nav-link ${styles.navLink}`} href="#">
+            <li className="nav-item dropdown">
+              <a
+                className={`nav-link dropdown-toggle ${styles.navLink}`}
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Quiénes somos
               </a>
               <ul className={`dropdown-menu ${styles.dropdownMenu}`}>
@@ -56,8 +62,14 @@ export default function Navbar() {
             </li>
 
             {/* 🔹 Trámites */}
-            <li className={`nav-item dropdown ${styles.dropdownHover}`}>
-              <a className={`nav-link ${styles.navLink}`} href="#">
+            <li className="nav-item dropdown">
+              <a
+                className={`nav-link dropdown-toggle ${styles.navLink}`}
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Trámites
               </a>
               <ul className={`dropdown-menu ${styles.dropdownMenu}`}>
@@ -81,8 +93,14 @@ export default function Navbar() {
             </li>
 
             {/* 🔹 Actividades */}
-            <li className={`nav-item dropdown ${styles.dropdownHover}`}>
-              <a className={`nav-link ${styles.navLink}`} href="#">
+            <li className="nav-item dropdown">
+              <a
+                className={`nav-link dropdown-toggle ${styles.navLink}`}
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Actividades
               </a>
               <ul className={`dropdown-menu ${styles.dropdownMenu}`}>
@@ -106,8 +124,14 @@ export default function Navbar() {
             </li>
 
             {/* 🔹 Legislación laboral */}
-            <li className={`nav-item dropdown ${styles.dropdownHover}`}>
-              <a className={`nav-link ${styles.navLink}`} href="#">
+            <li className="nav-item dropdown">
+              <a
+                className={`nav-link dropdown-toggle ${styles.navLink}`}
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Legislación laboral
               </a>
               <ul className={`dropdown-menu ${styles.dropdownMenu}`}>
@@ -176,6 +200,7 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
+                <i className="bi bi-whatsapp" aria-hidden="true"></i>
                 Únete al SITE
               </a>
             </li>

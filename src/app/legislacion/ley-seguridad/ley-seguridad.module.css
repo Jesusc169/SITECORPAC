@@ -13,7 +13,7 @@
   color: #1f2937;
   margin-bottom: 3.25rem;
   padding-left: 1rem;
-  border-left: 5px solid #dc2626; /* rojo institucional */
+  border-left: 5px solid var(--sitecorpac-red); /* rojo institucional */
   line-height: 1.35;
 }
 
@@ -70,7 +70,7 @@
 .ctaLink {
   display: inline-flex;
   padding: 0.85rem 1.9rem;
-  background-color: #dc2626;
+  background-color: var(--sitecorpac-red);
   color: #ffffff;
   border-radius: 999px;
   text-decoration: none;
@@ -82,7 +82,7 @@
 }
 
 .ctaLink:hover {
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
   box-shadow: 0 6px 14px rgba(220, 38, 38, 0.35);
 }
 

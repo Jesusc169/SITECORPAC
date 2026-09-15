@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verificarSesion } from "@/lib/auth";
 
 /* =========================
    GET – listar fechas de un evento de feria
    ========================= */
 export async function GET(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const eventoFeriaId = Number(url.pathname.split("/").slice(-2)[0]); // obtiene el [id] del evento
     if (isNaN(eventoFeriaId)) {
@@ -29,6 +35,11 @@ export async function GET(request: Request) {
    ========================= */
 export async function POST(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const eventoFeriaId = Number(url.pathname.split("/").slice(-2)[0]); // obtiene el [id] del evento
     if (isNaN(eventoFeriaId)) {

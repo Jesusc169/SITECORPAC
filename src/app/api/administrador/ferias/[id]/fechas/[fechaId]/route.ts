@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verificarSesion } from "@/lib/auth";
 
 /* =========================
    GET – obtener una fecha específica
    ========================= */
 export async function GET(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const fechaId = Number(url.pathname.split("/").pop());
     if (isNaN(fechaId)) {
@@ -32,6 +38,11 @@ export async function GET(request: Request) {
    ========================= */
 export async function PUT(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const fechaId = Number(url.pathname.split("/").pop());
     if (isNaN(fechaId)) {
@@ -63,6 +74,11 @@ export async function PUT(request: Request) {
    ========================= */
 export async function DELETE(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const fechaId = Number(url.pathname.split("/").pop());
     if (isNaN(fechaId)) {

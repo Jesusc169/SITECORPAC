@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verificarSesion } from "@/lib/auth";
 
 // Esta función maneja la ruta POST /api/ferias/[id]/duplicate
 export async function POST(request: Request) {
   try {
+    const sesion = await verificarSesion();
+    if (!sesion) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     // Obtener el ID de la feria desde la URL
     const url = new URL(request.url);
     const feriaId = Number(url.pathname.split("/").slice(-2, -1)[0]); // toma el penúltimo segmento

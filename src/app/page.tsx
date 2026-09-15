@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Cabecera from "@/components/Cabecera/Cabecera";
 import Navbar from "@/components/Navbar/Navbar";
 import styles from "@/styles/Home.module.css";
@@ -39,9 +40,12 @@ export default async function HomePage() {
       <Navbar />
 
       <section className={styles.contenedorImagen}>
-        <img
+        <Image
           src="/Fondo_principal.png"
           alt="Fondo principal"
+          fill
+          priority
+          sizes="100vw"
           className={styles.imagenFondo}
         />
 

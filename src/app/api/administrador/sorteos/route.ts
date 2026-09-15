@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import prisma from "@/lib/prisma";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 /* =========================================
 GET - LISTAR
 ========================================= */
 export async function GET() {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "sorteos")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const sorteos = await prisma.sorteo.findMany({
       orderBy: { fecha_hora: "desc" },
       include: {
@@ -30,6 +37,11 @@ POST - CREAR
 ========================================= */
 export async function POST(req: Request) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "sorteos")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     let data: any = {};
     let imagenUrl: string | null = null;
 

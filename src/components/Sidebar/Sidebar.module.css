@@ -185,7 +185,7 @@
   padding: 10px 14px;
   border-radius: 10px;
   border: none;
-  background-color: #dc2626;
+  background-color: var(--sitecorpac-red);
   color: #fff;
   font-weight: 600;
   font-size: 0.85rem;
@@ -194,7 +194,7 @@
 }
 
 .logoutBtn:hover {
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
 }
 
 .logoutBtn:active {

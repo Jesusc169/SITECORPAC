@@ -30,7 +30,7 @@
 }
 
 .navLink:hover {
-  color: #0077b6 !important; /* azul corporativo más destacado */
+  color: var(--sitecorpac-blue) !important;
 }
 
 /* ===============================
@@ -39,7 +39,6 @@
 .dropdownMenu {
   background-color: #f8f9fa;
   border-radius: 8px;
-  display: none; /* por defecto oculto */
   margin-top: 0;
   padding: 0.5rem 0;
   min-width: 200px;
@@ -54,31 +53,32 @@
 }
 
 .dropdownItem:hover {
-  background-color: #0077b6; /* azul corporativo */
+  background-color: var(--sitecorpac-blue);
   color: #fff !important;
-}
-
-/* Hover para mostrar dropdown */
-.dropdownHover:hover .dropdownMenu {
-  display: block;
-  position: absolute;
 }
 
 /* ===============================
    BOTÓN ÚNETE
 ================================ */
 .btnUnete {
-  background-color: #0077b6 !important; /* azul corporativo */
+  background-color: var(--sitecorpac-blue) !important;
   color: #fff !important;
   border: none;
   border-radius: 4px;
   padding: 0.5rem 1rem;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   transition: background-color 0.3s ease-in-out, transform 0.2s;
 }
 
+.btnUnete i {
+  font-size: 1rem;
+}
+
 .btnUnete:hover {
-  background-color: #005f87 !important;
+  background-color: var(--sitecorpac-blue-dark) !important;
   transform: translateY(-2px);
   text-decoration: none;
   color: #fff !important;

@@ -2,9 +2,9 @@
    VARIABLES CORPORATIVAS
 ===================================================== */
 :root {
-  --primary: #1d4ed8;
-  --primary-dark: #1e40af;
-  --danger: #b91c1c;
+  --primary: var(--sitecorpac-blue);
+  --primary-dark: var(--sitecorpac-blue-dark);
+  --danger: var(--sitecorpac-red);
   --success: #166534;
 
   --bg-main: #f5f7fa;
@@ -14,7 +14,7 @@
   --border: #e5e7eb;
   --border-soft: #cbd5e1;
 
-  --text-main: #0f172a;
+  --text-main: var(--sitecorpac-navy);
   --text-muted: #64748b;
 }
 

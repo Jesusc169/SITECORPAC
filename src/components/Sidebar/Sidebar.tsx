@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
+import { tienePermiso, type ClavePrivilegio } from "@/lib/permisos";
+
+const ITEMS_MENU: { href: string; label: string; permiso: ClavePrivilegio }[] = [
+  { href: "/admin/noticias", label: "Administrar noticias", permiso: "noticias" },
+  { href: "/admin/directorio", label: "Administrar directorio", permiso: "directorio" },
+  { href: "/admin/ferias", label: "Administrar ferias", permiso: "ferias" },
+  { href: "/admin/sorteos", label: "Administrar sorteos", permiso: "sorteos" },
+  { href: "/admin/usuarios", label: "Administrar usuarios", permiso: "usuarios" },
+];
+
+interface UsuarioActual {
+  rol: string;
+  permisos: unknown;
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
+
+  useEffect(() => {
+    fetch("/api/administrador/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUsuario(data))
+      .catch(() => setUsuario(null));
+  }, []);
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
@@ -83,53 +105,21 @@ export default function Sidebar() {
           {/* Navegación */}
           <nav className={styles.nav}>
             <ul>
-              <li>
-                <Link
-                  href="/admin/noticias"
-                  className={`${styles.link} ${
-                    isActive("/admin/noticias") ? styles.active : ""
-                  }`}
-                  onClick={() => setOpen(false)}
-                >
-                  Administrar noticias
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/admin/directorio"
-                  className={`${styles.link} ${
-                    isActive("/admin/directorio") ? styles.active : ""
-                  }`}
-                  onClick={() => setOpen(false)}
-                >
-                  Administrar directorio
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/admin/ferias"
-                  className={`${styles.link} ${
-                    isActive("/admin/ferias") ? styles.active : ""
-                  }`}
-                  onClick={() => setOpen(false)}
-                >
-                  Administrar ferias
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/admin/sorteos"
-                  className={`${styles.link} ${
-                    isActive("/admin/sorteos") ? styles.active : ""
-                  }`}
-                  onClick={() => setOpen(false)}
-                >
-                  Administrar sorteos
-                </Link>
-              </li>
+              {ITEMS_MENU.filter((item) => tienePermiso(usuario, item.permiso)).map(
+                (item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`${styles.link} ${
+                        isActive(item.href) ? styles.active : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                )
+              )}
             </ul>
           </nav>
         </div>

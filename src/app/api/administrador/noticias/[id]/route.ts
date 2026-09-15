@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 export const runtime = "nodejs";
 
@@ -13,6 +15,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "noticias")) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+
     const { id: idParam } = await params;
     const id = Number(idParam);
 
@@ -30,9 +37,19 @@ export async function PUT(
     const contenido = formData.get("contenido") as string;
     const autor = formData.get("autor") as string;
     const imagenFile = formData.get("imagen") as File | null;
+    const pdfFilesNuevos = formData.getAll("pdfs") as File[];
+    const pdfsEliminarRaw = formData.get("pdfsEliminar")?.toString() || "[]";
+
+    let pdfsEliminar: number[] = [];
+    try {
+      pdfsEliminar = JSON.parse(pdfsEliminarRaw);
+    } catch {
+      pdfsEliminar = [];
+    }
 
     const noticiaActual = await prisma.noticia.findUnique({
       where: { id },
+      include: { noticia_pdf: true },
     });
 
     if (!noticiaActual) {
@@ -53,9 +70,9 @@ export async function PUT(
         );
       }
 
-      if (imagenFile.size > 2 * 1024 * 1024) {
+      if (imagenFile.size > 10 * 1024 * 1024) {
         return NextResponse.json(
-          { message: "Máximo 2MB" },
+          { message: "Máximo 10MB" },
           { status: 400 }
         );
       }
@@ -94,6 +111,96 @@ export async function PUT(
       imagenPath = `/images/uploads/noticias/${nombreArchivo}`;
     }
 
+    /* =============================
+       Eliminar PDFs marcados
+    ============================== */
+    const pdfsAEliminar = noticiaActual.noticia_pdf.filter((p) =>
+      pdfsEliminar.includes(p.id)
+    );
+
+    const pdfsRestantes =
+      noticiaActual.noticia_pdf.length - pdfsAEliminar.length;
+
+    if (pdfsRestantes + pdfFilesNuevos.length > 5) {
+      return NextResponse.json(
+        { message: "Máximo 5 documentos PDF por noticia" },
+        { status: 400 }
+      );
+    }
+
+    for (const pdf of pdfsAEliminar) {
+      const rutaAnterior = path.join(process.cwd(), "public", pdf.url);
+      try {
+        await unlink(rutaAnterior);
+      } catch {}
+    }
+
+    if (pdfsAEliminar.length > 0) {
+      await prisma.noticia_pdf.deleteMany({
+        where: { id: { in: pdfsAEliminar.map((p) => p.id) } },
+      });
+    }
+
+    /* =============================
+       Agregar PDFs nuevos
+    ============================== */
+    let ordenSiguiente =
+      Math.max(
+        0,
+        ...noticiaActual.noticia_pdf
+          .filter((p) => !pdfsEliminar.includes(p.id))
+          .map((p) => p.orden ?? 0)
+      ) + 1;
+
+    for (const pdfFile of pdfFilesNuevos) {
+      if (!pdfFile || pdfFile.size === 0) continue;
+
+      if (pdfFile.type !== "application/pdf") {
+        return NextResponse.json(
+          { message: "Los documentos adjuntos deben ser PDF" },
+          { status: 400 }
+        );
+      }
+
+      if (pdfFile.size > 15 * 1024 * 1024) {
+        return NextResponse.json(
+          { message: `El PDF "${pdfFile.name}" debe ser menor a 15MB` },
+          { status: 400 }
+        );
+      }
+
+      const bytes = await pdfFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const nombreArchivo =
+        `noticia-${Date.now()}-${ordenSiguiente}-${pdfFile.name.replace(/\s+/g, "_")}`;
+
+      const uploadDir = path.join(
+        process.cwd(),
+        "public",
+        "images",
+        "uploads",
+        "noticias",
+        "pdf"
+      );
+
+      await mkdir(uploadDir, { recursive: true });
+
+      const filePath = path.join(uploadDir, nombreArchivo);
+      await writeFile(filePath, buffer);
+
+      await prisma.noticia_pdf.create({
+        data: {
+          noticia_id: id,
+          url: `/images/uploads/noticias/pdf/${nombreArchivo}`,
+          nombre: pdfFile.name,
+          orden: ordenSiguiente,
+        },
+      });
+
+      ordenSiguiente++;
+    }
+
     const noticiaActualizada = await prisma.noticia.update({
       where: { id },
       data: {
@@ -103,6 +210,9 @@ export async function PUT(
         autor,
         imagen: imagenPath,
         updatedAt: new Date(),
+      },
+      include: {
+        noticia_pdf: { orderBy: { orden: "asc" } },
       },
     });
 
@@ -125,6 +235,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "noticias")) {
+      return NextResponse.json({ message: "No autorizado" }, { status: 401 });
+    }
+
     const { id: idParam } = await params;
     const id = Number(idParam);
 
@@ -137,6 +252,7 @@ export async function DELETE(
 
     const noticia = await prisma.noticia.findUnique({
       where: { id },
+      include: { noticia_pdf: true },
     });
 
     if (!noticia) {
@@ -155,6 +271,14 @@ export async function DELETE(
 
       try {
         await unlink(rutaImagen);
+      } catch {}
+    }
+
+    for (const pdf of noticia.noticia_pdf) {
+      const rutaPdf = path.join(process.cwd(), "public", pdf.url);
+
+      try {
+        await unlink(rutaPdf);
       } catch {}
     }
 

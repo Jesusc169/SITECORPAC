@@ -13,7 +13,7 @@ export default function Cabecera() {
             className={styles.logo}
           />
           <div>
-            <h1 className={styles.titulo}>SITECORPAC</h1>
+            <p className={styles.titulo}>SITECORPAC</p>
             <span className={styles.subtitulo}>
               Sindicato de Trabajadores de CORPAC
             </span>

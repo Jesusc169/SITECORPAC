@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 /* =========================
    GET – LISTAR FERIAS
 ========================= */
 export async function GET() {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const ferias = await prisma.evento_feria.findMany({
       orderBy: { created_at: "desc" },
       include: {
@@ -33,6 +40,11 @@ export async function GET() {
 ========================= */
 export async function POST(req: Request) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "ferias")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const formData = await req.formData();
 
     const titulo = formData.get("titulo")?.toString().trim();

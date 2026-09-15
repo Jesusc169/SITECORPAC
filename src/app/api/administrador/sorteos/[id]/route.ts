@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { obtenerUsuarioActual } from "@/lib/auth";
+import { tienePermiso } from "@/lib/permisos";
 
 export const runtime = "nodejs";
 
@@ -13,6 +15,11 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "sorteos")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const params = await context.params;
     const sorteoId = Number(params.id);
 
@@ -50,6 +57,11 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "sorteos")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const params = await context.params;
     const sorteoId = Number(params.id);
 
@@ -151,6 +163,11 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual || !tienePermiso(usuarioActual, "sorteos")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const params = await context.params;
     const sorteoId = Number(params.id);
 

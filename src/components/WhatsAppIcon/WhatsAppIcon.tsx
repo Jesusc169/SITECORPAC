@@ -1,12 +1,34 @@
-// components/WhatsAppIcon.tsx
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { getWhatsAppLink } from "@/controllers/contact.controller";
 import styles from "./WhatsAppIcon.module.css";
 
 export default function WhatsAppIcon() {
   const whatsappLink = getWhatsAppLink();
+  const [sobreFooter, setSobreFooter] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setSobreFooter(entry.isIntersecting),
+      { rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className={styles.floatingContainer}>
+    <div
+      ref={containerRef}
+      className={`${styles.floatingContainer} ${
+        sobreFooter ? styles.desplazado : ""
+      }`}
+    >
       <a
         href={whatsappLink}
         target="_blank"

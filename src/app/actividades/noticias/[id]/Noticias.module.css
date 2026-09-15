@@ -8,7 +8,7 @@
   padding: 36px 40px;
   background-color: #ffffff;
   border-radius: 10px;
-  border-top: 6px solid #b91c1c; /* rojo institucional */
+  border-top: 6px solid var(--sitecorpac-red);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
 }
@@ -41,14 +41,58 @@
 /* ===============================
    IMAGEN PRINCIPAL
 ================================ */
-.noticiaImagenPage {
+.noticiaImagenWrapper {
+  position: relative;
+  max-width: 520px;
   width: 100%;
-  max-height: 460px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  display: block;
+  aspect-ratio: 3 / 2;
+  margin: 0 auto 30px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #e5e7eb;
   border: 1px solid #e5e7eb;
+}
+
+.noticiaImagenPage {
+  object-fit: cover;
+  display: block;
+}
+
+/* ===============================
+   PDF ADJUNTO
+================================ */
+.noticiaPdfWrapper {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.noticiaPdfTitulo {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.noticiaPdfLista {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.noticiaPdfItem {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #374151;
+}
+
+.noticiaPdfLink {
+  color: var(--sitecorpac-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.noticiaPdfLink:hover {
+  color: var(--sitecorpac-blue-dark);
 }
 
 /* ===============================
@@ -71,14 +115,14 @@
 }
 
 .noticiaContenido a {
-  color: #1d4ed8;
+  color: var(--sitecorpac-blue);
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.2s ease;
 }
 
 .noticiaContenido a:hover {
-  color: #1e40af;
+  color: var(--sitecorpac-blue-dark);
 }
 
 /* ===============================
@@ -90,7 +134,7 @@
   margin: 40px auto 0;
   width: 120px;
   height: 3px;
-  background-color: #b91c1c;
+  background-color: var(--sitecorpac-red);
   border-radius: 2px;
 }
 
@@ -119,5 +163,9 @@
 
   .noticiaContenido {
     font-size: 0.95rem;
+  }
+
+  .noticiaImagenWrapper {
+    max-width: 100%;
   }
 }

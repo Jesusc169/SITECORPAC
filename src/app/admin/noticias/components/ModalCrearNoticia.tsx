@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { evaluarProporcion } from "@/lib/imagenValidacion";
 
 interface Props {
   onClose: () => void;
@@ -15,6 +16,9 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
 
   const [imagen, setImagen] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+
+  const [pdfs, setPdfs] = useState<File[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +27,33 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
     if (!file) return;
 
     setImagen(file);
-    setPreview(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+
+    const img = new Image();
+    img.onload = () => {
+      setAvisoImagen(evaluarProporcion(img.width, img.height));
+    };
+    img.src = url;
+  };
+
+  const handlePdfs = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nuevos = Array.from(e.target.files || []);
+    if (!nuevos.length) return;
+
+    setPdfs((prev) => {
+      const combinados = [...prev, ...nuevos];
+      if (combinados.length > 5) {
+        alert("Máximo 5 documentos PDF por noticia. Se tomaron los primeros 5.");
+      }
+      return combinados.slice(0, 5);
+    });
+
+    e.target.value = "";
+  };
+
+  const quitarPdf = (index: number) => {
+    setPdfs((prev) => prev.filter((_, i) => i !== index));
   };
 
   const crearNoticia = async () => {
@@ -41,6 +71,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
       if (imagen) {
         formData.append("imagen", imagen);
       }
+
+      pdfs.forEach((file) => formData.append("pdfs", file));
 
       await fetch("/api/administrador/noticias", {
         method: "POST",
@@ -126,19 +158,78 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
                   accept="image/*"
                   onChange={handleImagen}
                 />
+                <div className="form-text">
+                  💡 Usa una foto <strong>horizontal</strong> (apaisada), de
+                  al menos 800x500px. Evita fotos verticales o cuadradas,
+                  porque se recortarán arriba y abajo.
+                </div>
               </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label fw-semibold">
+                Documentos PDF (opcional, máximo 5)
+              </label>
+              <input
+                type="file"
+                className="form-control"
+                accept="application/pdf"
+                multiple
+                disabled={pdfs.length >= 5}
+                onChange={handlePdfs}
+              />
+              {pdfs.length > 0 && (
+                <ul className="list-group mt-2">
+                  {pdfs.map((file, i) => (
+                    <li
+                      key={`${file.name}-${i}`}
+                      className="list-group-item d-flex justify-content-between align-items-center py-1 small"
+                    >
+                      📄 {file.name}
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger py-0 px-2"
+                        onClick={() => quitarPdf(i)}
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* PREVIEW IMAGEN */}
             {preview && (
               <div className="mt-3 text-center">
-                <p className="fw-semibold mb-2">Vista previa</p>
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="img-fluid rounded shadow"
-                  style={{ maxHeight: "260px" }}
-                />
+                <p className="fw-semibold mb-2">
+                  Vista previa (así se verá recortada en la noticia)
+                </p>
+                <div
+                  className="rounded shadow mx-auto"
+                  style={{
+                    width: "100%",
+                    maxWidth: "420px",
+                    aspectRatio: "3 / 2",
+                    overflow: "hidden",
+                    backgroundColor: "#e5e7eb",
+                  }}
+                >
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+                {avisoImagen && (
+                  <div className="alert alert-warning mt-2 py-2 small mb-0">
+                    {avisoImagen}
+                  </div>
+                )}
               </div>
             )}
 
