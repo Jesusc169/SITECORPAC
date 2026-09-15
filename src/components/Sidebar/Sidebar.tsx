@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./Sidebar.module.css";
 import { tienePermiso, type ClavePrivilegio } from "@/lib/permisos";
 
@@ -21,6 +21,7 @@ interface UsuarioActual {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
 
@@ -47,8 +48,11 @@ export default function Sidebar() {
     localStorage.clear();
     sessionStorage.clear();
 
-    // Evita volver con "atrás"
-    window.location.replace("/login");
+    // Navegación del lado del cliente: evita recargar todo el JS/CSS
+    // (eso era lo que causaba el retraso al escribir justo después de salir)
+    // y router.replace también evita volver con "atrás".
+    router.replace("/login");
+    router.refresh();
   };
 
   return (
