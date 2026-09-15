@@ -136,13 +136,20 @@ export default function ModalEditarNoticia({
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Error al actualizar");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "Error al actualizar la noticia");
+      }
 
       onSuccess();
       onClose();
     } catch (error) {
       console.error(error);
-      alert("Error al actualizar la noticia");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar la noticia"
+      );
     } finally {
       setLoading(false);
     }

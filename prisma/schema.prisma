@@ -34,7 +34,7 @@ model directorio {
 model noticia {
   id          Int           @id @default(autoincrement())
   titulo      String
-  descripcion String
+  descripcion String        @db.Text
   contenido   String?       @db.Text
   imagen      String?
   fecha       DateTime      @default(now())

@@ -74,16 +74,25 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
 
       pdfs.forEach((file) => formData.append("pdfs", file));
 
-      await fetch("/api/administrador/noticias", {
+      const res = await fetch("/api/administrador/noticias", {
         method: "POST",
         body: formData,
       });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "No se pudo crear la noticia");
+      }
 
       onSuccess();
       onClose();
     } catch (error) {
       console.error(error);
-      alert("Error al crear la noticia");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Error al crear la noticia"
+      );
     } finally {
       setLoading(false);
     }
