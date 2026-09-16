@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import styles from "./ferias.admin.module.css";
 import AdminFeriaModal from "./AdminFeriaModal";
+import * as feriaService from "@/services/feria.admin.service";
 
 export default function FeriasView() {
   const [ferias, setFerias] = useState<any[]>([]);
@@ -18,13 +19,7 @@ export default function FeriasView() {
   ========================= */
   const fetchFerias = async () => {
     try {
-      const res = await fetch("/api/administrador/ferias", {
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Error al cargar ferias");
-
-      const data = await res.json();
+      const data = await feriaService.fetchFerias();
       setFerias(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error(err);
@@ -37,13 +32,7 @@ export default function FeriasView() {
   ========================= */
   const fetchEmpresas = async () => {
     try {
-      const res = await fetch("/api/administrador/empresas", {
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Error al cargar empresas");
-
-      const data = await res.json();
+      const data = await feriaService.fetchEmpresasDisponibles();
       setEmpresasDisponibles(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error cargando empresas", err);
@@ -87,13 +76,7 @@ export default function FeriasView() {
 
   const handleEdit = async (id: number) => {
     try {
-      const res = await fetch(`/api/administrador/ferias/${id}`, {
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Error al obtener feria");
-
-      const data = await res.json();
+      const data = await feriaService.fetchFeriaPorId(id);
       setFeriaSeleccionada(data);
       setShowModal(true);
     } catch (err) {
@@ -106,34 +89,21 @@ export default function FeriasView() {
     if (!confirm("¿Duplicar esta feria?")) return;
 
     try {
-      const res = await fetch(
-        `/api/administrador/ferias/${id}/duplicar`,
-        { method: "POST" }
-      );
-
-      const text = await res.text();
+      const text = await feriaService.duplicarFeria(id);
       console.log("RESPUESTA DUPLICAR:", text);
-
-      if (!res.ok) {
-        alert("❌ Error servidor duplicar:\n" + text);
-        throw new Error(text);
-      }
 
       alert("✅ Feria duplicada");
       await fetchFerias();
     } catch (err) {
       console.error(err);
-      alert("Error al duplicar feria (ver consola)");
+      alert("❌ Error servidor duplicar:\n" + err);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("¿Eliminar esta feria definitivamente?")) return;
 
-    await fetch(`/api/administrador/ferias/${id}`, {
-      method: "DELETE",
-    });
-
+    await feriaService.eliminarFeria(id);
     await fetchFerias();
   };
 
@@ -152,17 +122,7 @@ export default function FeriasView() {
       formData.append("empresas", JSON.stringify(empresas));
       formData.append("fechas", JSON.stringify(fechas));
 
-      const res = await fetch(
-        isEdit
-          ? `/api/administrador/ferias/${feriaSeleccionada.id}`
-          : "/api/administrador/ferias",
-        {
-          method: isEdit ? "PUT" : "POST",
-          body: formData,
-        }
-      );
-
-      if (!res.ok) throw new Error("Error al guardar feria");
+      await feriaService.guardarFeria(isEdit, feriaSeleccionada?.id, formData);
 
       await fetchFerias();
       setShowModal(false);
