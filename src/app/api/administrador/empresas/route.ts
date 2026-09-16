@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { EmpresaController } from "@/controllers/empresaController";
 import { verificarSesion } from "@/lib/auth";
 
 export async function GET() {
@@ -9,14 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const empresas = await prisma.empresa.findMany({
-      orderBy: { nombre: "asc" }, // opcional: orden alfabético
-      select: {
-        id: true,
-        nombre: true,
-      },
-    });
-
+    const empresas = await EmpresaController.obtenerEmpresasParaSelector();
     return NextResponse.json(empresas);
   } catch (error) {
     console.error(error);
