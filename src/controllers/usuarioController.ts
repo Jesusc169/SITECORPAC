@@ -31,8 +31,8 @@ export const UsuarioController = {
       throw new UsuarioValidationError("Nombre, correo y contraseña son obligatorios");
     }
 
-    if (password.length < 6) {
-      throw new UsuarioValidationError("La contraseña debe tener al menos 6 caracteres");
+    if (password.length < 8) {
+      throw new UsuarioValidationError("La contraseña debe tener al menos 8 caracteres");
     }
 
     if (await UserModel.existeEmail(email)) {
@@ -66,8 +66,8 @@ export const UsuarioController = {
 
     let passwordHash: string | undefined;
     if (nuevaPassword) {
-      if (nuevaPassword.length < 6) {
-        throw new UsuarioValidationError("La contraseña debe tener al menos 6 caracteres");
+      if (nuevaPassword.length < 8) {
+        throw new UsuarioValidationError("La contraseña debe tener al menos 8 caracteres");
       }
       passwordHash = await bcrypt.hash(nuevaPassword, 10);
     }
