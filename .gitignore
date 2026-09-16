@@ -33,6 +33,11 @@ prisma/*.db-journal
 *.tsbuildinfo
 
 # ======================
+# PRUEBAS DE CARGA (locales, no van al repo)
+# ======================
+stress_tests/
+
+# ======================
 # LOGS
 # ======================
 npm-debug.log*
