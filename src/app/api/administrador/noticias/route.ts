@@ -7,6 +7,23 @@ import { tienePermiso } from "@/lib/permisos";
 
 export const runtime = "nodejs";
 
+const TIPOS_DOCUMENTO_PERMITIDOS = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+]);
+const EXTENSIONES_DOCUMENTO_PERMITIDAS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+
+function esDocumentoPermitido(file: File) {
+  const nombre = file.name.toLowerCase();
+  const extensionValida = EXTENSIONES_DOCUMENTO_PERMITIDAS.some((ext) =>
+    nombre.endsWith(ext)
+  );
+  return TIPOS_DOCUMENTO_PERMITIDOS.has(file.type) || extensionValida;
+}
+
 /* =====================================
    GET → Listar noticias
 ===================================== */
@@ -66,7 +83,7 @@ export async function POST(request: Request) {
 
     if (pdfFiles.length > 5) {
       return NextResponse.json(
-        { message: "Máximo 5 documentos PDF por noticia" },
+        { message: "Máximo 5 documentos por noticia" },
         { status: 400 }
       );
     }
@@ -125,16 +142,18 @@ export async function POST(request: Request) {
       const pdfFile = pdfFiles[i];
       if (!pdfFile || pdfFile.size === 0) continue;
 
-      if (pdfFile.type !== "application/pdf") {
+      if (!esDocumentoPermitido(pdfFile)) {
         return NextResponse.json(
-          { message: "Los documentos adjuntos deben ser PDF" },
+          {
+            message: `"${pdfFile.name}" no es un tipo de archivo permitido (PDF, Word o imagen JPG/PNG)`,
+          },
           { status: 400 }
         );
       }
 
       if (pdfFile.size > 15 * 1024 * 1024) {
         return NextResponse.json(
-          { message: `El PDF "${pdfFile.name}" debe ser menor a 15MB` },
+          { message: `"${pdfFile.name}" debe ser menor a 15MB` },
           { status: 400 }
         );
       }

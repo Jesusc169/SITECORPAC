@@ -96,7 +96,7 @@ export default function ModalEditarNoticia({
       const maxNuevos = 5 - pdfsExistentesActivos.length;
       const combinados = [...prev, ...nuevos];
       if (combinados.length > maxNuevos) {
-        alert("Máximo 5 documentos PDF por noticia.");
+        alert("Máximo 5 documentos por noticia.");
       }
       return combinados.slice(0, Math.max(0, maxNuevos));
     });
@@ -233,16 +233,20 @@ export default function ModalEditarNoticia({
 
             <div className="mb-3">
               <label className="form-label fw-semibold">
-                Documentos PDF (opcional, máximo 5)
+                Documentos adjuntos (opcional, máximo 5)
               </label>
               <input
                 type="file"
                 className="form-control"
-                accept="application/pdf"
+                accept="application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
                 multiple
                 disabled={pdfsActivosCount >= 5}
                 onChange={handlePdfsNuevos}
               />
+              <div className="form-text">
+                💡 Admite PDF, Word (.doc/.docx) o fotos de documentos
+                escaneados (JPG/PNG).
+              </div>
 
               {pdfsExistentesActivos.length > 0 && (
                 <ul className="list-group mt-2">
@@ -294,7 +298,7 @@ export default function ModalEditarNoticia({
 
               {pdfsActivosCount === 0 && (
                 <div className="text-muted small mt-1">
-                  Sin PDFs adjuntos actualmente
+                  Sin documentos adjuntos actualmente
                 </div>
               )}
             </div>

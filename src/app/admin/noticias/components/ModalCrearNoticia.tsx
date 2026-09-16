@@ -44,7 +44,7 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
     setPdfs((prev) => {
       const combinados = [...prev, ...nuevos];
       if (combinados.length > 5) {
-        alert("Máximo 5 documentos PDF por noticia. Se tomaron los primeros 5.");
+        alert("Máximo 5 documentos por noticia. Se tomaron los primeros 5.");
       }
       return combinados.slice(0, 5);
     });
@@ -177,16 +177,20 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
 
             <div className="mb-3">
               <label className="form-label fw-semibold">
-                Documentos PDF (opcional, máximo 5)
+                Documentos adjuntos (opcional, máximo 5)
               </label>
               <input
                 type="file"
                 className="form-control"
-                accept="application/pdf"
+                accept="application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
                 multiple
                 disabled={pdfs.length >= 5}
                 onChange={handlePdfs}
               />
+              <div className="form-text">
+                💡 Admite PDF, Word (.doc/.docx) o fotos de documentos
+                escaneados (JPG/PNG).
+              </div>
               {pdfs.length > 0 && (
                 <ul className="list-group mt-2">
                   {pdfs.map((file, i) => (
