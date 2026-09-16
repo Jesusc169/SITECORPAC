@@ -112,4 +112,8 @@ export const FeriaModel = {
   eliminar: async (id: number) => {
     return prisma.evento_feria.delete({ where: { id } });
   },
+
+  contarActivas: async () => {
+    return prisma.evento_feria.count({ where: { estado: true } });
+  },
 };

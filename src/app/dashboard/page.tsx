@@ -1,6 +1,6 @@
 import Sidebar from "@/components/Sidebar/Sidebar";
 import styles from "@/styles/Dashboard.module.css";
-import prisma from "@/lib/prisma";
+import { DashboardController } from "@/controllers/dashboardController";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -16,27 +16,8 @@ export default async function DashboardPage() {
   /* ===============================
      MÉTRICAS
   ================================ */
-  const [
-    totalNoticias,
-    totalEventos,
-    totalSorteos,
-    totalDocumentos,
-    ultimasNoticias,
-  ] = await Promise.all([
-    prisma.noticia.count(),
-    prisma.evento_feria.count({
-      where: { estado: true },
-    }),
-    prisma.sorteo.count({
-      where: { estado: "ACTIVO" },
-    }),
-    prisma.estatuto_contenido.count(),
-    prisma.noticia.findMany({
-      take: 4,
-      orderBy: { fecha: "desc" },
-      select: { titulo: true },
-    }),
-  ]);
+  const { totalNoticias, totalEventos, totalSorteos, ultimasNoticias } =
+    await DashboardController.obtenerResumen();
 
   return (
     <div className={styles.dashboard}>

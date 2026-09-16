@@ -81,4 +81,8 @@ export const SorteoModel = {
   eliminar: async (id: number) => {
     return prisma.sorteo.delete({ where: { id } });
   },
+
+  contarActivos: async () => {
+    return prisma.sorteo.count({ where: { estado: "ACTIVO" } });
+  },
 };

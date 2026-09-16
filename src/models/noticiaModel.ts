@@ -62,4 +62,16 @@ export const NoticiaModel = {
   eliminarPdfs: async (ids: number[]) => {
     return prisma.noticia_pdf.deleteMany({ where: { id: { in: ids } } });
   },
+
+  contar: async () => {
+    return prisma.noticia.count();
+  },
+
+  obtenerUltimosTitulos: async (take: number) => {
+    return prisma.noticia.findMany({
+      take,
+      orderBy: { fecha: "desc" },
+      select: { titulo: true },
+    });
+  },
 };

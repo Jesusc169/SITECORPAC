@@ -5,3 +5,7 @@ export const obtenerEstatuto = async () => {
     where: { estado: 1 },
   });
 };
+
+export const contarEstatutoContenido = async () => {
+  return prisma.estatuto_contenido.count();
+};
