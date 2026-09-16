@@ -1,17 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import path from "path";
-import { promises as fs } from "fs";
+import { DirectorioController } from "@/controllers/directorioController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-
-/* =========================
-   RUTA REAL PRODUCCIÓN
-========================= */
-const UPLOAD_DIR = path.join(
-  process.cwd(),
-  "public/uploads/directorio"
-);
 
 /* =========================
    Utilidad fechas
@@ -49,65 +39,22 @@ export async function PUT(request: Request) {
     const periodoFin = formData.get("periodoFin") as string | null;
     const foto = formData.get("foto") as File | null;
 
-    const miembro = await prisma.directorio.findUnique({ where: { id } });
+    const actualizado = await DirectorioController.actualizarMiembro(id, {
+      nombre: nombre ?? undefined,
+      cargo: cargo ?? undefined,
+      correo: correo ?? undefined,
+      telefono: telefono ?? undefined,
+      periodoInicio: periodoInicio ? parseLocalDate(periodoInicio) : undefined,
+      periodoFin: periodoFin ? parseLocalDate(periodoFin) : undefined,
+      fotoFile: foto,
+    });
 
-    if (!miembro) {
+    if (!actualizado) {
       return NextResponse.json(
         { error: "Miembro no encontrado" },
         { status: 404 }
       );
     }
-
-    let fotoUrl = miembro.fotoUrl;
-
-    /* =========================
-       SUBIR FOTO NUEVA
-    ========================== */
-    if (foto && foto.size > 0) {
-      const buffer = Buffer.from(await foto.arrayBuffer());
-      const extension = foto.name.split(".").pop();
-      const fileName = `directorio-${Date.now()}.${extension}`;
-
-      // crear carpeta si no existe
-      await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
-      const newFilePath = path.join(UPLOAD_DIR, fileName);
-
-      // guardar imagen
-      await fs.writeFile(newFilePath, buffer);
-
-      // borrar imagen anterior
-      if (miembro.fotoUrl) {
-        try {
-          const oldPath = path.join(
-            "/var/www/sitecorpac",
-            miembro.fotoUrl
-          );
-          await fs.unlink(oldPath);
-        } catch {
-          // si no existe no pasa nada
-        }
-      }
-
-      fotoUrl = `/uploads/directorio/${fileName}`;
-    }
-
-    /* =========================
-       DATA DINÁMICA
-    ========================== */
-    const data: any = {};
-    if (nombre !== null) data.nombre = nombre;
-    if (cargo !== null) data.cargo = cargo;
-    if (correo !== null) data.correo = correo;
-    if (telefono !== null) data.telefono = telefono;
-    if (periodoInicio) data.periodoInicio = parseLocalDate(periodoInicio);
-    if (periodoFin) data.periodoFin = parseLocalDate(periodoFin);
-    if (fotoUrl !== miembro.fotoUrl) data.fotoUrl = fotoUrl;
-
-    const actualizado = await prisma.directorio.update({
-      where: { id },
-      data,
-    });
 
     return NextResponse.json(actualizado);
   } catch (error) {
@@ -137,27 +84,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const miembro = await prisma.directorio.findUnique({ where: { id } });
+    const eliminado = await DirectorioController.eliminarMiembro(id);
 
-    if (!miembro) {
+    if (!eliminado) {
       return NextResponse.json(
         { error: "Miembro no encontrado" },
         { status: 404 }
       );
     }
-
-    // borrar imagen física
-    if (miembro.fotoUrl) {
-      try {
-        const filePath = path.join(
-          "/var/www/sitecorpac",
-          miembro.fotoUrl
-        );
-        await fs.unlink(filePath);
-      } catch {}
-    }
-
-    await prisma.directorio.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

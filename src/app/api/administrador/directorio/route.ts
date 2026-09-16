@@ -1,17 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import path from "path";
-import { promises as fs } from "fs";
+import { DirectorioController } from "@/controllers/directorioController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-
-/* =========================
-   RUTA REAL PRODUCCIÓN
-========================= */
-const UPLOAD_DIR = path.join(
-  process.cwd(),
-  "public/uploads/directorio"
-);
 
 /* =========================
    Utilidad fechas
@@ -31,10 +21,7 @@ export async function GET() {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const miembros = await prisma.directorio.findMany({
-      orderBy: { orden: "asc" },
-    });
-
+    const miembros = await DirectorioController.obtenerDirectorio();
     return NextResponse.json(miembros);
   } catch (error) {
     console.error("Error al obtener directorio:", error);
@@ -72,51 +59,14 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =========================
-       ORDEN AUTOMÁTICO
-    ========================== */
-    const ultimo = await prisma.directorio.findFirst({
-      orderBy: { orden: "desc" },
-      select: { orden: true },
-    });
-
-    const nuevoOrden = ultimo ? ultimo.orden + 1 : 1;
-
-    /* =========================
-       SUBIR FOTO
-    ========================== */
-    let fotoUrl: string | null = null;
-
-    if (foto && foto.size > 0) {
-      const buffer = Buffer.from(await foto.arrayBuffer());
-      const extension = foto.name.split(".").pop();
-      const fileName = `directorio-${Date.now()}.${extension}`;
-
-      // crear carpeta si no existe
-      await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
-      const filePath = path.join(UPLOAD_DIR, fileName);
-
-      // guardar imagen
-      await fs.writeFile(filePath, buffer);
-
-      fotoUrl = `/uploads/directorio/${fileName}`;
-    }
-
-    /* =========================
-       CREAR EN BD
-    ========================== */
-    const nuevoMiembro = await prisma.directorio.create({
-      data: {
-        nombre,
-        cargo,
-        correo,
-        telefono,
-        fotoUrl,
-        periodoInicio: parseLocalDate(periodoInicio),
-        periodoFin: periodoFin ? parseLocalDate(periodoFin) : null,
-        orden: nuevoOrden,
-      },
+    const nuevoMiembro = await DirectorioController.crearMiembro({
+      nombre,
+      cargo,
+      correo,
+      telefono,
+      periodoInicio: parseLocalDate(periodoInicio),
+      periodoFin: periodoFin ? parseLocalDate(periodoFin) : null,
+      fotoFile: foto,
     });
 
     return NextResponse.json(nuevoMiembro, { status: 201 });

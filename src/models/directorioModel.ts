@@ -4,8 +4,20 @@ import type { directorio } from "@prisma/client";
 export const DirectorioModel = {
   obtenerTodos: async (): Promise<directorio[]> => {
     return prisma.directorio.findMany({
-      orderBy: { nombre: "asc" },
+      orderBy: { orden: "asc" },
     });
+  },
+
+  obtenerPorId: async (id: number): Promise<directorio | null> => {
+    return prisma.directorio.findUnique({ where: { id } });
+  },
+
+  obtenerUltimoOrden: async (): Promise<number> => {
+    const ultimo = await prisma.directorio.findFirst({
+      orderBy: { orden: "desc" },
+      select: { orden: true },
+    });
+    return ultimo?.orden ?? 0;
   },
 
   crear: async (data: {
@@ -13,16 +25,12 @@ export const DirectorioModel = {
     cargo: string;
     correo: string;
     telefono: string;
-    fotoUrl?: string;
+    fotoUrl?: string | null;
     periodoInicio: Date;
-    periodoFin?: Date;
+    periodoFin?: Date | null;
+    orden: number;
   }): Promise<directorio> => {
-    return prisma.directorio.create({
-      data: {
-        ...data,
-        orden: 0, // ✅ valor por defecto técnico
-      },
-    });
+    return prisma.directorio.create({ data });
   },
 
   actualizar: async (

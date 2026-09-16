@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { DirectorioController } from "@/controllers/directorioController";
 
 /* =========================
    CACHE SIMPLE (DEV)
@@ -16,28 +16,7 @@ export async function GET() {
       return NextResponse.json(cache);
     }
 
-    const data = await prisma.directorio.findMany({
-      orderBy: { orden: "asc" },
-    });
-
-    // 🔥 NORMALIZAMOS PARA EL FRONT
-    const directorio = data.map((d) => ({
-      id: d.id,
-      nombre: d.nombre,
-      cargo: d.cargo,
-
-      // 🔑 claves que el front suele usar
-      email: d.correo,
-      telefono: d.telefono,
-
-      foto: d.fotoUrl,
-
-      fechaInicio: d.periodoInicio,
-      fechaFin: d.periodoFin,
-
-      createdAt: d.createdAt,
-      orden: d.orden,
-    }));
+    const directorio = await DirectorioController.obtenerDirectorioPublico();
 
     cache = directorio;
     lastFetch = now;
