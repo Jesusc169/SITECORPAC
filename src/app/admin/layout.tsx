@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import InactivityGuard from "@/components/InactivityGuard/InactivityGuard";
 
 export default async function AdminLayout({
   children,
@@ -14,5 +15,10 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <InactivityGuard />
+    </>
+  );
 }

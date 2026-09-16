@@ -4,6 +4,7 @@ import { DashboardController } from "@/controllers/dashboardController";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import InactivityGuard from "@/components/InactivityGuard/InactivityGuard";
 
 export default async function DashboardPage() {
   // 🔐 Verificación de sesión propia de la página: no depende del
@@ -74,6 +75,8 @@ export default async function DashboardPage() {
 
         </div>
       </main>
+
+      <InactivityGuard />
     </div>
   );
 }

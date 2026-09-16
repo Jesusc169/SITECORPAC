@@ -18,10 +18,13 @@ export class AuthController {
     const isValid = await bcrypt.compare(password, user?.password ?? HASH_SENUELO);
     if (!user || !isValid) throw new Error("Credenciales inválidas");
 
+    // 8h, igual que el maxAge de la cookie en /api/auth/login — antes el
+    // JWT duraba 24h pero la cookie se borraba a las 8h, una inconsistencia
+    // inofensiva (el navegador descarta la cookie primero) pero confusa.
     const token = jwt.sign(
       { id: user.id, email: user.email, rol: user.rol },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1d", algorithm: "HS256" }
+      { expiresIn: "8h", algorithm: "HS256" }
     );
 
     const { password: _password, ...userSinPassword } = user;
