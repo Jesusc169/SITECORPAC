@@ -1,10 +1,12 @@
 import path from "path";
 import { promises as fs } from "fs";
+import { optimizarImagen } from "@/lib/imagenes";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "directorio");
 
 export async function guardarFotoDirectorio(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const original = Buffer.from(await file.arrayBuffer());
+  const buffer = await optimizarImagen(original);
   const extension = file.name.split(".").pop();
   const fileName = `directorio-${Date.now()}.${extension}`;
 

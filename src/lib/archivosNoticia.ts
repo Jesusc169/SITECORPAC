@@ -1,5 +1,6 @@
 import path from "path";
 import { writeFile, mkdir, unlink } from "fs/promises";
+import { optimizarImagen } from "@/lib/imagenes";
 
 export const MAX_IMAGEN_BYTES = 10 * 1024 * 1024;
 export const MAX_DOCUMENTO_BYTES = 15 * 1024 * 1024;
@@ -26,7 +27,8 @@ export function esDocumentoPermitido(file: File): boolean {
 }
 
 export async function guardarImagenNoticia(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const original = Buffer.from(await file.arrayBuffer());
+  const buffer = await optimizarImagen(original);
   const nombreArchivo = `noticia-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
 
   const uploadDir = path.join(process.cwd(), "public", "uploads", "noticias");

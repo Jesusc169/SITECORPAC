@@ -1,8 +1,10 @@
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
+import { optimizarImagen } from "@/lib/imagenes";
 
 export async function guardarImagenSorteo(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const original = Buffer.from(await file.arrayBuffer());
+  const buffer = await optimizarImagen(original);
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
 
   const uploadDir = path.join(process.cwd(), "public", "uploads", "sorteos");
