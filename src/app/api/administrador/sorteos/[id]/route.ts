@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SorteoController } from "@/controllers/sorteoController";
+import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -109,6 +110,10 @@ export async function PUT(
 
     return NextResponse.json(actualizado);
   } catch (error) {
+    if (error instanceof ArchivoInvalidoError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error("ERROR PUT:", error);
     return NextResponse.json(
       { error: "Error actualizando sorteo" },

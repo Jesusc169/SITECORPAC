@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { DirectorioController } from "@/controllers/directorioController";
+import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -71,6 +72,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(nuevoMiembro, { status: 201 });
   } catch (error) {
+    if (error instanceof ArchivoInvalidoError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error("Error al crear miembro:", error);
     return NextResponse.json(
       { error: "Error al crear miembro" },

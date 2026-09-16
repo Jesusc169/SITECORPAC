@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SorteoController } from "@/controllers/sorteoController";
+import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -100,6 +101,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(nuevo);
   } catch (error) {
+    if (error instanceof ArchivoInvalidoError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error("ERROR CREAR:", error);
     return NextResponse.json(
       { error: "Error creando sorteo" },

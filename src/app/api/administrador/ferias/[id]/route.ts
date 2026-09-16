@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { FeriaController } from "@/controllers/feriaController";
+import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -58,6 +59,10 @@ export async function PUT(
 
     return NextResponse.json(feria);
   } catch (error) {
+    if (error instanceof ArchivoInvalidoError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error("PUT FERIA ERROR:", error);
     return NextResponse.json(
       { error: "Error al actualizar feria" },

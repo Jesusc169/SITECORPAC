@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { FeriaController, FeriaValidationError } from "@/controllers/feriaController";
+import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(feria, { status: 201 });
   } catch (error) {
-    if (error instanceof FeriaValidationError) {
+    if (error instanceof FeriaValidationError || error instanceof ArchivoInvalidoError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

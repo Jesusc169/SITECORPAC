@@ -24,7 +24,9 @@ export async function verificarSesion(): Promise<SesionUsuario | null> {
   if (!token) return null;
 
   try {
-    return jwt.verify(token, process.env.JWT_SECRET as string) as SesionUsuario;
+    return jwt.verify(token, process.env.JWT_SECRET as string, {
+      algorithms: ["HS256"],
+    }) as SesionUsuario;
   } catch {
     return null;
   }
