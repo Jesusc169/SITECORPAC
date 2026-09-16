@@ -118,54 +118,6 @@ model empresa {
   rubro                String?                @db.VarChar(100)
   estado               Boolean?               @default(true)
   evento_feria_empresa evento_feria_empresa[]
-  feria_empresa        feria_empresa[]
-}
-
-model feria {
-  id              Int               @id @default(autoincrement())
-  titulo          String            @db.VarChar(150)
-  descripcion     String            @db.Text
-  mes             String            @db.VarChar(20)
-  anio            Int
-  imagen_portada  String?           @db.VarChar(255)
-  estado          Boolean?          @default(true)
-  created_at      DateTime?         @default(now()) @db.DateTime(0)
-  feria_empresa   feria_empresa[]
-  feria_fecha     feria_fecha[]
-  feria_historial feria_historial[]
-  ubicacion       ubicacion[]
-}
-
-model feria_empresa {
-  id         Int     @id @default(autoincrement())
-  feria_id   Int
-  empresa_id Int
-  feria      feria   @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_empresa_ibfk_1")
-  empresa    empresa @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_empresa_ibfk_2")
-
-  @@unique([feria_id, empresa_id], map: "feria_id")
-  @@index([empresa_id], map: "empresa_id")
-}
-
-model feria_fecha {
-  id          Int      @id @default(autoincrement())
-  feria_id    Int
-  fecha       DateTime @db.Date
-  hora_inicio DateTime @db.Time(0)
-  hora_fin    DateTime @db.Time(0)
-  feria       feria    @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "feria_fecha_ibfk_1")
-
-  @@index([feria_id], map: "feria_id")
-}
-
-model ubicacion {
-  id          Int     @id @default(autoincrement())
-  feria_id    Int
-  descripcion String  @db.VarChar(200)
-  zona        String? @db.VarChar(100)
-  feria       feria   @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ubicacion_ibfk_1")
-
-  @@index([feria_id], map: "feria_id")
 }
 
 model evento_feria {
@@ -289,18 +241,6 @@ model ley_relaciones_colectivas {
   imagen      String?   @db.VarChar(255)
   estado      Int?      @default(1) @db.TinyInt
   created_at  DateTime? @default(now()) @db.Timestamp(0)
-}
-
-model feria_historial {
-  id       Int      @id @default(autoincrement())
-  feria_id Int
-  accion   String   @db.VarChar(255)
-  usuario  String   @db.VarChar(100)
-  detalle  String?  @db.Text
-  fecha    DateTime @default(now()) @db.DateTime(0)
-  feria    feria    @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_feria_historial_feria")
-
-  @@index([feria_id], map: "idx_feria_historial_feria")
 }
 
 enum sorteo_estado {
