@@ -1,28 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { NoticiasController, NoticiaValidationError } from "@/controllers/noticiasController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
 export const runtime = "nodejs";
-
-const TIPOS_DOCUMENTO_PERMITIDOS = new Set([
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "image/jpeg",
-  "image/png",
-]);
-const EXTENSIONES_DOCUMENTO_PERMITIDAS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
-
-function esDocumentoPermitido(file: File) {
-  const nombre = file.name.toLowerCase();
-  const extensionValida = EXTENSIONES_DOCUMENTO_PERMITIDAS.some((ext) =>
-    nombre.endsWith(ext)
-  );
-  return TIPOS_DOCUMENTO_PERMITIDOS.has(file.type) || extensionValida;
-}
 
 /* =====================================
    GET → Listar noticias
@@ -34,19 +15,10 @@ export async function GET() {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
-    const noticias = await prisma.noticia.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        noticia_pdf: { orderBy: { orden: "asc" } },
-      },
-    });
-
+    const noticias = await NoticiasController.obtenerNoticiasAdmin();
     return NextResponse.json(noticias);
   } catch (error) {
     console.error("ERROR GET NOTICIAS:", error);
-
     return NextResponse.json(
       { message: "Error al obtener noticias" },
       { status: 500 }
@@ -66,151 +38,22 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
 
-    const titulo = formData.get("titulo")?.toString().trim() || "";
-    const descripcion = formData.get("descripcion")?.toString().trim() || "";
-    const contenido = formData.get("contenido")?.toString() || null;
-    const autor = formData.get("autor")?.toString().trim() || "SITECORPAC";
-    const imagenFile = formData.get("imagen") as File | null;
-    const pdfFiles = formData.getAll("pdfs") as File[];
-
-    // Validación mínima (sin romper tu lógica)
-    if (!titulo) {
-      return NextResponse.json(
-        { message: "El título es obligatorio" },
-        { status: 400 }
-      );
-    }
-
-    if (pdfFiles.length > 5) {
-      return NextResponse.json(
-        { message: "Máximo 5 documentos por noticia" },
-        { status: 400 }
-      );
-    }
-
-    let imagenPath: string | null = null;
-
-    /* =============================
-       Guardar imagen si existe
-    ============================== */
-    if (imagenFile && imagenFile.size > 0) {
-      // Validación tipo
-      if (!imagenFile.type.startsWith("image/")) {
-        return NextResponse.json(
-          { message: "Solo se permiten imágenes" },
-          { status: 400 }
-        );
-      }
-
-      // Validación tamaño (10MB)
-      if (imagenFile.size > 10 * 1024 * 1024) {
-        return NextResponse.json(
-          { message: "La imagen debe ser menor a 10MB" },
-          { status: 400 }
-        );
-      }
-
-      const bytes = await imagenFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const nombreArchivo = `noticia-${Date.now()}-${imagenFile.name.replace(
-        /\s+/g,
-        "_"
-      )}`;
-
-      const uploadDir = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "noticias"
-      );
-
-      await mkdir(uploadDir, { recursive: true });
-
-      const filePath = path.join(uploadDir, nombreArchivo);
-      await writeFile(filePath, buffer);
-
-      imagenPath = `/uploads/noticias/${nombreArchivo}`;
-    }
-
-    /* =============================
-       Guardar PDFs si existen (hasta 5)
-    ============================== */
-    const pdfsData: { url: string; nombre: string; orden: number }[] = [];
-
-    for (let i = 0; i < pdfFiles.length; i++) {
-      const pdfFile = pdfFiles[i];
-      if (!pdfFile || pdfFile.size === 0) continue;
-
-      if (!esDocumentoPermitido(pdfFile)) {
-        return NextResponse.json(
-          {
-            message: `"${pdfFile.name}" no es un tipo de archivo permitido (PDF, Word o imagen JPG/PNG)`,
-          },
-          { status: 400 }
-        );
-      }
-
-      if (pdfFile.size > 15 * 1024 * 1024) {
-        return NextResponse.json(
-          { message: `"${pdfFile.name}" debe ser menor a 15MB` },
-          { status: 400 }
-        );
-      }
-
-      const bytes = await pdfFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const nombreArchivo = `noticia-${Date.now()}-${i}-${pdfFile.name.replace(
-        /\s+/g,
-        "_"
-      )}`;
-
-      const uploadDir = path.join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "noticias",
-        "pdf"
-      );
-
-      await mkdir(uploadDir, { recursive: true });
-
-      const filePath = path.join(uploadDir, nombreArchivo);
-      await writeFile(filePath, buffer);
-
-      pdfsData.push({
-        url: `/uploads/noticias/pdf/${nombreArchivo}`,
-        nombre: pdfFile.name,
-        orden: i + 1,
-      });
-    }
-
-    const now = new Date();
-
-    const nuevaNoticia = await prisma.noticia.create({
-      data: {
-        titulo,
-        descripcion,
-        contenido,
-        autor,
-        imagen: imagenPath,
-        fecha: now,
-        updatedAt: now,
-        noticia_pdf: {
-          create: pdfsData,
-        },
-      },
-      include: {
-        noticia_pdf: { orderBy: { orden: "asc" } },
-      },
+    const nuevaNoticia = await NoticiasController.crearNoticiaCompleta({
+      titulo: formData.get("titulo")?.toString().trim() || "",
+      descripcion: formData.get("descripcion")?.toString().trim() || "",
+      contenido: formData.get("contenido")?.toString() || null,
+      autor: formData.get("autor")?.toString().trim() || "SITECORPAC",
+      imagenFile: formData.get("imagen") as File | null,
+      pdfFiles: formData.getAll("pdfs") as File[],
     });
 
     return NextResponse.json(nuevaNoticia, { status: 201 });
-
   } catch (error) {
-    console.error("ERROR CREANDO NOTICIA:", error);
+    if (error instanceof NoticiaValidationError) {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
 
+    console.error("ERROR CREANDO NOTICIA:", error);
     return NextResponse.json(
       { message: "Error interno del servidor" },
       { status: 500 }
