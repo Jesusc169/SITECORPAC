@@ -70,6 +70,7 @@ public/documentos/
 public/images/sorteos/
 public/images/noticias/
 public/images/ferias/
+public/images/uploads/
 
 # opcional: cualquier imagen generada en prod
 public/images/temp/
