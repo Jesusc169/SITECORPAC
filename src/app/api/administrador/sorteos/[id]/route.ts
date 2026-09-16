@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { SorteoController } from "@/controllers/sorteoController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -27,10 +25,7 @@ export async function GET(
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const sorteo = await prisma.sorteo.findUnique({
-      where: { id: sorteoId },
-      include: { sorteo_producto: true },
-    });
+    const sorteo = await SorteoController.obtenerSorteoPorId(sorteoId);
 
     if (!sorteo) {
       return NextResponse.json(
@@ -78,12 +73,9 @@ export async function PUT(
 
     let anio = Number(formData.get("anio"));
     const estado =
-      formData.get("estado")?.toString() === "INACTIVO"
-        ? "INACTIVO"
-        : "ACTIVO";
+      formData.get("estado")?.toString() === "INACTIVO" ? "INACTIVO" : "ACTIVO";
 
     const premiosRaw = formData.get("premios")?.toString() || "[]";
-
     let premios: any[] = [];
     try {
       premios = JSON.parse(premiosRaw);
@@ -102,47 +94,17 @@ export async function PUT(
       anio = new Date(fecha_hora).getFullYear();
     }
 
-    let imagenPath: string | undefined;
-    const file = formData.get("imagen") as File | null;
+    const imagenFile = formData.get("imagen") as File | null;
 
-    if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-      const uploadDir = path.join(
-        process.cwd(),
-        "public/uploads/sorteos"
-      );
-
-      await mkdir(uploadDir, { recursive: true });
-
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-
-      imagenPath = `/uploads/sorteos/${fileName}`;
-    }
-
-    const actualizado = await prisma.sorteo.update({
-      where: { id: sorteoId },
-      data: {
-        nombre,
-        descripcion,
-        ...(imagenPath && { imagen: imagenPath }),
-        lugar,
-        fecha_hora: new Date(fecha_hora),
-        anio,
-        estado,
-        sorteo_producto: {
-          deleteMany: {},
-          create: premios.map((p: any) => ({
-            nombre: p.nombre || "",
-            descripcion: p.descripcion || "",
-            cantidad: Number(p.cantidad || 1),
-          })),
-        },
-      },
-      include: { sorteo_producto: true },
+    const actualizado = await SorteoController.actualizarSorteo(sorteoId, {
+      nombre,
+      descripcion,
+      lugar,
+      anio,
+      estado,
+      fecha_hora: new Date(fecha_hora),
+      premios,
+      imagenFile,
     });
 
     return NextResponse.json(actualizado);
@@ -175,9 +137,7 @@ export async function DELETE(
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    await prisma.sorteo.delete({
-      where: { id: sorteoId },
-    });
+    await SorteoController.eliminarSorteo(sorteoId);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

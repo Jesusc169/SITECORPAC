@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { SorteoController } from "@/controllers/sorteoController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -20,38 +20,14 @@ export async function POST(
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
-    const original = await prisma.sorteo.findUnique({
-      where: { id: sorteoId },
-      include: { sorteo_producto: true },
-    });
+    const nuevo = await SorteoController.duplicarSorteo(sorteoId);
 
-    if (!original) {
+    if (!nuevo) {
       return NextResponse.json(
         { error: "Sorteo no encontrado" },
         { status: 404 }
       );
     }
-
-    const nuevo = await prisma.sorteo.create({
-      data: {
-        nombre: original.nombre + " (Copia)",
-        descripcion: original.descripcion,
-        imagen: original.imagen,
-        lugar: original.lugar,
-        fecha_hora: original.fecha_hora,
-        anio: original.anio,
-        estado: "ACTIVO",
-
-        sorteo_producto: {
-          create: original.sorteo_producto.map((p) => ({
-            nombre: p.nombre,
-            descripcion: p.descripcion,
-            cantidad: p.cantidad,
-          })),
-        },
-      },
-      include: { sorteo_producto: true },
-    });
 
     return NextResponse.json(nuevo);
   } catch (error) {
