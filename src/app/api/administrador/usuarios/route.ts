@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { UsuarioController, UsuarioValidationError } from "@/controllers/usuarioController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 
@@ -17,18 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const usuarios = await prisma.user.findMany({
-      orderBy: { id: "asc" },
-      select: {
-        id: true,
-        nombre: true,
-        email: true,
-        rol: true,
-        permisos: true,
-        createdAt: true,
-      },
-    });
-
+    const usuarios = await UsuarioController.obtenerUsuarios();
     return NextResponse.json(usuarios);
   } catch (error) {
     console.error("ERROR GET USUARIOS:", error);
@@ -50,56 +38,14 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const nombre = (body.nombre || "").trim();
-    const email = (body.email || "").trim().toLowerCase();
-    const password = body.password || "";
-    const rol = body.rol === "administrador" ? "administrador" : "secretaria";
-    const permisos: string[] = Array.isArray(body.permisos) ? body.permisos : [];
-
-    if (!nombre || !email || !password) {
-      return NextResponse.json(
-        { error: "Nombre, correo y contraseña son obligatorios" },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: "La contraseña debe tener al menos 6 caracteres" },
-        { status: 400 }
-      );
-    }
-
-    const existente = await prisma.user.findUnique({ where: { email } });
-    if (existente) {
-      return NextResponse.json(
-        { error: "Ya existe un usuario con ese correo" },
-        { status: 400 }
-      );
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const nuevoUsuario = await prisma.user.create({
-      data: {
-        nombre,
-        email,
-        password: hashedPassword,
-        rol,
-        permisos,
-      },
-      select: {
-        id: true,
-        nombre: true,
-        email: true,
-        rol: true,
-        permisos: true,
-        createdAt: true,
-      },
-    });
+    const nuevoUsuario = await UsuarioController.crearUsuario(body);
 
     return NextResponse.json(nuevoUsuario, { status: 201 });
   } catch (error) {
+    if (error instanceof UsuarioValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error("ERROR CREAR USUARIO:", error);
     return NextResponse.json(
       { error: "Error al crear usuario" },
