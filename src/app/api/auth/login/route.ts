@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   // ===============================
   // Bloqueo por intentos fallidos
   // ===============================
-  const bloqueadoHasta = estaBloqueado(ip);
+  const bloqueadoHasta = await estaBloqueado(ip);
   if (bloqueadoHasta) {
     const minutos = Math.max(1, Math.ceil((bloqueadoHasta - Date.now()) / 60000));
     return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       password: body.password,
     });
 
-    registrarExito(ip);
+    await registrarExito(ip);
 
     // ===============================
     // RESPUESTA + COOKIE httpOnly
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (err: any) {
-    registrarFallo(ip);
+    await registrarFallo(ip);
     return NextResponse.json(
       { error: err.message || "Credenciales inválidas" },
       { status: 401 }

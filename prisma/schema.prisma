@@ -307,3 +307,15 @@ enum sorteo_estado {
   ACTIVO
   INACTIVO
 }
+
+// Contador de intentos fallidos de login, por IP. Vive en la base de datos
+// (no en memoria del proceso) porque PM2 corre la app en modo cluster: cada
+// worker tiene su propia memoria, así que un contador en memoria daría un
+// límite distinto según qué worker atienda cada petición.
+model login_intento {
+  id             Int       @id @default(autoincrement())
+  ip             String    @unique @db.VarChar(64)
+  fallos         Int       @default(0)
+  primerFalloEn  DateTime
+  bloqueadoHasta DateTime?
+}
