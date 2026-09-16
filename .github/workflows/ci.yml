@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificaciones:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar tipos (tsc)
+        run: npx tsc --noEmit
+
+      - name: Pruebas automatizadas
+        run: npm run test
+
+      - name: Escaneo de dependencias (npm audit)
+        # No bloquea el pipeline: hoy hay un hallazgo conocido y aceptado
+        # (deepmerge-ts, via el CLI de Prisma, solo se usa en build/deploy,
+        # nunca en el sitio en produccion; sin fix estable disponible aun).
+        # El resultado siempre queda visible en el log de esta ejecucion.
+        run: npm audit --audit-level=high
+        continue-on-error: true
