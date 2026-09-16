@@ -1,3 +1,4 @@
+import { unstable_cache, revalidateTag } from "next/cache";
 import { SorteoModel } from "@/models/sorteoModel";
 import { guardarImagenSorteo } from "@/lib/archivosSorteo";
 
@@ -33,10 +34,18 @@ function fechaValida(fecha: Date): Date {
   return isNaN(fecha.getTime()) ? new Date() : fecha;
 }
 
+// Lectura pública cacheada 60s, con tag "sorteos" para invalidarla al
+// instante desde crear/editar/duplicar/eliminar (revalidateTag más abajo).
+const obtenerSorteosPublicosCacheados = unstable_cache(
+  async (anio: number | null) => SorteoModel.obtenerActivos(anio),
+  ["sorteos-publicos"],
+  { revalidate: 60, tags: ["sorteos"] }
+);
+
 export const SorteoController = {
   obtenerSorteosPublicos: (anioParam: string | null) => {
     const anio = anioParam && /^\d{4}$/.test(anioParam) ? Number(anioParam) : null;
-    return SorteoModel.obtenerActivos(anio);
+    return obtenerSorteosPublicosCacheados(anio);
   },
 
   obtenerSorteosAdmin: () => SorteoModel.obtenerTodos(),
@@ -49,7 +58,7 @@ export const SorteoController = {
       imagen = await guardarImagenSorteo(input.imagenFile);
     }
 
-    return SorteoModel.crear({
+    const sorteo = await SorteoModel.crear({
       nombre: input.nombre,
       descripcion: input.descripcion,
       lugar: input.lugar,
@@ -59,6 +68,9 @@ export const SorteoController = {
       imagen,
       premios: normalizarPremios(input.premios),
     });
+
+    revalidateTag("sorteos", "max");
+    return sorteo;
   },
 
   actualizarSorteo: async (
@@ -79,7 +91,7 @@ export const SorteoController = {
       imagen = await guardarImagenSorteo(input.imagenFile);
     }
 
-    return SorteoModel.actualizar(id, {
+    const sorteo = await SorteoModel.actualizar(id, {
       nombre: input.nombre,
       descripcion: input.descripcion,
       lugar: input.lugar,
@@ -89,13 +101,16 @@ export const SorteoController = {
       premios: normalizarPremios(input.premios),
       ...(imagen && { imagen }),
     });
+
+    revalidateTag("sorteos", "max");
+    return sorteo;
   },
 
   duplicarSorteo: async (id: number) => {
     const original = await SorteoModel.obtenerPorId(id);
     if (!original) return null;
 
-    return SorteoModel.crear({
+    const nuevo = await SorteoModel.crear({
       nombre: original.nombre + " (Copia)",
       descripcion: original.descripcion,
       lugar: original.lugar,
@@ -109,7 +124,13 @@ export const SorteoController = {
         cantidad: p.cantidad ?? 1,
       })),
     });
+
+    revalidateTag("sorteos", "max");
+    return nuevo;
   },
 
-  eliminarSorteo: (id: number) => SorteoModel.eliminar(id),
+  eliminarSorteo: async (id: number) => {
+    await SorteoModel.eliminar(id);
+    revalidateTag("sorteos", "max");
+  },
 };

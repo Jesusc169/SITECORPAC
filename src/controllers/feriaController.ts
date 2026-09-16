@@ -1,3 +1,4 @@
+import { unstable_cache, revalidateTag } from "next/cache";
 import { FeriaModel } from "@/models/feriaModel";
 import { guardarImagenFeria } from "@/lib/archivosFeria";
 
@@ -21,6 +22,15 @@ function normalizarFechas(fechas: FechaInput[]) {
   }));
 }
 
+// Lectura pública cacheada 60s, con tag "ferias" para invalidarla al
+// instante desde crear/editar/duplicar/eliminar (revalidateTag más abajo).
+const obtenerFeriasPublicasCacheadas = unstable_cache(
+  async (anio: number | null, skip: number, take: number) =>
+    FeriaModel.obtenerPublicas({ anio, skip, take }),
+  ["ferias-publicas"],
+  { revalidate: 60, tags: ["ferias"] }
+);
+
 export const FeriaController = {
   obtenerFeriasAdmin: () => FeriaModel.obtenerTodas(),
 
@@ -34,7 +44,7 @@ export const FeriaController = {
       anio = Number(opciones.anioParam);
     }
 
-    return FeriaModel.obtenerPublicas({ anio, skip, take: limit });
+    return obtenerFeriasPublicasCacheadas(anio, skip, limit);
   },
 
   obtenerFeriaPorId: (id: number) => FeriaModel.obtenerPorId(id),
@@ -59,7 +69,7 @@ export const FeriaController = {
       imagen_portada = await guardarImagenFeria(input.imagenFile);
     }
 
-    return FeriaModel.crear({
+    const feria = await FeriaModel.crear({
       titulo,
       descripcion,
       anio: input.anio,
@@ -67,6 +77,9 @@ export const FeriaController = {
       fechas: normalizarFechas(input.fechas),
       empresas: input.empresas,
     });
+
+    revalidateTag("ferias", "max");
+    return feria;
   },
 
   actualizarFeria: async (
@@ -93,7 +106,9 @@ export const FeriaController = {
     await FeriaModel.reemplazarEmpresas(id, input.empresas);
     await FeriaModel.reemplazarFechas(id, normalizarFechas(input.fechas));
 
-    return FeriaModel.obtenerPorId(id);
+    const feria = await FeriaModel.obtenerPorId(id);
+    revalidateTag("ferias", "max");
+    return feria;
   },
 
   duplicarFeria: async (id: number) => {
@@ -115,11 +130,13 @@ export const FeriaController = {
       empresas: original.evento_feria_empresa.map((e) => e.empresa_id),
     });
 
+    revalidateTag("ferias", "max");
     return nuevaFeria;
   },
 
   eliminarFeria: async (id: number) => {
     await FeriaModel.eliminarRelaciones(id);
     await FeriaModel.eliminar(id);
+    revalidateTag("ferias", "max");
   },
 };

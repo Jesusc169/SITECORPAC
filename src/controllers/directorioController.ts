@@ -1,3 +1,4 @@
+import { unstable_cache, revalidateTag } from "next/cache";
 import { DirectorioModel } from "@/models/directorioModel";
 import { guardarFotoDirectorio, borrarFotoDirectorio } from "@/lib/archivosDirectorio";
 import type { directorio } from "@prisma/client";
@@ -22,11 +23,13 @@ interface DatosMiembroParcial {
   fotoFile?: File | null;
 }
 
-export const DirectorioController = {
-  obtenerDirectorio: (): Promise<directorio[]> => DirectorioModel.obtenerTodos(),
-
-  // Forma normalizada que consume el sitio público (nombres de campo distintos a la BD)
-  obtenerDirectorioPublico: async () => {
+// Lectura pública cacheada 60s, con tag "directorio" para invalidarla al
+// instante desde crear/editar/eliminar (revalidateTag más abajo). Antes
+// tenía su propia caché manual en la ruta (una variable en memoria), pero
+// eso da un resultado distinto por cada proceso de PM2 en modo cluster;
+// esto vive en la caché de datos de Next, compartida por igual.
+const obtenerDirectorioPublicoCacheado = unstable_cache(
+  async () => {
     const data = await DirectorioModel.obtenerTodos();
 
     return data.map((d) => ({
@@ -42,6 +45,15 @@ export const DirectorioController = {
       orden: d.orden,
     }));
   },
+  ["directorio-publico"],
+  { revalidate: 60, tags: ["directorio"] }
+);
+
+export const DirectorioController = {
+  obtenerDirectorio: (): Promise<directorio[]> => DirectorioModel.obtenerTodos(),
+
+  // Forma normalizada que consume el sitio público (nombres de campo distintos a la BD)
+  obtenerDirectorioPublico: () => obtenerDirectorioPublicoCacheado(),
 
   crearMiembro: async (datos: DatosMiembro): Promise<directorio> => {
     let fotoUrl: string | null = null;
@@ -52,7 +64,7 @@ export const DirectorioController = {
 
     const nuevoOrden = (await DirectorioModel.obtenerUltimoOrden()) + 1;
 
-    return DirectorioModel.crear({
+    const miembro = await DirectorioModel.crear({
       nombre: datos.nombre,
       cargo: datos.cargo,
       correo: datos.correo,
@@ -62,6 +74,9 @@ export const DirectorioController = {
       periodoFin: datos.periodoFin ?? null,
       orden: nuevoOrden,
     });
+
+    revalidateTag("directorio", "max");
+    return miembro;
   },
 
   actualizarMiembro: async (
@@ -87,7 +102,9 @@ export const DirectorioController = {
     if (datos.periodoFin !== undefined) data.periodoFin = datos.periodoFin;
     if (fotoUrl !== miembro.fotoUrl) data.fotoUrl = fotoUrl;
 
-    return DirectorioModel.actualizar(id, data);
+    const actualizado = await DirectorioModel.actualizar(id, data);
+    revalidateTag("directorio", "max");
+    return actualizado;
   },
 
   eliminarMiembro: async (id: number): Promise<directorio | null> => {
@@ -95,6 +112,8 @@ export const DirectorioController = {
     if (!miembro) return null;
 
     await borrarFotoDirectorio(miembro.fotoUrl);
-    return DirectorioModel.eliminar(id);
+    const eliminado = await DirectorioModel.eliminar(id);
+    revalidateTag("directorio", "max");
+    return eliminado;
   },
 };

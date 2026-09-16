@@ -10,8 +10,10 @@ import Footer from "@/components/Footer/Footer";
 
 import { NoticiasController } from "@/controllers/noticiasController";
 
-/* 🔥 IMPORTANTE: evita que Next la deje estática */
-export const dynamic = "force-dynamic";
+// Antes forzaba "force-dynamic" para no dejar noticias viejas en caché.
+// Ahora NoticiasController cachea 60s y se invalida al instante al
+// publicar/editar/eliminar (revalidateTag("noticias")), así que ya no hace
+// falta forzar esta página completa a renderizarse sin caché en cada visita.
 
 /* ✅ Tipo LOCAL */
 interface Noticia {

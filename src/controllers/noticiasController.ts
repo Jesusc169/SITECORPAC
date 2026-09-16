@@ -1,5 +1,6 @@
 // src/controllers/noticiasController.ts
 import prisma from "@/lib/prisma";
+import { unstable_cache, revalidateTag } from "next/cache";
 import { NoticiaModel } from "@/models/noticiaModel";
 import {
   esImagenValida,
@@ -33,33 +34,49 @@ interface DatosNoticiaActualizacion {
   pdfsEliminar: number[];
 }
 
-export class NoticiasController {
-  // 🟢 Obtener todas las noticias (lectura pública, sin cambios)
-  static async obtenerNoticias() {
-    return await prisma.noticia.findMany({
-      orderBy: { fecha: "desc" },
-    });
-  }
+// Lecturas públicas: cacheadas 60s y con el tag "noticias" para poder
+// invalidarlas al instante desde crear/editar/eliminar (revalidateTag más
+// abajo), en vez de forzar cada página a renderizar sin caché en cada visita.
+const obtenerNoticiasCacheadas = unstable_cache(
+  async () => prisma.noticia.findMany({ orderBy: { fecha: "desc" } }),
+  ["noticias-todas"],
+  { revalidate: 60, tags: ["noticias"] }
+);
 
-  // 🔵 Obtener últimas noticias (lectura pública, sin cambios)
-  static async obtenerUltimasNoticias(limit = 3) {
-    return await prisma.noticia.findMany({
-      orderBy: { fecha: "desc" },
-      take: limit,
-    });
-  }
+const obtenerUltimasNoticiasCacheadas = unstable_cache(
+  async (limit: number) =>
+    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, take: limit }),
+  ["noticias-ultimas"],
+  { revalidate: 60, tags: ["noticias"] }
+);
 
-  // 🟣 Obtener noticia por ID (lectura pública, sin cambios)
-  static async obtenerNoticiaPorId(id: number) {
-    return await prisma.noticia.findUnique({
+const obtenerNoticiaPorIdCacheada = unstable_cache(
+  async (id: number) =>
+    prisma.noticia.findUnique({
       where: { id },
-      include: {
-        noticia_pdf: { orderBy: { orden: "asc" } },
-      },
-    });
+      include: { noticia_pdf: { orderBy: { orden: "asc" } } },
+    }),
+  ["noticia-detalle"],
+  { revalidate: 60, tags: ["noticias"] }
+);
+
+export class NoticiasController {
+  // 🟢 Obtener todas las noticias (lectura pública, cacheada)
+  static async obtenerNoticias() {
+    return obtenerNoticiasCacheadas();
   }
 
-  // 🟤 Listar noticias para el panel admin (incluye documentos)
+  // 🔵 Obtener últimas noticias (lectura pública, cacheada)
+  static async obtenerUltimasNoticias(limit = 3) {
+    return obtenerUltimasNoticiasCacheadas(limit);
+  }
+
+  // 🟣 Obtener noticia por ID (lectura pública, cacheada)
+  static async obtenerNoticiaPorId(id: number) {
+    return obtenerNoticiaPorIdCacheada(id);
+  }
+
+  // 🟤 Listar noticias para el panel admin (incluye documentos, sin caché)
   static async obtenerNoticiasAdmin() {
     return NoticiaModel.obtenerTodas();
   }
@@ -105,7 +122,7 @@ export class NoticiasController {
     }
 
     const now = new Date();
-    return NoticiaModel.crear({
+    const noticia = await NoticiaModel.crear({
       titulo,
       descripcion: input.descripcion,
       contenido: input.contenido,
@@ -115,6 +132,9 @@ export class NoticiasController {
       updatedAt: now,
       pdfs: pdfsData,
     });
+
+    revalidateTag("noticias", "max");
+    return noticia;
   }
 
   // 🟠 Actualizar noticia (imagen, documentos y datos)
@@ -183,7 +203,7 @@ export class NoticiasController {
       ordenSiguiente++;
     }
 
-    return NoticiaModel.actualizar(id, {
+    const actualizada = await NoticiaModel.actualizar(id, {
       titulo: input.titulo,
       descripcion: input.descripcion,
       contenido: input.contenido || null,
@@ -191,6 +211,9 @@ export class NoticiasController {
       imagen: imagenPath,
       updatedAt: new Date(),
     });
+
+    revalidateTag("noticias", "max");
+    return actualizada;
   }
 
   // 🔴 Eliminar noticia y sus archivos
@@ -204,6 +227,7 @@ export class NoticiasController {
     }
 
     await NoticiaModel.eliminar(id);
+    revalidateTag("noticias", "max");
     return true;
   }
 }

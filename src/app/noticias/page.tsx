@@ -1,6 +1,8 @@
 // src/app/noticias/page.tsx
 
-export const dynamic = "force-dynamic";
+// NoticiasController cachea 60s y se invalida al instante al
+// publicar/editar/eliminar (revalidateTag("noticias")), así que ya no hace
+// falta forzar esta página a renderizarse sin caché en cada visita.
 
 import type { Metadata } from "next";
 import { NoticiasController } from "@/controllers/noticiasController";
