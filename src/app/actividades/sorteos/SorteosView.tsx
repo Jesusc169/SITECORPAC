@@ -1,10 +1,17 @@
 import styles from "@/app/actividades/sorteos/sorteos.module.css";
+import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
 
 interface SorteoProducto {
   id?: number;
   nombre: string;
   descripcion?: string | null;
   cantidad?: number | null;
+}
+
+interface SorteoImagen {
+  id: number;
+  url: string;
+  principal: boolean;
 }
 
 interface Sorteo {
@@ -19,6 +26,7 @@ interface Sorteo {
   // 🔥 soporta ambas formas (backend viejo o nuevo)
   sorteo_producto?: SorteoProducto[];
   premios?: SorteoProducto[];
+  sorteo_imagen?: SorteoImagen[];
 }
 
 interface Props {
@@ -103,17 +111,24 @@ export default function SorteosView({
           return (
             <article key={`sorteo-${sorteo.id}`} className={styles.card}>
               {/* Imagen */}
-              {imagenSrc ? (
-                <img
-                  src={imagenSrc}
-                  alt={sorteo.nombre}
-                  loading="lazy"
+              <div className={styles.imgWrap}>
+                {imagenSrc ? (
+                  <img
+                    src={imagenSrc}
+                    alt={sorteo.nombre}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className={styles.imagePlaceholder}>
+                    Imagen no disponible
+                  </div>
+                )}
+                <GaleriaBoton
+                  imagenes={(sorteo.sorteo_imagen ?? []).map((i) => i.url)}
+                  titulo={sorteo.nombre}
+                  className={styles.galeriaBoton}
                 />
-              ) : (
-                <div className={styles.imagePlaceholder}>
-                  Imagen no disponible
-                </div>
-              )}
+              </div>
 
               {/* Contenido */}
               <div className={styles.content}>

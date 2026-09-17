@@ -1,5 +1,10 @@
 import prisma from "@/lib/prisma";
 
+const CON_IMAGENES = {
+  sorteo_producto: true,
+  sorteo_imagen: { orderBy: { orden: "asc" as const } },
+};
+
 export const SorteoModel = {
   obtenerActivos: async (anio: number | null) => {
     return prisma.sorteo.findMany({
@@ -7,7 +12,7 @@ export const SorteoModel = {
         estado: "ACTIVO",
         ...(anio ? { anio } : {}),
       },
-      include: { sorteo_producto: true },
+      include: CON_IMAGENES,
       orderBy: { fecha_hora: "desc" },
     });
   },
@@ -15,14 +20,14 @@ export const SorteoModel = {
   obtenerTodos: async () => {
     return prisma.sorteo.findMany({
       orderBy: { fecha_hora: "desc" },
-      include: { sorteo_producto: true },
+      include: CON_IMAGENES,
     });
   },
 
   obtenerPorId: async (id: number) => {
     return prisma.sorteo.findUnique({
       where: { id },
-      include: { sorteo_producto: true },
+      include: CON_IMAGENES,
     });
   },
 
@@ -35,6 +40,7 @@ export const SorteoModel = {
     fecha_hora: Date;
     imagen: string | null;
     premios: { nombre: string; descripcion: string; cantidad: number }[];
+    imagenes?: { url: string; orden: number; principal: boolean }[];
   }) => {
     return prisma.sorteo.create({
       data: {
@@ -46,8 +52,9 @@ export const SorteoModel = {
         fecha_hora: data.fecha_hora,
         imagen: data.imagen,
         sorteo_producto: { create: data.premios },
+        sorteo_imagen: { create: data.imagenes ?? [] },
       },
-      include: { sorteo_producto: true },
+      include: CON_IMAGENES,
     });
   },
 
@@ -60,7 +67,7 @@ export const SorteoModel = {
       anio: number;
       estado: "ACTIVO" | "INACTIVO";
       fecha_hora: Date;
-      imagen?: string;
+      imagen?: string | null;
       premios: { nombre: string; descripcion: string; cantidad: number }[];
     }
   ) => {
@@ -74,7 +81,7 @@ export const SorteoModel = {
           create: premios,
         },
       },
-      include: { sorteo_producto: true },
+      include: CON_IMAGENES,
     });
   },
 
@@ -84,5 +91,26 @@ export const SorteoModel = {
 
   contarActivos: async () => {
     return prisma.sorteo.count({ where: { estado: "ACTIVO" } });
+  },
+
+  crearImagen: async (data: { sorteo_id: number; url: string; orden: number; principal: boolean }) => {
+    return prisma.sorteo_imagen.create({ data });
+  },
+
+  eliminarImagenes: async (ids: number[]) => {
+    if (ids.length === 0) return;
+    await prisma.sorteo_imagen.deleteMany({ where: { id: { in: ids } } });
+  },
+
+  reordenarImagen: async (id: number, orden: number) => {
+    await prisma.sorteo_imagen.update({ where: { id }, data: { orden } });
+  },
+
+  marcarImagenPrincipal: async (sorteo_id: number, id: number) => {
+    await prisma.sorteo_imagen.updateMany({
+      where: { sorteo_id },
+      data: { principal: false },
+    });
+    await prisma.sorteo_imagen.update({ where: { id }, data: { principal: true } });
   },
 };

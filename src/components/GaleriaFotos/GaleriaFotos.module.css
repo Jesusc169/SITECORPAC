@@ -1,0 +1,64 @@
+.seccion {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.titulo {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background-color: #e5e7eb;
+}
+
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.tile:hover img {
+  transform: scale(1.05);
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--sitecorpac-blue, #1d4ed8);
+  outline-offset: 2px;
+}
+
+/* Botón compacto para tarjetas (ferias / sorteos) */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton:hover {
+  background: rgba(0, 0, 0, 0.82);
+}

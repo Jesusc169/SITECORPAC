@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "@/app/actividades/ferias/ferias.module.css";
+import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
 
 // =========================
 // Tipos
@@ -24,6 +25,12 @@ export interface EventoFeriaFecha {
   zona?: string | null;
 }
 
+export interface EventoFeriaImagen {
+  id: number;
+  url: string;
+  principal: boolean;
+}
+
 export interface EventoFeria {
   id: number;
   titulo: string;
@@ -32,6 +39,7 @@ export interface EventoFeria {
   imagen_portada?: string | null;
   evento_feria_empresa: EventoFeriaEmpresa[];
   evento_feria_fecha: EventoFeriaFecha[];
+  evento_feria_imagen?: EventoFeriaImagen[];
 }
 
 export interface FeriasViewProps {
@@ -177,11 +185,18 @@ export default function FeriasView({
 
             {feriasAgrupadas[anio].map((feria) => (
               <section key={feria.id} className={styles.feria}>
-                <img
-                  src={feria.imagen_portada || "/images/ferias/default.jpg"}
-                  alt={feria.titulo}
-                  loading="lazy"
-                />
+                <div className={styles.feriaImgWrap}>
+                  <img
+                    src={feria.imagen_portada || "/images/ferias/default.jpg"}
+                    alt={feria.titulo}
+                    loading="lazy"
+                  />
+                  <GaleriaBoton
+                    imagenes={(feria.evento_feria_imagen ?? []).map((i) => i.url)}
+                    titulo={feria.titulo}
+                    className={styles.galeriaBoton}
+                  />
+                </div>
 
                 <div className={styles.feriaBody}>
                   <h3>{feria.titulo}</h3>

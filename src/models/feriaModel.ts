@@ -5,6 +5,7 @@ const CON_RELACIONES = {
   evento_feria_empresa: {
     include: { empresa: true },
   },
+  evento_feria_imagen: { orderBy: { orden: "asc" as const } },
 };
 
 export const FeriaModel = {
@@ -42,6 +43,7 @@ export const FeriaModel = {
     imagen_portada: string | null;
     fechas: { fecha: Date; hora_inicio: string; hora_fin: string; ubicacion: string; zona: string | null }[];
     empresas: number[];
+    imagenes?: { url: string; orden: number; principal: boolean }[];
   }) => {
     return prisma.evento_feria.create({
       data: {
@@ -51,6 +53,7 @@ export const FeriaModel = {
         imagen_portada: data.imagen_portada,
         evento_feria_fecha: { create: data.fechas },
         evento_feria_empresa: { create: data.empresas.map((empresa_id) => ({ empresa_id })) },
+        evento_feria_imagen: { create: data.imagenes ?? [] },
       },
       include: CON_RELACIONES,
     });
@@ -58,7 +61,7 @@ export const FeriaModel = {
 
   actualizar: async (
     id: number,
-    data: { titulo: string; descripcion: string; imagen_portada?: string }
+    data: { titulo: string; descripcion: string; imagen_portada?: string | null }
   ) => {
     return prisma.evento_feria.update({
       where: { id },
@@ -107,6 +110,27 @@ export const FeriaModel = {
   eliminarRelaciones: async (feriaId: number) => {
     await prisma.evento_feria_empresa.deleteMany({ where: { feria_id: feriaId } });
     await prisma.evento_feria_fecha.deleteMany({ where: { feria_id: feriaId } });
+  },
+
+  crearImagen: async (data: { feria_id: number; url: string; orden: number; principal: boolean }) => {
+    return prisma.evento_feria_imagen.create({ data });
+  },
+
+  eliminarImagenes: async (ids: number[]) => {
+    if (ids.length === 0) return;
+    await prisma.evento_feria_imagen.deleteMany({ where: { id: { in: ids } } });
+  },
+
+  reordenarImagen: async (id: number, orden: number) => {
+    await prisma.evento_feria_imagen.update({ where: { id }, data: { orden } });
+  },
+
+  marcarImagenPrincipal: async (feria_id: number, id: number) => {
+    await prisma.evento_feria_imagen.updateMany({
+      where: { feria_id },
+      data: { principal: false },
+    });
+    await prisma.evento_feria_imagen.update({ where: { id }, data: { principal: true } });
   },
 
   eliminar: async (id: number) => {

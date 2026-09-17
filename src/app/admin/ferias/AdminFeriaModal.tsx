@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./AdminFeriaModal.module.css";
-import { evaluarProporcion } from "@/lib/imagenValidacion";
+import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
+import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 
 /* =========================
    TIPOS
@@ -49,9 +50,7 @@ export default function AdminFeriaModal({
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
-  const [imagen, setImagen] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+  const selectorImagenes = useSelectorImagenes();
 
   const [empresas, setEmpresas] = useState<number[]>([]);
   const [empresaQuery, setEmpresaQuery] = useState("");
@@ -69,9 +68,7 @@ export default function AdminFeriaModal({
       setTitulo("");
       setDescripcion("");
       setAnio(new Date().getFullYear());
-      setImagen(null);
-      setPreview(null);
-      setAvisoImagen(null);
+      selectorImagenes.resetear([]);
       setEmpresas([]);
       setFechas([]);
       return;
@@ -80,9 +77,11 @@ export default function AdminFeriaModal({
     setTitulo(feriaData.titulo ?? "");
     setDescripcion(feriaData.descripcion ?? "");
     setAnio(feriaData.anio ?? new Date().getFullYear());
-    setImagen(null);
-    setPreview(feriaData.imagen_portada ?? null);
-    setAvisoImagen(null);
+    selectorImagenes.resetear(
+      Array.isArray(feriaData.evento_feria_imagen)
+        ? feriaData.evento_feria_imagen.map((img: any) => ({ id: img.id, url: img.url }))
+        : []
+    );
 
     setEmpresas(
       Array.isArray(feriaData.evento_feria_empresa)
@@ -173,8 +172,14 @@ export default function AdminFeriaModal({
     formData.append("descripcion", descripcion.trim());
     formData.append("anio", String(anio));
 
-    if (imagen) {
-      formData.append("imagen_portada", imagen);
+    if (feriaData) {
+      // Edición: puede combinar fotos existentes + nuevas + una eliminación.
+      selectorImagenes.aplicarAFormData(formData);
+    } else {
+      // Creación: todas las fotos son nuevas, la principal se manda por índice.
+      selectorImagenes.aplicarAFormData(formData, {
+        principalIndex: "imagenPrincipalIndex",
+      });
     }
 
     onSave({
@@ -213,41 +218,8 @@ export default function AdminFeriaModal({
             onChange={(e) => setAnio(Number(e.target.value))}
           />
 
-          <label>Imagen de portada</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setImagen(file);
-              if (!file) return;
-
-              const url = URL.createObjectURL(file);
-              setPreview(url);
-
-              const img = new Image();
-              img.onload = () => {
-                setAvisoImagen(evaluarProporcion(img.width, img.height));
-              };
-              img.src = url;
-            }}
-          />
-          <div className={styles.hint}>
-            💡 Usa una foto <strong>horizontal</strong> (apaisada), de al
-            menos 800x500px. Evita fotos verticales o cuadradas, porque se
-            recortarán arriba y abajo.
-          </div>
-
-          {preview && (
-            <div className={styles.previewBox}>
-              <div className={styles.previewFrame}>
-                <img src={preview} alt="Vista previa" />
-              </div>
-              {avisoImagen && (
-                <div className={styles.previewAviso}>{avisoImagen}</div>
-              )}
-            </div>
-          )}
+          <label>Fotos de la feria (hasta 5)</label>
+          <SelectorImagenes selector={selectorImagenes} />
 
           {/* EMPRESAS */}
           <label>Empresas participantes</label>

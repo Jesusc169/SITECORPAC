@@ -36,12 +36,14 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
+    const imagenPrincipalIndexRaw = formData.get("imagenPrincipalIndex");
 
     const feria = await FeriaController.crearFeria({
       titulo: formData.get("titulo")?.toString(),
       descripcion: formData.get("descripcion")?.toString(),
       anio: Number(formData.get("anio")),
-      imagenFile: formData.get("imagen_portada") as File | null,
+      imagenFiles: formData.getAll("imagenes") as File[],
+      imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       empresas: JSON.parse((formData.get("empresas") as string) || "[]"),
       fechas: JSON.parse((formData.get("fechas") as string) || "[]"),
     });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SorteoController } from "@/controllers/sorteoController";
+import { SorteoController, SorteoValidationError } from "@/controllers/sorteoController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -95,7 +95,16 @@ export async function PUT(
       anio = new Date(fecha_hora).getFullYear();
     }
 
-    const imagenFile = formData.get("imagen") as File | null;
+    const imagenesEliminarRaw = formData.get("imagenesEliminar")?.toString() || "[]";
+    let imagenesEliminar: number[] = [];
+    try {
+      imagenesEliminar = JSON.parse(imagenesEliminarRaw);
+    } catch {
+      imagenesEliminar = [];
+    }
+
+    const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
+    const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
 
     const actualizado = await SorteoController.actualizarSorteo(sorteoId, {
       nombre,
@@ -105,12 +114,21 @@ export async function PUT(
       estado,
       fecha_hora: new Date(fecha_hora),
       premios,
-      imagenFile,
+      imagenesNuevas: formData.getAll("imagenes") as File[],
+      imagenesEliminar,
+      imagenPrincipalId: imagenPrincipalIdRaw ? Number(imagenPrincipalIdRaw) : null,
+      imagenPrincipalNuevaIndex: imagenPrincipalNuevaIndexRaw
+        ? Number(imagenPrincipalNuevaIndexRaw)
+        : null,
     });
+
+    if (!actualizado) {
+      return NextResponse.json({ error: "Sorteo no encontrado" }, { status: 404 });
+    }
 
     return NextResponse.json(actualizado);
   } catch (error) {
-    if (error instanceof ArchivoInvalidoError) {
+    if (error instanceof ArchivoInvalidoError || error instanceof SorteoValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

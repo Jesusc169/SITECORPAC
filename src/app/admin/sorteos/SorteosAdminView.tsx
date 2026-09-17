@@ -23,6 +23,7 @@ export interface Sorteo {
   anio: number;
   estado?: "ACTIVO" | "INACTIVO";
   premios?: Premio[];
+  sorteo_imagen?: { id: number; url: string; principal: boolean }[];
 }
 
 interface SorteosAdminViewProps {

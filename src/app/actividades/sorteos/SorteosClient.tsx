@@ -21,6 +21,7 @@ interface Sorteo {
   anio: number;
   sorteo_producto?: SorteoProducto[];
   premios?: SorteoProducto[];
+  sorteo_imagen?: { id: number; url: string; principal: boolean }[];
 }
 
 export default function SorteosClient() {

@@ -32,16 +32,17 @@ model directorio {
 }
 
 model noticia {
-  id          Int           @id @default(autoincrement())
-  titulo      String
-  descripcion String        @db.Text
-  contenido   String?       @db.Text
-  imagen      String?
-  fecha       DateTime      @default(now())
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime
-  autor       String
-  noticia_pdf noticia_pdf[]
+  id             Int              @id @default(autoincrement())
+  titulo         String
+  descripcion    String           @db.Text
+  contenido      String?          @db.Text
+  imagen         String?
+  fecha          DateTime         @default(now())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  autor          String
+  noticia_pdf    noticia_pdf[]
+  noticia_imagen noticia_imagen[]
 }
 
 model noticia_pdf {
@@ -53,6 +54,21 @@ model noticia_pdf {
   noticia    noticia @relation(fields: [noticia_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_noticia_pdf")
 
   @@index([noticia_id], map: "fk_noticia_pdf")
+}
+
+// Galería de hasta 5 fotos por noticia. Una de ellas (principal = true) es la
+// que se usa en el carrusel/portada; el resto aparece en "ver noticia
+// completa". El campo legacy `noticia.imagen` se mantiene en espejo con la
+// URL de la foto principal para no romper nada que aún la lea directamente.
+model noticia_imagen {
+  id         Int     @id @default(autoincrement())
+  noticia_id Int
+  url        String  @db.VarChar(255)
+  orden      Int     @default(1)
+  principal  Boolean @default(false)
+  noticia    noticia @relation(fields: [noticia_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_noticia_imagen")
+
+  @@index([noticia_id], map: "fk_noticia_imagen")
 }
 
 model prestamo_faq {
@@ -130,11 +146,24 @@ model evento_feria {
   created_at           DateTime?              @default(now()) @db.DateTime(0)
   evento_feria_empresa evento_feria_empresa[]
   evento_feria_fecha   evento_feria_fecha[]
+  evento_feria_imagen  evento_feria_imagen[]
 
   @@index([anio, estado], map: "idx_evento_feria_anio_estado")
   @@index([created_at], map: "idx_evento_feria_created")
   @@index([id, estado], map: "idx_evento_feria_id_estado")
   @@index([estado, anio, created_at(sort: Desc)], map: "idx_evento_feria_listado")
+}
+
+// Galería de hasta 5 fotos por feria (misma idea que noticia_imagen).
+model evento_feria_imagen {
+  id           Int          @id @default(autoincrement())
+  feria_id     Int
+  url          String       @db.VarChar(255)
+  orden        Int          @default(1)
+  principal    Boolean      @default(false)
+  evento_feria evento_feria @relation(fields: [feria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_evento_feria_imagen")
+
+  @@index([feria_id], map: "fk_evento_feria_imagen")
 }
 
 model evento_feria_empresa {
@@ -174,6 +203,19 @@ model sorteo {
   creado_en       DateTime?         @default(now()) @db.Timestamp(0)
   actualizado_en  DateTime?         @default(now()) @db.Timestamp(0)
   sorteo_producto sorteo_producto[]
+  sorteo_imagen   sorteo_imagen[]
+}
+
+// Galería de hasta 5 fotos por sorteo (misma idea que noticia_imagen).
+model sorteo_imagen {
+  id        Int     @id @default(autoincrement())
+  sorteo_id Int
+  url       String  @db.VarChar(255)
+  orden     Int     @default(1)
+  principal Boolean @default(false)
+  sorteo    sorteo  @relation(fields: [sorteo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_sorteo_imagen")
+
+  @@index([sorteo_id], map: "fk_sorteo_imagen")
 }
 
 model sorteo_producto {

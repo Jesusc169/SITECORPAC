@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import styles from "./sorteos.admin.module.css";
-import { evaluarProporcion } from "@/lib/imagenValidacion";
+import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
+import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 
 interface Premio {
   nombre: string;
@@ -29,13 +30,11 @@ export default function AdminSorteoModal({
     descripcion: "",
     fecha: "",
     hora: "",
-    imagen: "",
-    imagenFile: null as File | null,
     premios: [] as Premio[],
   };
 
   const [form, setForm] = useState(emptyForm);
-  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+  const selectorImagenes = useSelectorImagenes();
 
   /* =========================================================
      CARGAR DATOS PARA EDITAR
@@ -52,8 +51,6 @@ export default function AdminSorteoModal({
         descripcion: initialData.descripcion ?? "",
         fecha: fechaISO ? fechaISO.split("T")[0] : "",
         hora: fechaISO ? fechaISO.split("T")[1].slice(0, 5) : "",
-        imagen: initialData.imagen ?? "",
-        imagenFile: null,
         premios:
           (initialData.premios ?? initialData.sorteo_producto)?.map(
             (p: any) => ({
@@ -63,10 +60,16 @@ export default function AdminSorteoModal({
             })
           ) ?? [],
       });
+      selectorImagenes.resetear(
+        Array.isArray(initialData.sorteo_imagen)
+          ? initialData.sorteo_imagen.map((img: any) => ({ id: img.id, url: img.url }))
+          : []
+      );
     } else {
       setForm(emptyForm);
+      selectorImagenes.resetear([]);
     }
-    setAvisoImagen(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]);
 
   if (!open) return null;
@@ -79,25 +82,6 @@ export default function AdminSorteoModal({
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value ?? "" }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const url = URL.createObjectURL(file);
-
-    setForm((prev) => ({
-      ...prev,
-      imagenFile: file,
-      imagen: url,
-    }));
-
-    const img = new Image();
-    img.onload = () => {
-      setAvisoImagen(evaluarProporcion(img.width, img.height));
-    };
-    img.src = url;
   };
 
   /* =========================================================
@@ -147,8 +131,14 @@ export default function AdminSorteoModal({
       formData.append("estado", "ACTIVO");
       formData.append("premios", JSON.stringify(form.premios || []));
 
-      if (form.imagenFile) {
-        formData.append("imagen", form.imagenFile);
+      if (form.id) {
+        // Edición: puede combinar fotos existentes + nuevas + eliminaciones.
+        selectorImagenes.aplicarAFormData(formData);
+      } else {
+        // Creación: todas las fotos son nuevas, la principal se manda por índice.
+        selectorImagenes.aplicarAFormData(formData, {
+          principalIndex: "imagenPrincipalIndex",
+        });
       }
 
       // 🔥 CORRECCIÓN CLAVE
@@ -212,27 +202,8 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label>Imagen del sorteo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              <div className={styles.hint}>
-                💡 Usa una foto <strong>horizontal</strong> (apaisada), de al
-                menos 800x500px. Evita fotos verticales o cuadradas, porque
-                se recortarán arriba y abajo.
-              </div>
-              {form.imagen && (
-                <img
-                  src={form.imagen}
-                  className={styles.previewImg}
-                  alt="preview"
-                />
-              )}
-              {avisoImagen && (
-                <div className={styles.previewAviso}>{avisoImagen}</div>
-              )}
+              <label>Fotos del sorteo (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} />
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>

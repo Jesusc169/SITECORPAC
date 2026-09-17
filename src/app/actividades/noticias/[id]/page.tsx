@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import Cabecera from "@/components/Cabecera/Cabecera";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
+import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
 
 export async function generateMetadata({
   params,
@@ -85,6 +86,13 @@ export default async function NoticiaPage({
         <div className={styles.noticiaContenido}>
           <p>{noticia.contenido || noticia.descripcion}</p>
         </div>
+
+        <GaleriaFotos
+          imagenes={noticia.noticia_imagen
+            .filter((img) => !img.principal)
+            .map((img) => img.url)}
+          titulo={noticia.titulo}
+        />
 
         {noticia.noticia_pdf.length > 0 && (
           <div className={styles.noticiaPdfWrapper}>

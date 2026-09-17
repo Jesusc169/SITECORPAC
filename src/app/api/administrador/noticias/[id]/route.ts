@@ -27,6 +27,7 @@ export async function PUT(
 
     const formData = await request.formData();
     const pdfsEliminarRaw = formData.get("pdfsEliminar")?.toString() || "[]";
+    const imagenesEliminarRaw = formData.get("imagenesEliminar")?.toString() || "[]";
 
     let pdfsEliminar: number[] = [];
     try {
@@ -35,12 +36,27 @@ export async function PUT(
       pdfsEliminar = [];
     }
 
+    let imagenesEliminar: number[] = [];
+    try {
+      imagenesEliminar = JSON.parse(imagenesEliminarRaw);
+    } catch {
+      imagenesEliminar = [];
+    }
+
+    const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
+    const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
+
     const noticiaActualizada = await NoticiasController.actualizarNoticiaCompleta(id, {
       titulo: formData.get("titulo") as string,
       descripcion: formData.get("descripcion") as string,
       contenido: formData.get("contenido") as string,
       autor: formData.get("autor") as string,
-      imagenFile: formData.get("imagen") as File | null,
+      imagenesNuevas: formData.getAll("imagenes") as File[],
+      imagenesEliminar,
+      imagenPrincipalId: imagenPrincipalIdRaw ? Number(imagenPrincipalIdRaw) : null,
+      imagenPrincipalNuevaIndex: imagenPrincipalNuevaIndexRaw
+        ? Number(imagenPrincipalNuevaIndexRaw)
+        : null,
       pdfFilesNuevos: formData.getAll("pdfs") as File[],
       pdfsEliminar,
     });

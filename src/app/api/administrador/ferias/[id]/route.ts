@@ -48,14 +48,34 @@ export async function PUT(
 
     const empresasRaw = formData.get("empresas") as string;
     const fechasRaw = formData.get("fechas") as string;
+    const imagenesEliminarRaw = formData.get("imagenesEliminar")?.toString() || "[]";
+
+    let imagenesEliminar: number[] = [];
+    try {
+      imagenesEliminar = JSON.parse(imagenesEliminarRaw);
+    } catch {
+      imagenesEliminar = [];
+    }
+
+    const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
+    const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
 
     const feria = await FeriaController.actualizarFeria(feriaId, {
       titulo: formData.get("titulo") as string,
       descripcion: formData.get("descripcion") as string,
-      imagenFile: formData.get("imagen_portada") as File | null,
+      imagenesNuevas: formData.getAll("imagenes") as File[],
+      imagenesEliminar,
+      imagenPrincipalId: imagenPrincipalIdRaw ? Number(imagenPrincipalIdRaw) : null,
+      imagenPrincipalNuevaIndex: imagenPrincipalNuevaIndexRaw
+        ? Number(imagenPrincipalNuevaIndexRaw)
+        : null,
       empresas: empresasRaw ? JSON.parse(empresasRaw) : [],
       fechas: fechasRaw ? JSON.parse(fechasRaw) : [],
     });
+
+    if (!feria) {
+      return NextResponse.json({ error: "Feria no encontrada" }, { status: 404 });
+    }
 
     return NextResponse.json(feria);
   } catch (error) {

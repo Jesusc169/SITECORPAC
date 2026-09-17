@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { evaluarProporcion } from "@/lib/imagenValidacion";
+import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
+import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 
 interface Props {
   onClose: () => void;
@@ -14,28 +15,11 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
   const [contenido, setContenido] = useState("");
   const [autor, setAutor] = useState("SITECORPAC");
 
-  const [imagen, setImagen] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+  const selectorImagenes = useSelectorImagenes();
 
   const [pdfs, setPdfs] = useState<File[]>([]);
 
   const [loading, setLoading] = useState(false);
-
-  const handleImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImagen(file);
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-
-    const img = new Image();
-    img.onload = () => {
-      setAvisoImagen(evaluarProporcion(img.width, img.height));
-    };
-    img.src = url;
-  };
 
   const handlePdfs = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nuevos = Array.from(e.target.files || []);
@@ -68,9 +52,10 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
       formData.append("contenido", contenido);
       formData.append("autor", autor);
 
-      if (imagen) {
-        formData.append("imagen", imagen);
-      }
+      selectorImagenes.aplicarAFormData(formData, {
+        nuevas: "imagenes",
+        principalIndex: "imagenPrincipalIndex",
+      });
 
       pdfs.forEach((file) => formData.append("pdfs", file));
 
@@ -149,30 +134,19 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
               />
             </div>
 
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label fw-semibold">Autor</label>
-                <input
-                  className="form-control"
-                  value={autor}
-                  onChange={(e) => setAutor(e.target.value)}
-                />
-              </div>
+            <div className="mb-3">
+              <label className="form-label fw-semibold">Autor</label>
+              <input
+                className="form-control"
+                style={{ maxWidth: 320 }}
+                value={autor}
+                onChange={(e) => setAutor(e.target.value)}
+              />
+            </div>
 
-              <div className="col-md-6 mb-3">
-                <label className="form-label fw-semibold">Imagen</label>
-                <input
-                  type="file"
-                  className="form-control"
-                  accept="image/*"
-                  onChange={handleImagen}
-                />
-                <div className="form-text">
-                  💡 Usa una foto <strong>horizontal</strong> (apaisada), de
-                  al menos 800x500px. Evita fotos verticales o cuadradas,
-                  porque se recortarán arriba y abajo.
-                </div>
-              </div>
+            <div className="mb-3">
+              <label className="form-label fw-semibold">Fotos (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} />
             </div>
 
             <div className="mb-3">
@@ -211,40 +185,6 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
                 </ul>
               )}
             </div>
-
-            {/* PREVIEW IMAGEN */}
-            {preview && (
-              <div className="mt-3 text-center">
-                <p className="fw-semibold mb-2">
-                  Vista previa (así se verá recortada en la noticia)
-                </p>
-                <div
-                  className="rounded shadow mx-auto"
-                  style={{
-                    width: "100%",
-                    maxWidth: "420px",
-                    aspectRatio: "3 / 2",
-                    overflow: "hidden",
-                    backgroundColor: "#e5e7eb",
-                  }}
-                >
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-                {avisoImagen && (
-                  <div className="alert alert-warning mt-2 py-2 small mb-0">
-                    {avisoImagen}
-                  </div>
-                )}
-              </div>
-            )}
 
           </div>
 

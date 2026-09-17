@@ -34,10 +34,10 @@ export function esDocumentoPermitido(file: File): boolean {
   return TIPOS_DOCUMENTO_PERMITIDOS.has(file.type) || extensionValida;
 }
 
-export async function guardarImagenNoticia(file: File): Promise<string> {
+export async function guardarImagenNoticia(file: File, indice = 0): Promise<string> {
   const original = Buffer.from(await file.arrayBuffer());
   const buffer = await optimizarImagen(original);
-  const nombreArchivo = `noticia-${Date.now()}-${nombreArchivoSeguro(file.name)}`;
+  const nombreArchivo = `noticia-${Date.now()}-${indice}-${nombreArchivoSeguro(file.name)}`;
 
   const uploadDir = path.join(process.cwd(), "public", "uploads", "noticias");
   await mkdir(uploadDir, { recursive: true });

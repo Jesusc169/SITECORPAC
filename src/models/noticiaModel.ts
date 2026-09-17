@@ -3,6 +3,7 @@ import type { noticia } from "@prisma/client";
 
 const CON_PDFS = {
   noticia_pdf: { orderBy: { orden: "asc" as const } },
+  noticia_imagen: { orderBy: { orden: "asc" as const } },
 };
 
 export const NoticiaModel = {
@@ -29,12 +30,14 @@ export const NoticiaModel = {
     fecha: Date;
     updatedAt: Date;
     pdfs: { url: string; nombre: string; orden: number }[];
+    imagenes: { url: string; orden: number; principal: boolean }[];
   }) => {
-    const { pdfs, ...resto } = data;
+    const { pdfs, imagenes, ...resto } = data;
     return prisma.noticia.create({
       data: {
         ...resto,
         noticia_pdf: { create: pdfs },
+        noticia_imagen: { create: imagenes },
       },
       include: CON_PDFS,
     });
@@ -61,6 +64,27 @@ export const NoticiaModel = {
 
   eliminarPdfs: async (ids: number[]) => {
     return prisma.noticia_pdf.deleteMany({ where: { id: { in: ids } } });
+  },
+
+  crearImagen: async (data: { noticia_id: number; url: string; orden: number; principal: boolean }) => {
+    return prisma.noticia_imagen.create({ data });
+  },
+
+  eliminarImagenes: async (ids: number[]) => {
+    if (ids.length === 0) return;
+    await prisma.noticia_imagen.deleteMany({ where: { id: { in: ids } } });
+  },
+
+  reordenarImagen: async (id: number, orden: number) => {
+    await prisma.noticia_imagen.update({ where: { id }, data: { orden } });
+  },
+
+  marcarImagenPrincipal: async (noticia_id: number, id: number) => {
+    await prisma.noticia_imagen.updateMany({
+      where: { noticia_id },
+      data: { principal: false },
+    });
+    await prisma.noticia_imagen.update({ where: { id }, data: { principal: true } });
   },
 
   contar: async () => {

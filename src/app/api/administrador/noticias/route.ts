@@ -38,12 +38,15 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
 
+    const imagenPrincipalIndexRaw = formData.get("imagenPrincipalIndex");
+
     const nuevaNoticia = await NoticiasController.crearNoticiaCompleta({
       titulo: formData.get("titulo")?.toString().trim() || "",
       descripcion: formData.get("descripcion")?.toString().trim() || "",
       contenido: formData.get("contenido")?.toString() || null,
       autor: formData.get("autor")?.toString().trim() || "SITECORPAC",
-      imagenFile: formData.get("imagen") as File | null,
+      imagenFiles: formData.getAll("imagenes") as File[],
+      imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       pdfFiles: formData.getAll("pdfs") as File[],
     });
 

@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { evaluarProporcion } from "@/lib/imagenValidacion";
+import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
+import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 
 interface NoticiaPdf {
   id: number;
   url: string;
   nombre: string;
+}
+
+interface NoticiaImagen {
+  id: number;
+  url: string;
+  principal: boolean;
 }
 
 interface Noticia {
@@ -17,6 +24,7 @@ interface Noticia {
   autor: string;
   imagen?: string | null;
   noticia_pdf?: NoticiaPdf[];
+  noticia_imagen?: NoticiaImagen[];
 }
 
 interface Props {
@@ -35,10 +43,7 @@ export default function ModalEditarNoticia({
   const [contenido, setContenido] = useState("");
   const [autor, setAutor] = useState("");
 
-  const [imagenActual, setImagenActual] = useState<string | null>(null);
-  const [imagenNueva, setImagenNueva] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [avisoImagen, setAvisoImagen] = useState<string | null>(null);
+  const selectorImagenes = useSelectorImagenes();
 
   const [pdfsExistentes, setPdfsExistentes] = useState<NoticiaPdf[]>([]);
   const [pdfsAEliminar, setPdfsAEliminar] = useState<number[]>([]);
@@ -51,37 +56,15 @@ export default function ModalEditarNoticia({
     setDescripcion(noticia.descripcion || "");
     setContenido(noticia.contenido || "");
     setAutor(noticia.autor);
-    setImagenActual(noticia.imagen || null);
-    setPreview(noticia.imagen || null);
     setPdfsExistentes(noticia.noticia_pdf || []);
     setPdfsAEliminar([]);
     setPdfsNuevos([]);
 
-    if (noticia.imagen) {
-      const img = new Image();
-      img.onload = () => {
-        setAvisoImagen(evaluarProporcion(img.width, img.height));
-      };
-      img.src = noticia.imagen;
-    } else {
-      setAvisoImagen(null);
-    }
+    selectorImagenes.resetear(
+      (noticia.noticia_imagen || []).map((img) => ({ id: img.id, url: img.url }))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noticia]);
-
-  const handleImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImagenNueva(file);
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-
-    const img = new Image();
-    img.onload = () => {
-      setAvisoImagen(evaluarProporcion(img.width, img.height));
-    };
-    img.src = url;
-  };
 
   const pdfsExistentesActivos = pdfsExistentes.filter(
     (p) => !pdfsAEliminar.includes(p.id)
@@ -124,9 +107,7 @@ export default function ModalEditarNoticia({
       formData.append("contenido", contenido);
       formData.append("autor", autor);
 
-      if (imagenNueva) {
-        formData.append("imagen", imagenNueva);
-      }
+      selectorImagenes.aplicarAFormData(formData);
 
       formData.append("pdfsEliminar", JSON.stringify(pdfsAEliminar));
       pdfsNuevos.forEach((file) => formData.append("pdfs", file));
@@ -203,32 +184,19 @@ export default function ModalEditarNoticia({
               />
             </div>
 
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label fw-semibold">Autor</label>
-                <input
-                  className="form-control"
-                  value={autor}
-                  onChange={(e) => setAutor(e.target.value)}
-                />
-              </div>
+            <div className="mb-3">
+              <label className="form-label fw-semibold">Autor</label>
+              <input
+                className="form-control"
+                style={{ maxWidth: 320 }}
+                value={autor}
+                onChange={(e) => setAutor(e.target.value)}
+              />
+            </div>
 
-              <div className="col-md-6 mb-3">
-                <label className="form-label fw-semibold">
-                  Cambiar imagen (opcional)
-                </label>
-                <input
-                  type="file"
-                  className="form-control"
-                  accept="image/*"
-                  onChange={handleImagen}
-                />
-                <div className="form-text">
-                  💡 Usa una foto <strong>horizontal</strong> (apaisada), de
-                  al menos 800x500px. Evita fotos verticales o cuadradas,
-                  porque se recortarán arriba y abajo.
-                </div>
-              </div>
+            <div className="mb-3">
+              <label className="form-label fw-semibold">Fotos (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} />
             </div>
 
             <div className="mb-3">
@@ -302,46 +270,6 @@ export default function ModalEditarNoticia({
                 </div>
               )}
             </div>
-
-            {/* PREVIEW */}
-            {preview && (
-              <div className="mt-4 text-center">
-                <p className="fw-semibold mb-2">
-                  Vista previa (así se verá recortada en la noticia)
-                </p>
-                <div
-                  className="rounded shadow mx-auto"
-                  style={{
-                    width: "100%",
-                    maxWidth: "420px",
-                    aspectRatio: "3 / 2",
-                    overflow: "hidden",
-                    backgroundColor: "#e5e7eb",
-                  }}
-                >
-                  <img
-                    src={preview}
-                    alt="preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-                {avisoImagen && (
-                  <div className="alert alert-warning mt-2 py-2 small mb-0">
-                    {avisoImagen}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {!preview && (
-              <div className="text-muted small mt-2">
-                Sin imagen actualmente
-              </div>
-            )}
 
           </div>
 

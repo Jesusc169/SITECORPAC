@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SorteoController } from "@/controllers/sorteoController";
+import { SorteoController, SorteoValidationError } from "@/controllers/sorteoController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -44,11 +44,12 @@ export async function POST(req: Request) {
     let estado = "ACTIVO";
     let fecha_hora = new Date();
     let premios: any[] = [];
-    let imagenFile: File | null = null;
+    let imagenFiles: File[] = [];
+    let imagenPrincipalIndex = 0;
     let imagenUrl: string | null = null;
 
     /* =====================================
-       SI ES MULTIPART (VIENE IMAGEN)
+       SI ES MULTIPART (VIENEN FOTOS)
     ===================================== */
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
@@ -68,7 +69,9 @@ export async function POST(req: Request) {
       const premiosRaw = formData.get("premios");
       premios = premiosRaw ? JSON.parse(premiosRaw as string) : [];
 
-      imagenFile = formData.get("imagen") as File | null;
+      imagenFiles = formData.getAll("imagenes") as File[];
+      const imagenPrincipalIndexRaw = formData.get("imagenPrincipalIndex");
+      imagenPrincipalIndex = imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0;
     }
 
     /* =====================================
@@ -95,13 +98,14 @@ export async function POST(req: Request) {
       estado: estado === "INACTIVO" ? "INACTIVO" : "ACTIVO",
       fecha_hora,
       premios,
-      imagenFile,
+      imagenFiles,
+      imagenPrincipalIndex,
       imagenUrl,
     });
 
     return NextResponse.json(nuevo);
   } catch (error) {
-    if (error instanceof ArchivoInvalidoError) {
+    if (error instanceof ArchivoInvalidoError || error instanceof SorteoValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
