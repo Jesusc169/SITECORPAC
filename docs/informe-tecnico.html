@@ -1,0 +1,571 @@
+<meta charset="utf-8">
+<title>Informe técnico SITECORPAC</title>
+<meta name="description" content="Stack, arquitectura, infraestructura y procedimiento de despliegue del sitio del SITECORPAC, para quien continúe el mantenimiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --surface:#ffffff;
+    --surface-2:#f0f2f5;
+    --text:#1c2230;
+    --muted:#5b6472;
+    --border:#e2e5eb;
+    --accent:#1d4ed8;
+    --accent-soft:#e8edfc;
+    --warn:#b3261e;
+    --warn-soft:#fdecea;
+    --ok:#0f7a4a;
+    --ok-soft:#e7f6ee;
+    --code-bg:#0f1420;
+    --code-text:#d7e0f0;
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171f;
+      --surface:#1b1f2a;
+      --surface-2:#20242f;
+      --text:#e7eaf1;
+      --muted:#9aa2b1;
+      --border:#2b303c;
+      --accent:#7fa2f7;
+      --accent-soft:#212a42;
+      --warn:#ff8a80;
+      --warn-soft:#3a2020;
+      --ok:#7fe0b4;
+      --ok-soft:#122a22;
+      --code-bg:#0b0e16;
+      --code-text:#cfd9ee;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14171f;
+    --surface:#1b1f2a;
+    --surface-2:#20242f;
+    --text:#e7eaf1;
+    --muted:#9aa2b1;
+    --border:#2b303c;
+    --accent:#7fa2f7;
+    --accent-soft:#212a42;
+    --warn:#ff8a80;
+    --warn-soft:#3a2020;
+    --ok:#7fe0b4;
+    --ok-soft:#122a22;
+    --code-bg:#0b0e16;
+    --code-text:#cfd9ee;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    margin:0;
+    font-family:"IBM Plex Sans",-apple-system,Segoe UI,sans-serif;
+    line-height:1.6;
+  }
+  code, .mono, .badge, table{
+    font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+
+  .wrap{
+    max-width:840px;
+    margin:0 auto;
+    padding-inline:20px;
+    padding-block:48px 80px;
+  }
+
+  header.hero{
+    border-bottom:1px solid var(--border);
+    padding-bottom:28px;
+    margin-bottom:36px;
+  }
+  .eyebrow{
+    color:var(--accent);
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.78rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin:0 0 10px;
+  }
+  h1{
+    font-size:2.15rem;
+    margin:0 0 10px;
+    text-wrap:balance;
+    letter-spacing:-0.01em;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:1.05rem;
+    max-width:60ch;
+    margin:0 0 18px;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .chip{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:5px 12px;
+    font-size:0.8rem;
+    color:var(--muted);
+  }
+
+  nav.toc{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 22px;
+    margin-bottom:40px;
+  }
+  nav.toc p{
+    margin:0 0 10px;
+    font-weight:600;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+  }
+  nav.toc ol{
+    columns:2;
+    -webkit-columns:2;
+    margin:0;
+    padding-left:1.1em;
+    gap:24px;
+  }
+  nav.toc li{margin-bottom:6px;}
+  nav.toc a{color:var(--text); text-decoration:none;}
+  nav.toc a:hover{color:var(--accent);}
+
+  section{margin-bottom:46px;}
+  h2{
+    font-size:1.4rem;
+    border-bottom:1px solid var(--border);
+    padding-bottom:10px;
+    margin:0 0 18px;
+    scroll-margin-top:16px;
+  }
+  h3{
+    font-size:1.08rem;
+    margin:26px 0 10px;
+    scroll-margin-top:16px;
+  }
+  p{margin:0 0 14px; max-width:70ch;}
+  ul,ol{margin:0 0 14px; padding-left:1.3em;}
+  li{margin-bottom:6px;}
+  a{color:var(--accent);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:14px 0 20px;
+    font-size:0.86rem;
+    overflow-x:auto;
+    display:block;
+  }
+  table thead{display:table-header-group;}
+  table tbody{display:table-row-group;}
+  table tr{display:table-row;}
+  table th, table td{
+    display:table-cell;
+    text-align:left;
+    padding:9px 12px;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+  }
+  table th{
+    color:var(--muted);
+    font-weight:600;
+    font-family:"IBM Plex Sans",sans-serif;
+    background:var(--surface-2);
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin:16px 0;
+  }
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:620px){
+    .grid-2{grid-template-columns:1fr;}
+    nav.toc ol{columns:1;}
+  }
+
+  .callout{
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin:16px 0;
+    border:1px solid transparent;
+    font-size:0.94rem;
+  }
+  .callout.warn{background:var(--warn-soft); border-color:color-mix(in srgb, var(--warn) 35%, transparent); color:var(--text);}
+  .callout.warn strong{color:var(--warn);}
+  .callout.ok{background:var(--ok-soft); border-color:color-mix(in srgb, var(--ok) 35%, transparent); color:var(--text);}
+  .callout.ok strong{color:var(--ok);}
+  .callout p:last-child{margin-bottom:0;}
+
+  pre{
+    background:var(--code-bg);
+    color:var(--code-text);
+    padding:14px 16px;
+    border-radius:var(--radius);
+    overflow-x:auto;
+    font-size:0.82rem;
+    margin:14px 0;
+    line-height:1.55;
+  }
+  code.inline{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:0.85em;
+  }
+
+  .badge{
+    display:inline-block;
+    background:var(--accent-soft);
+    color:var(--accent);
+    border-radius:5px;
+    padding:1px 7px;
+    font-size:0.78rem;
+    font-weight:600;
+  }
+
+  footer{
+    border-top:1px solid var(--border);
+    padding-top:20px;
+    margin-top:50px;
+    color:var(--muted);
+    font-size:0.85rem;
+  }
+
+  .toplink{font-size:0.8rem;}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Documentación técnica · Handoff</p>
+    <h1>SITECORPAC — informe técnico</h1>
+    <p class="subtitle">Qué es el proyecto, con qué está construido, cómo está desplegado y qué hay que saber para darle mantenimiento sin sorpresas.</p>
+    <div class="meta-row">
+      <span class="chip">Actualizado: 17 de septiembre de 2026</span>
+      <span class="chip">Repo: github.com/Jesusc169/SITECORPAC</span>
+      <span class="chip">Rama: main</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Contenido">
+    <p>Contenido</p>
+    <ol>
+      <li><a href="#que-es">Qué es SITECORPAC</a></li>
+      <li><a href="#stack">Stack y versiones</a></li>
+      <li><a href="#arquitectura">Arquitectura del código</a></li>
+      <li><a href="#datos">Modelo de datos</a></li>
+      <li><a href="#infra">Infraestructura de producción</a></li>
+      <li><a href="#deploy">Procedimiento de despliegue</a></li>
+      <li><a href="#gotchas">Gotchas conocidos</a></li>
+      <li><a href="#seguridad">Seguridad</a></li>
+      <li><a href="#ci">CI y pruebas</a></li>
+      <li><a href="#local">Correr el proyecto en local</a></li>
+    </ol>
+  </nav>
+
+  <section id="que-es">
+    <h2>1. Qué es SITECORPAC</h2>
+    <p>
+      Es el sitio web institucional del <strong>Sindicato de Trabajadores de CORPAC</strong> (SITECORPAC), un
+      sindicato peruano de trabajadores del sector aeroportuario. El sitio cumple dos roles a la vez:
+    </p>
+    <ul>
+      <li><strong>Sitio público</strong>: noticias, ferias, sorteos, directorio de la junta directiva, legislación
+        laboral, trámites (préstamos, beneficio por fallecimiento), información institucional.</li>
+      <li><strong>Panel administrativo</strong> (<code class="inline">/admin</code>): donde el personal de oficina
+        (no técnico) publica y edita ese contenido día a día, sin tocar código ni base de datos.</li>
+    </ul>
+    <p>
+      Es mantenido por un único desarrollador. No hay equipo de QA ni de operaciones: cualquier cambio que rompa
+      producción lo nota primero una de las secretarias, no un sistema de monitoreo.
+    </p>
+  </section>
+
+  <section id="stack">
+    <h2>2. Stack y versiones</h2>
+    <p>Versiones exactas al 2026-09-17 (ver <code class="inline">package.json</code> para el detalle completo):</p>
+    <table>
+      <thead><tr><th>Componente</th><th>Versión</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>Next.js</td><td>16.x (App Router, Turbopack)</td><td>SSR + rutas API en el mismo proyecto</td></tr>
+        <tr><td>React</td><td>19.x</td><td></td></tr>
+        <tr><td>TypeScript</td><td>5.x</td><td></td></tr>
+        <tr><td>Prisma</td><td>6.16 (cliente) / 6.19 en el VM</td><td>ORM sobre MySQL</td></tr>
+        <tr><td>MySQL</td><td>8.0 (producción)</td><td>Motor de base de datos</td></tr>
+        <tr><td>Node.js</td><td>20.x</td><td>Local y producción</td></tr>
+        <tr><td>Bootstrap</td><td>5.3</td><td>UI del panel admin, vía CDN jsdelivr en runtime</td></tr>
+        <tr><td>sharp</td><td>0.35.4 (fijada)</td><td>Compresión de imágenes al subir — ver <a href="#gotchas">gotchas</a></td></tr>
+        <tr><td>bcryptjs / jsonwebtoken</td><td>3.x / 9.x</td><td>Login y sesión (JWT en cookie)</td></tr>
+        <tr><td>Vitest</td><td>2.1</td><td>Pruebas unitarias, corre en CI</td></tr>
+        <tr><td>PM2</td><td>6.0 (VM)</td><td>Proceso Node en modo <code class="inline">cluster</code>, 2 instancias</td></tr>
+        <tr><td>nginx</td><td>1.18 (VM)</td><td>Reverse proxy + HTTPS + estáticos</td></tr>
+        <tr><td>Ubuntu</td><td>22.04 LTS (VM)</td><td>Hostinger</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="arquitectura">
+    <h2>3. Arquitectura del código</h2>
+    <p>
+      El código sigue un patrón MVC explícito por módulo (noticias, ferias, sorteos, directorio, beneficios, etc.),
+      encima de las convenciones de Next.js App Router. Cuatro capas, de arriba hacia abajo:
+    </p>
+    <div class="card">
+      <ol>
+        <li><strong>Rutas API</strong> — <code class="inline">src/app/api/**/route.ts</code>. Parsean el request
+          (JSON o <code class="inline">FormData</code> con archivos), verifican sesión/permiso con
+          <code class="inline">obtenerUsuarioActual()</code> + <code class="inline">tienePermiso()</code>, y
+          delegan al controlador. No tienen lógica de negocio.</li>
+        <li><strong>Controllers</strong> — <code class="inline">src/controllers/*.ts</code>. Validan reglas de
+          negocio, orquestan subida/borrado de archivos, arman la respuesta y disparan
+          <code class="inline">revalidateTag()</code> para invalidar caché tras crear/editar/eliminar.</li>
+        <li><strong>Models</strong> — <code class="inline">src/models/*.ts</code>. Única capa que llama a Prisma
+          directamente (<code class="inline">src/lib/prisma.ts</code>). Cada método es una operación atómica
+          (crear, actualizar, listar con sus <code class="inline">include</code>).</li>
+        <li><strong>Views / componentes</strong> — <code class="inline">src/views</code>,
+          <code class="inline">src/components</code>, y las propias páginas en
+          <code class="inline">src/app/**/page.tsx</code>. Client components (<code class="inline">"use client"</code>)
+          solo donde hace falta interactividad (modales admin, filtros, el selector de fotos, el visor de galería).</li>
+      </ol>
+    </div>
+    <p>
+      Las lecturas públicas (noticias, ferias, sorteos, directorio) usan
+      <code class="inline">unstable_cache</code> de Next con <code class="inline">revalidate: 60</code> y un
+      <code class="inline">tag</code> por módulo, en vez de <code class="inline">force-dynamic</code> o caché manual
+      en memoria de proceso — importante porque PM2 corre <strong>2 instancias en cluster</strong>, así que un caché
+      en memoria de un solo proceso quedaría desincronizado entre workers.
+    </p>
+
+    <h3>Estructura de carpetas relevante</h3>
+    <pre>src/
+├─ app/
+│  ├─ (público)/actividades/{noticias,ferias,sorteos}/...
+│  ├─ admin/{noticias,ferias,sorteos,directorio,usuarios}/...
+│  └─ api/
+│     ├─ administrador/...        (rutas protegidas, requieren sesión + permiso)
+│     └─ {noticias,ferias,sorteos,directorio}/...   (rutas públicas de lectura)
+├─ controllers/     lógica de negocio por módulo
+├─ models/           acceso a datos (Prisma) por módulo
+├─ components/       piezas de UI reutilizables (galería de fotos, selector de imágenes...)
+├─ hooks/            hooks compartidos (ej. useSelectorImagenes)
+├─ lib/              utilidades: auth, permisos, validación de archivos, rate limiter...
+├─ services/         wrappers fetch() usados desde componentes cliente
+└─ views/            componentes de presentación "puros" reusados por página+cliente</pre>
+  </section>
+
+  <section id="datos">
+    <h2>4. Modelo de datos</h2>
+    <p>
+      Esquema definido en <code class="inline">prisma/schema.prisma</code>, MySQL como motor. Las entidades de
+      contenido principales:
+    </p>
+    <table>
+      <thead><tr><th>Tabla</th><th>Qué guarda</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge">noticia</span></td><td>Noticias del sitio. Relación 1:N con <span class="badge">noticia_pdf</span> (documentos adjuntos) y <span class="badge">noticia_imagen</span> (galería de fotos).</td></tr>
+        <tr><td><span class="badge">evento_feria</span></td><td>Ferias. Relación 1:N con fechas, empresas participantes y <span class="badge">evento_feria_imagen</span>.</td></tr>
+        <tr><td><span class="badge">sorteo</span></td><td>Sorteos. Relación 1:N con premios (<span class="badge">sorteo_producto</span>) y <span class="badge">sorteo_imagen</span>.</td></tr>
+        <tr><td><span class="badge">directorio</span></td><td>Miembros de la junta directiva.</td></tr>
+        <tr><td><span class="badge">user</span></td><td>Usuarios del panel admin. <code class="inline">permisos</code> es un JSON con acceso por módulo.</td></tr>
+        <tr><td><span class="badge">login_intento</span></td><td>Contador de intentos fallidos de login por IP, en BD (no en memoria) por el modo cluster de PM2.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Galería de fotos (agregada 2026-09-17)</h3>
+    <p>
+      Noticias, ferias y sorteos ahora soportan <strong>hasta 5 fotos</strong>, una marcada como
+      <code class="inline">principal</code>. Cada entidad tiene su propia tabla de galería
+      (<span class="badge">noticia_imagen</span>, <span class="badge">evento_feria_imagen</span>,
+      <span class="badge">sorteo_imagen</span>), todas con la misma forma:
+    </p>
+    <pre>id · &lt;entidad&gt;_id · url (VARCHAR) · orden (INT) · principal (BOOLEAN)</pre>
+    <p>
+      El campo legado de una sola imagen (<code class="inline">noticia.imagen</code>,
+      <code class="inline">evento_feria.imagen_portada</code>, <code class="inline">sorteo.imagen</code>) se
+      mantiene y se sincroniza automáticamente con la URL de la foto marcada como principal en cada
+      creación/edición — así cualquier código que todavía lea ese campo directamente (tarjetas, carrusel del
+      home, metadata OG) sigue funcionando sin cambios. La lógica de "qué foto queda como principal cuando se
+      combinan fotos existentes + nuevas + una eliminación en el mismo guardado" vive en una única función pura,
+      <code class="inline">src/lib/resolverGaleria.ts</code>, reutilizada por los tres controllers.
+    </p>
+    <div class="callout ok">
+      <p><strong>Migración de datos.</strong> El script <code class="inline">scripts/backfill-imagenes-galeria.js</code>
+      convierte, una sola vez, la foto suelta que ya tenía cada registro en la primera fila (principal) de su
+      galería nueva. Es idempotente: si un registro ya tiene filas en su galería, se salta. Correrlo después de
+      cualquier <code class="inline">prisma db push</code> que recree estas tablas desde cero (por ejemplo, una
+      base de datos de desarrollo nueva).</p>
+    </div>
+  </section>
+
+  <section id="infra">
+    <h2>5. Infraestructura de producción</h2>
+    <div class="grid-2">
+      <div class="card">
+        <strong>Servidor</strong>
+        <p style="margin-top:8px">VM Ubuntu 22.04 en Hostinger, IP <code class="inline">76.13.115.57</code>,
+        dominio <code class="inline">sitecorpac.com</code>. Acceso SSH como <code class="inline">root</code>;
+        la app corre bajo el usuario Linux <code class="inline">sitecorpac</code> (no root) en
+        <code class="inline">/home/sitecorpac/SITECORPAC</code>.</p>
+      </div>
+      <div class="card">
+        <strong>Proceso</strong>
+        <p style="margin-top:8px">PM2, proceso <code class="inline">sitecorpac</code>, modo
+        <code class="inline">cluster</code> con 2 instancias (<code class="inline">ecosystem.config.js</code>).
+        Next corre con <code class="inline">next start</code> (build estándar, no standalone).</p>
+      </div>
+      <div class="card">
+        <strong>Red</strong>
+        <p style="margin-top:8px">nginx como reverse proxy hacia <code class="inline">127.0.0.1:3000</code>,
+        HTTPS vía Certbot/Let's Encrypt, HTTP/2 habilitado. <code class="inline">/uploads/*</code> y
+        <code class="inline">/images/uploads/*</code> se sirven directo desde disco vía <code class="inline">alias</code>
+        de nginx (no pasan por Next).</p>
+      </div>
+      <div class="card">
+        <strong>Imágenes subidas</strong>
+        <p style="margin-top:8px">El optimizador de imágenes de Next (<code class="inline">/_next/image</code>)
+        está <strong>desactivado</strong> (<code class="inline">images.unoptimized: true</code> en
+        <code class="inline">next.config.ts</code>) — ver el gotcha #2 más abajo para el porqué.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="deploy">
+    <h2>6. Procedimiento de despliegue</h2>
+    <p>Sin CD automático: el despliegue a producción es manual, por SSH, siguiendo siempre este orden:</p>
+    <ol>
+      <li><strong>Backup</strong> si el cambio toca el esquema: <code class="inline">mysqldump</code> con las
+        credenciales del <code class="inline">.env</code> del VM, a un archivo con timestamp.</li>
+      <li><code class="inline">sudo -u sitecorpac git -C /home/sitecorpac/SITECORPAC pull origin main</code></li>
+      <li><code class="inline">sudo -u sitecorpac npm install --no-audit --no-fund</code></li>
+      <li><code class="inline">npx prisma generate</code> y, solo si el schema cambió,
+        <code class="inline">npx prisma db push</code> (revisar la salida por advertencias de pérdida de datos
+        antes de confirmar).</li>
+      <li>Si hubo tablas nuevas de galería o similar: correr el script de backfill correspondiente.</li>
+      <li><code class="inline">rm -rf .next && npm run build</code> — limpiar <code class="inline">.next</code>
+        primero evita errores de tipos por rutas/archivos eliminados en commits anteriores.</li>
+      <li><code class="inline">sudo -u sitecorpac pm2 restart sitecorpac</code></li>
+      <li>Verificar con <code class="inline">curl -o /dev/null -w '%{http_code}'</code> contra el sitio público y
+        rutas API clave (200 en públicas, 401 en admin sin cookie).</li>
+    </ol>
+    <div class="callout warn">
+      <strong>Ojo:</strong> si <code class="inline">git pull</code> falla con "dubious ownership", correr
+      <code class="inline">git config --global --add safe.directory /home/sitecorpac/SITECORPAC</code> (ya se
+      configuró una vez, pero puede reaparecer).
+    </div>
+  </section>
+
+  <section id="gotchas">
+    <h2>7. Gotchas conocidos</h2>
+
+    <h3>sharp puede desaparecer en un install limpio</h3>
+    <p>
+      <code class="inline">sharp</code> (usado para comprimir/optimizar imágenes al subir) es una dependencia
+      opcional específica de plataforma. Si no queda explícitamente listada en <code class="inline">package.json</code>
+      (no basta con haberla instalado manualmente alguna vez), un <code class="inline">npm install</code> limpio en
+      el VM puede perderla silenciosamente — rompe la optimización de <code class="inline">next/image</code> solo
+      para fotos nuevas, mientras las ya optimizadas y cacheadas siguen viéndose bien, lo que lo hace parecer un bug
+      intermitente. Está fijada en <code class="inline">^0.35.4</code>; no dejar que se caiga del
+      <code class="inline">package.json</code>.
+    </p>
+
+    <h3>Caché 404 de rutas de imagen nunca servidas por nginx</h3>
+    <p>
+      Cualquier imagen subida bajo una ruta que <strong>no</strong> tenga su propio <code class="inline">alias</code>
+      de nginx (hoy: <code class="inline">/uploads/</code> e <code class="inline">/images/uploads/</code>) pasa por
+      Next. Si Next recibe una petición para un archivo que todavía no terminó de escribirse en disco, el App
+      Router cae al boundary de "no encontrado" y <strong>cachea esa respuesta 404 para esa ruta exacta</strong> —
+      no se autocorrige ni con el tiempo, solo con un <code class="inline">pm2 restart</code>. Si se agrega un
+      nuevo tipo de subida bajo un prefijo de URL distinto a los dos ya cubiertos, hay que agregar el
+      <code class="inline">alias</code> correspondiente en <code class="inline">/etc/nginx/sites-available/sitecorpac</code>
+      antes de habilitar esa subida en producción.
+    </p>
+
+    <h3>El optimizador de <code class="inline" style="font-size:1rem">next/image</code> está apagado a propósito</h3>
+    <p>
+      Es la raíz del gotcha anterior: el optimizador interno hace un auto-fetch a su propia ruta interna, que puede
+      quedar cacheada como "no encontrada". Se desactivó (<code class="inline">unoptimized: true</code>) y en su
+      lugar las imágenes se comprimen una vez al subirlas (vía <code class="inline">sharp</code>, en
+      <code class="inline">src/lib/imagenes.ts</code>) y nginx las sirve directo desde disco.
+    </p>
+
+    <h3>HTTP/2 importa para el rendimiento de primera carga</h3>
+    <p>
+      Con ~18 recursos estáticos por página, HTTP/1.1 los encola en lotes de 6 por el límite de conexiones
+      concurrentes del navegador por host. HTTP/2 ya está habilitado (<code class="inline">listen 443 ssl http2;</code>)
+      — si se migra de proveedor o se reconstruye la config de nginx desde cero, no perder esa línea.
+    </p>
+  </section>
+
+  <section id="seguridad">
+    <h2>8. Seguridad</h2>
+    <ul>
+      <li>Login: máximo 5 intentos fallidos por IP en 15 minutos (contador en BD, no en memoria — necesario por
+        el modo cluster). Contraseñas mínimo 8 caracteres, hasheadas con bcrypt.</li>
+      <li>JWT en cookie httpOnly, algoritmo explícito, duración de sesión 8h, con cierre automático por
+        inactividad y aviso previo en el navegador.</li>
+      <li>Subida de archivos: whitelist estricta de tipos MIME (JPG/PNG/WEBP para imágenes), sanitización de
+        nombre de archivo contra path traversal (<code class="inline">src/lib/validacionArchivos.ts</code>).</li>
+      <li>Cabeceras HTTP: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+        (ver <code class="inline">next.config.ts</code>).</li>
+      <li>Permisos por módulo: cada usuario admin tiene un JSON de permisos (<code class="inline">user.permisos</code>);
+        <code class="inline">tienePermiso()</code> se revisa en cada ruta API protegida.</li>
+    </ul>
+  </section>
+
+  <section id="ci">
+    <h2>9. CI y pruebas</h2>
+    <p>
+      GitHub Actions (<code class="inline">.github/workflows/ci.yml</code>) corre en cada push/PR a
+      <code class="inline">main</code>: <code class="inline">tsc --noEmit</code>, la suite de Vitest
+      (reglas de seguridad más sensibles: validación de archivos, permisos, rate limiter, autoprotección de
+      usuarios), y <code class="inline">npm audit --audit-level=high</code> en modo informativo (no bloquea el
+      pipeline). No hay despliegue automático — el CI es solo verificación, el deploy sigue siendo manual
+      (sección 6).
+    </p>
+  </section>
+
+  <section id="local">
+    <h2>10. Correr el proyecto en local</h2>
+    <pre>git clone git@github.com:Jesusc169/SITECORPAC.git
+cd SITECORPAC
+npm install
+# .env local con DATABASE_URL apuntando a un MySQL local (nunca a producción)
+npx prisma generate
+npx prisma db push
+node scripts/backfill-imagenes-galeria.js   # si es una BD nueva
+npm run dev</pre>
+    <p>
+      El servidor de desarrollo (<code class="inline">next dev</code>, Turbopack) puede mostrar errores que no
+      aparecen en producción (build estándar) por diferencias de caché entre modo dev y build — si algo falla
+      solo en <code class="inline">npm run dev</code> pero <code class="inline">npm run build</code> pasa limpio,
+      confirmar contra el build antes de asumir una regresión real.
+    </p>
+  </section>
+
+  <footer>
+    <p class="toplink"><a href="#que-es">↑ Volver al inicio</a></p>
+    <p>Documento generado como parte de la implementación de la galería de fotos (septiembre 2026), pensado para
+    que cualquier próximo desarrollador pueda retomar el proyecto sin depender de contexto que solo tenía quien
+    lo mantuvo hasta ahora.</p>
+  </footer>
+
+</div>
