@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./Lightbox.module.css";
 
 interface Props {
@@ -34,7 +35,12 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
 
   if (imagenes.length === 0) return null;
 
-  return (
+  // Portal a document.body: si el lightbox se quedara anidado dentro de la
+  // tarjeta que lo abre (feria/sorteo), un simple `transform` en su :hover
+  // (ver .feria:hover, .sorteo:hover) convierte a esa tarjeta en el
+  // contenedor de este position:fixed, y el visor queda encerrado en la
+  // tarjeta en vez de cubrir toda la pantalla.
+  return createPortal(
     <div
       className={styles.overlay}
       onClick={onClose}
@@ -93,6 +99,7 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
           ))}
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
