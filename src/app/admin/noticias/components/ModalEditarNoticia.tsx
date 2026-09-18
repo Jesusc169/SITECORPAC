@@ -31,12 +31,14 @@ interface Props {
   noticia: Noticia;
   onClose: () => void;
   onSuccess: () => void;
+  mostrarToast: (tipo: "exito" | "error", texto: string) => void;
 }
 
 export default function ModalEditarNoticia({
   noticia,
   onClose,
   onSuccess,
+  mostrarToast,
 }: Props) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -124,12 +126,12 @@ export default function ModalEditarNoticia({
 
       onSuccess();
       onClose();
+      mostrarToast("exito", "Noticia actualizada correctamente");
     } catch (error) {
       console.error(error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Error al actualizar la noticia"
+      mostrarToast(
+        "error",
+        error instanceof Error ? error.message : "Error al actualizar la noticia"
       );
     } finally {
       setLoading(false);

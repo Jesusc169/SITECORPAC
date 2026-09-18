@@ -112,7 +112,10 @@
    IMAGEN
 ================================ */
 .imgWrap {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 12px;
 }
 
 .card img {
@@ -122,10 +125,11 @@
   background-color: #f3f4f6;
 }
 
+/* Antes iba superpuesto sobre la foto; ahora queda como una etiqueta
+   propia debajo de la imagen, a un costado, sin tapar la portada. */
 .galeriaBoton {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+  align-self: flex-end;
+  margin-right: 18px;
 }
 
 .imagePlaceholder {

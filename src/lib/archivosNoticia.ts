@@ -2,9 +2,9 @@ import path from "path";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import { optimizarImagen } from "@/lib/imagenes";
 import { validarImagen, nombreArchivoSeguro } from "@/lib/validacionArchivos";
+import { MAX_IMAGEN_BYTES, MAX_DOCUMENTO_BYTES } from "@/lib/constantesArchivos";
 
-export const MAX_IMAGEN_BYTES = 10 * 1024 * 1024;
-export const MAX_DOCUMENTO_BYTES = 15 * 1024 * 1024;
+export { MAX_IMAGEN_BYTES, MAX_DOCUMENTO_BYTES };
 
 const TIPOS_DOCUMENTO_PERMITIDOS = new Set([
   "application/pdf",

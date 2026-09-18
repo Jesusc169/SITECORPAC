@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from "./SelectorImagenes.module.css";
-import { MAX_FOTOS, type SelectorImagenesState } from "@/hooks/useSelectorImagenes";
+import { MAX_FOTOS, MAX_IMAGEN_MB, type SelectorImagenesState } from "@/hooks/useSelectorImagenes";
 
 interface Props {
   selector: SelectorImagenesState;
@@ -122,9 +122,10 @@ export default function SelectorImagenes({ selector }: Props) {
       </div>
 
       <div className={styles.hint}>
-        💡 Puedes subir hasta {MAX_FOTOS} fotos ({total}/{MAX_FOTOS}). Pasa el mouse sobre una
-        foto para elegirla como <strong>principal</strong> (la que se ve en la portada) o
-        quitarla. La principal se marca con ★.
+        💡 Puedes subir hasta {MAX_FOTOS} fotos ({total}/{MAX_FOTOS}), cada una de máximo{" "}
+        <strong>{MAX_IMAGEN_MB}MB</strong>. Pasa el mouse sobre una foto para elegirla como{" "}
+        <strong>principal</strong> (la que se ve en la portada) o quitarla. La principal se
+        marca con ★.
       </div>
     </div>
   );

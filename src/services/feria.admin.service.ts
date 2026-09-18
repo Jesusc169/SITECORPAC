@@ -25,7 +25,13 @@ export const guardarFeria = async (isEdit: boolean, id: number | undefined, form
     }
   );
 
-  if (!res.ok) throw new Error("Error al guardar feria");
+  if (!res.ok) {
+    // La API devuelve el motivo real en { error } (ej. "Cada imagen debe
+    // ser menor a 10MB"); sin esto la secretaria solo veía un mensaje
+    // genérico sin saber qué corregir.
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || "Error al guardar feria");
+  }
   return res.json();
 };
 
@@ -40,5 +46,9 @@ export const duplicarFeria = async (id: number) => {
 };
 
 export const eliminarFeria = async (id: number) => {
-  await fetch(`/api/administrador/ferias/${id}`, { method: "DELETE" });
+  const res = await fetch(`/api/administrador/ferias/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || "Error al eliminar feria");
+  }
 };

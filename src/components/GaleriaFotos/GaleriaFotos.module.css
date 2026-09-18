@@ -44,21 +44,28 @@
   outline-offset: 2px;
 }
 
-/* Botón compacto para tarjetas (ferias / sorteos) */
+/* Botón compacto para tarjetas (ferias / sorteos). Antes iba superpuesto
+   sobre la foto (pill oscuro encima de la imagen, tapando parte de la
+   portada); ahora las tarjetas lo colocan fuera de la imagen (ver
+   .galeriaBoton en ferias.module.css / sorteos.module.css), así que usa
+   colores propios de tarjeta en vez de un overlay semitransparente. */
 .boton {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.68);
-  color: #fff;
-  border: none;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .boton:hover {
-  background: rgba(0, 0, 0, 0.82);
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
 }
