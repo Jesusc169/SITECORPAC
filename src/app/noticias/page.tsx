@@ -28,7 +28,10 @@ export default async function NoticiasPage() {
     titulo: n.titulo,
     descripcion: n.descripcion,
     imagen: n.imagen,
-    fecha: n.fecha.toISOString(), // ✅ Date → string
+    // n.fecha puede llegar como Date (cache miss) o string (cache hit:
+    // unstable_cache lo serializa a JSON), así que no se puede asumir
+    // que siempre trae .toISOString().
+    fecha: typeof n.fecha === "string" ? n.fecha : n.fecha.toISOString(),
   }));
 
   return (
