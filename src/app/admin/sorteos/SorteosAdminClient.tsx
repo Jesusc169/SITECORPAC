@@ -8,6 +8,8 @@ import {
   eliminarSorteo,
   duplicarSorteo,
 } from "@/services/sorteo.service";
+import Toast from "@/components/Toast/Toast";
+import { useToast } from "@/components/Toast/useToast";
 
 /* =========================================
 MAP BACKEND → FRONTEND
@@ -42,6 +44,7 @@ export default function SorteosAdminClient() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Sorteo | null>(null);
   const [loadingSave, setLoadingSave] = useState(false);
+  const { toast, mostrarToast, cerrarToast } = useToast();
 
   /* =========================================
   CARGAR
@@ -77,7 +80,12 @@ export default function SorteosAdminClient() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Error guardando");
+      if (!res.ok) {
+        // La API devuelve el motivo real en { error } (ej. "Cada imagen
+        // debe ser menor a 10MB"), no solo un genérico "Error guardando".
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Error guardando sorteo");
+      }
 
       const backend = await res.json();
       const mapped = mapSorteoToFrontend(backend);
@@ -92,9 +100,10 @@ export default function SorteosAdminClient() {
 
       setSelected(null);
       setModalOpen(false);
+      mostrarToast("exito", isEdit ? "Sorteo actualizado correctamente" : "Sorteo publicado correctamente");
     } catch (err) {
       console.error(err);
-      alert("Error guardando sorteo");
+      mostrarToast("error", err instanceof Error ? err.message : "Error guardando sorteo");
     } finally {
       setLoadingSave(false);
     }
@@ -106,17 +115,29 @@ export default function SorteosAdminClient() {
   const onEliminar = async (id: number) => {
     if (!confirm("¿Eliminar sorteo?")) return;
 
-    await eliminarSorteo(id);
-    setSorteos((prev) => prev.filter((s) => s.id !== id));
+    try {
+      await eliminarSorteo(id);
+      setSorteos((prev) => prev.filter((s) => s.id !== id));
+      mostrarToast("exito", "Sorteo eliminado correctamente");
+    } catch (err) {
+      console.error(err);
+      mostrarToast("error", err instanceof Error ? err.message : "No se pudo eliminar el sorteo");
+    }
   };
 
   /* =========================================
   DUPLICAR
   ========================================= */
   const onDuplicar = async (id: number) => {
-    const backend = await duplicarSorteo(id);
-    const nuevo = mapSorteoToFrontend(backend);
-    setSorteos((prev) => [nuevo, ...prev]);
+    try {
+      const backend = await duplicarSorteo(id);
+      const nuevo = mapSorteoToFrontend(backend);
+      setSorteos((prev) => [nuevo, ...prev]);
+      mostrarToast("exito", "Sorteo duplicado correctamente");
+    } catch (err) {
+      console.error(err);
+      mostrarToast("error", err instanceof Error ? err.message : "No se pudo duplicar el sorteo");
+    }
   };
 
   /* =========================================
@@ -124,6 +145,8 @@ export default function SorteosAdminClient() {
   ========================================= */
   return (
     <>
+      <Toast toast={toast} onClose={cerrarToast} />
+
       <SorteosAdminView
         sorteos={sorteos}
         onNuevo={() => {

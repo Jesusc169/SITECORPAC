@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import styles from "./ferias.admin.module.css";
 import AdminFeriaModal from "./AdminFeriaModal";
 import * as feriaService from "@/services/feria.admin.service";
+import Toast from "@/components/Toast/Toast";
+import { useToast } from "@/components/Toast/useToast";
 
 export default function FeriasView() {
   const [ferias, setFerias] = useState<any[]>([]);
@@ -13,6 +15,8 @@ export default function FeriasView() {
 
   const [showModal, setShowModal] = useState(false);
   const [feriaSeleccionada, setFeriaSeleccionada] = useState<any>(null);
+
+  const { toast, mostrarToast, cerrarToast } = useToast();
 
   /* =========================
      CARGAR FERIAS
@@ -92,19 +96,25 @@ export default function FeriasView() {
       const text = await feriaService.duplicarFeria(id);
       console.log("RESPUESTA DUPLICAR:", text);
 
-      alert("✅ Feria duplicada");
+      mostrarToast("exito", "Feria duplicada correctamente");
       await fetchFerias();
     } catch (err) {
       console.error(err);
-      alert("❌ Error servidor duplicar:\n" + err);
+      mostrarToast("error", "No se pudo duplicar la feria");
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("¿Eliminar esta feria definitivamente?")) return;
 
-    await feriaService.eliminarFeria(id);
-    await fetchFerias();
+    try {
+      await feriaService.eliminarFeria(id);
+      await fetchFerias();
+      mostrarToast("exito", "Feria eliminada correctamente");
+    } catch (err) {
+      console.error(err);
+      mostrarToast("error", "No se pudo eliminar la feria");
+    }
   };
 
   const handleSave = async ({
@@ -127,9 +137,10 @@ export default function FeriasView() {
       await fetchFerias();
       setShowModal(false);
       setFeriaSeleccionada(null);
+      mostrarToast("exito", isEdit ? "Feria actualizada correctamente" : "Feria publicada correctamente");
     } catch (error) {
       console.error(error);
-      alert("Error al guardar la feria");
+      mostrarToast("error", error instanceof Error ? error.message : "Error al guardar la feria");
     }
   };
 
@@ -141,6 +152,8 @@ export default function FeriasView() {
 
   return (
     <>
+      <Toast toast={toast} onClose={cerrarToast} />
+
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Administración de Ferias</h1>

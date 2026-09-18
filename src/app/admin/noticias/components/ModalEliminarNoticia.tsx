@@ -4,14 +4,29 @@ export default function ModalEliminarNoticia({
   noticia,
   onClose,
   onSuccess,
+  mostrarToast,
 }: any) {
   const handleDelete = async () => {
-    await fetch(`/api/administrador/noticias/${noticia.id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`/api/administrador/noticias/${noticia.id}`, {
+        method: "DELETE",
+      });
 
-    onSuccess();
-    onClose();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "No se pudo eliminar la noticia");
+      }
+
+      onSuccess();
+      onClose();
+      mostrarToast("exito", "Noticia eliminada correctamente");
+    } catch (error) {
+      console.error(error);
+      mostrarToast(
+        "error",
+        error instanceof Error ? error.message : "No se pudo eliminar la noticia"
+      );
+    }
   };
 
   return (

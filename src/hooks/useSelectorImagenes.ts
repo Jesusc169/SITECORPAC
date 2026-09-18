@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MAX_IMAGEN_BYTES } from "@/lib/constantesArchivos";
 
 export const MAX_FOTOS = 5;
+export const MAX_IMAGEN_MB = Math.round(MAX_IMAGEN_BYTES / (1024 * 1024));
 
 export interface ImagenExistente {
   id: number;
@@ -53,14 +55,32 @@ export function useSelectorImagenes(imagenesIniciales: ImagenExistente[] = []) {
     const arr = Array.from(files);
     if (arr.length === 0) return;
 
+    // Las fotos que pesan más de lo que el servidor acepta ni siquiera se
+    // agregan a la lista: si se dejaran pasar, recién al guardar el
+    // formulario completo (título, fechas, empresas...) el servidor las
+    // rechazaría y la secretaria perdería todo lo demás que ya había
+    // llenado. Mejor avisar aquí, apenas elige el archivo.
+    const sobrepesadas = arr.filter((f) => f.size > MAX_IMAGEN_BYTES);
+    const dentroDelLimite = arr.filter((f) => f.size <= MAX_IMAGEN_BYTES);
+    if (sobrepesadas.length > 0) {
+      alert(
+        `${sobrepesadas
+          .map((f) => `"${f.name}"`)
+          .join(", ")} pesa${sobrepesadas.length > 1 ? "n" : ""} más de ${MAX_IMAGEN_MB}MB y no se ${
+          sobrepesadas.length > 1 ? "agregaron" : "agregó"
+        }. Comprime la foto o elige otra.`
+      );
+    }
+    if (dentroDelLimite.length === 0) return;
+
     const espacio = MAX_FOTOS - total;
     if (espacio <= 0) {
       alert(`Ya tienes ${MAX_FOTOS} fotos, el máximo permitido.`);
       return;
     }
 
-    const aAgregar = arr.slice(0, espacio);
-    if (arr.length > espacio) {
+    const aAgregar = dentroDelLimite.slice(0, espacio);
+    if (dentroDelLimite.length > espacio) {
       alert(`Solo se agregaron ${aAgregar.length} foto(s); el máximo es ${MAX_FOTOS} en total.`);
     }
     setNuevas((prev) => [...prev, ...aAgregar]);

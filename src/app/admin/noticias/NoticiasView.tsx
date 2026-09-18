@@ -6,6 +6,8 @@ import styles from "./noticias.module.css";
 import ModalCrearNoticia from "./components/ModalCrearNoticia";
 import ModalEditarNoticia from "./components/ModalEditarNoticia";
 import ModalEliminarNoticia from "./components/ModalEliminarNoticia";
+import Toast from "@/components/Toast/Toast";
+import { useToast } from "@/components/Toast/useToast";
 
 /* ===============================
    INTERFACE
@@ -45,6 +47,8 @@ export default function NoticiasView() {
   const [showEditar, setShowEditar] = useState(false);
   const [showEliminar, setShowEliminar] = useState(false);
 
+  const { toast, mostrarToast, cerrarToast } = useToast();
+
   const cargarNoticias = async () => {
     try {
       const res = await fetch("/api/administrador/noticias", {
@@ -79,6 +83,8 @@ export default function NoticiasView() {
 
   return (
     <div className={styles.container}>
+      <Toast toast={toast} onClose={cerrarToast} />
+
       {/* ===============================
           HEADER
       ================================ */}
@@ -150,6 +156,7 @@ export default function NoticiasView() {
         <ModalCrearNoticia
           onClose={() => setShowCrear(false)}
           onSuccess={cargarNoticias}
+          mostrarToast={mostrarToast}
         />
       )}
 
@@ -158,6 +165,7 @@ export default function NoticiasView() {
           noticia={noticiaSeleccionada}
           onClose={() => setShowEditar(false)}
           onSuccess={cargarNoticias}
+          mostrarToast={mostrarToast}
         />
       )}
 
@@ -166,6 +174,7 @@ export default function NoticiasView() {
           noticia={noticiaSeleccionada}
           onClose={() => setShowEliminar(false)}
           onSuccess={cargarNoticias}
+          mostrarToast={mostrarToast}
         />
       )}
     </div>

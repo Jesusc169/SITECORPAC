@@ -66,9 +66,13 @@ export const actualizarSorteo = async (data: any) => {
 // ELIMINAR
 // ===============================
 export const eliminarSorteo = async (id: number) => {
-  await fetch(`/api/administrador/sorteos/${id}`, {
+  const res = await fetch(`/api/administrador/sorteos/${id}`, {
     method: "DELETE",
   });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || "Error al eliminar sorteo");
+  }
 };
 
 // ===============================
@@ -82,5 +86,9 @@ export const duplicarSorteo = async (id: number) => {
     }
   );
 
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || "Error al duplicar sorteo");
+  }
   return res.json();
 };

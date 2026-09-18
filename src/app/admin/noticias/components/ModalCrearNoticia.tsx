@@ -7,9 +7,10 @@ import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 interface Props {
   onClose: () => void;
   onSuccess: () => void;
+  mostrarToast: (tipo: "exito" | "error", texto: string) => void;
 }
 
-export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
+export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: Props) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [contenido, setContenido] = useState("");
@@ -71,12 +72,12 @@ export default function ModalCrearNoticia({ onClose, onSuccess }: Props) {
 
       onSuccess();
       onClose();
+      mostrarToast("exito", "Noticia publicada correctamente");
     } catch (error) {
       console.error(error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Error al crear la noticia"
+      mostrarToast(
+        "error",
+        error instanceof Error ? error.message : "Error al crear la noticia"
       );
     } finally {
       setLoading(false);
