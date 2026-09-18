@@ -33,7 +33,10 @@ export default async function HomePage() {
     titulo: n.titulo,
     descripcion: n.descripcion,
     imagen: n.imagen ?? "/placeholder.png",
-    fecha: n.fecha.toISOString(),
+    // n.fecha puede llegar como Date (cache miss, recién leído de Prisma) o
+    // como string (cache hit: unstable_cache lo serializó a JSON), así que no
+    // se puede asumir que siempre trae .toISOString().
+    fecha: typeof n.fecha === "string" ? n.fecha : n.fecha.toISOString(),
   }));
 
   return (
