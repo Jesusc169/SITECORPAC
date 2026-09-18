@@ -260,7 +260,7 @@
     <h1>SITECORPAC — informe técnico</h1>
     <p class="subtitle">Qué es el proyecto, con qué está construido, cómo está desplegado y qué hay que saber para darle mantenimiento sin sorpresas.</p>
     <div class="meta-row">
-      <span class="chip">Actualizado: 17 de septiembre de 2026</span>
+      <span class="chip">Actualizado: 18 de septiembre de 2026</span>
       <span class="chip">Repo: github.com/Jesusc169/SITECORPAC</span>
       <span class="chip">Rama: main</span>
     </div>
@@ -365,11 +365,23 @@
 │     └─ {noticias,ferias,sorteos,directorio}/...   (rutas públicas de lectura)
 ├─ controllers/     lógica de negocio por módulo
 ├─ models/           acceso a datos (Prisma) por módulo
-├─ components/       piezas de UI reutilizables (galería de fotos, selector de imágenes...)
+├─ components/       piezas de UI reutilizables (galería de fotos, selector de imágenes, Toast...)
 ├─ hooks/            hooks compartidos (ej. useSelectorImagenes)
 ├─ lib/              utilidades: auth, permisos, validación de archivos, rate limiter...
 ├─ services/         wrappers fetch() usados desde componentes cliente
 └─ views/            componentes de presentación "puros" reusados por página+cliente</pre>
+
+    <h3>Convención: modales y overlays van en un portal a <code class="inline" style="font-size:1rem">document.body</code></h3>
+    <p>
+      <code class="inline">Lightbox</code> (visor de fotos) y <code class="inline">Toast</code> (aviso de
+      éxito/error) se renderizan con <code class="inline">createPortal(..., document.body)</code> de React en vez
+      de quedar anidados donde se llaman. Es a propósito: cualquier <code class="inline">position: fixed</code>
+      anidado dentro de un ancestro con <code class="inline">transform</code> (como el <code class="inline">.feria:hover</code>
+      / <code class="inline">.card:hover</code> de las tarjetas de ferias y sorteos, que aplican
+      <code class="inline">transform: translateY(...)</code>) deja de posicionarse respecto al viewport y pasa a
+      posicionarse respecto a ese ancestro — ver el gotcha correspondiente más abajo. Cualquier componente nuevo
+      de overlay a pantalla completa (otro modal, otro visor) debería seguir el mismo patrón.
+    </p>
   </section>
 
   <section id="datos">
@@ -414,6 +426,30 @@
       cualquier <code class="inline">prisma db push</code> que recree estas tablas desde cero (por ejemplo, una
       base de datos de desarrollo nueva).</p>
     </div>
+
+    <h3>Límite de tamaño por foto y su validación (agregado 2026-09-18)</h3>
+    <p>
+      El límite de 10MB por imagen (<code class="inline">MAX_IMAGEN_BYTES</code>) vivía solo en
+      <code class="inline">src/lib/archivosNoticia.ts</code>, que importa <code class="inline">sharp</code> y
+      <code class="inline">fs/promises</code> — código de servidor que no se puede importar desde un componente
+      <code class="inline">"use client"</code>. Se extrajo a <code class="inline">src/lib/constantesArchivos.ts</code>,
+      un módulo sin dependencias de Node, para que tanto los controllers (servidor) como
+      <code class="inline">useSelectorImagenes.ts</code> (cliente) importen el mismo valor. El hook ahora rechaza en
+      el momento cualquier foto que supere el límite (antes solo se enteraba el servidor al guardar, después de
+      que la secretaria ya había llenado el resto del formulario), y el límite se muestra siempre en el texto de
+      ayuda del selector.
+    </p>
+
+    <h3>Botón "Ver N fotos" fuera de la imagen (agregado 2026-09-18)</h3>
+    <p>
+      En las tarjetas de ferias y sorteos, <code class="inline">GaleriaBoton</code> dejó de ir superpuesto sobre
+      la portada (<code class="inline">position: absolute</code> encima de la foto) y ahora se renderiza como un
+      elemento normal del flujo, debajo de la imagen y alineado a la derecha (<code class="inline">.galeriaBoton</code>
+      en <code class="inline">ferias.module.css</code> / <code class="inline">sorteos.module.css</code>). Los
+      colores del botón (<code class="inline">GaleriaFotos.module.css</code>) pasaron de un pill oscuro
+      semitransparente (pensado para ir sobre una foto) a un chip neutro de tarjeta, ya que ahora se ve sobre fondo
+      blanco.
+    </p>
   </section>
 
   <section id="infra">
@@ -513,6 +549,47 @@
       concurrentes del navegador por host. HTTP/2 ya está habilitado (<code class="inline">listen 443 ssl http2;</code>)
       — si se migra de proveedor o se reconstruye la config de nginx desde cero, no perder esa línea.
     </p>
+
+    <h3>Modal/visor que queda "encerrado" en su tarjeta en vez de cubrir la pantalla (2026-09-18)</h3>
+    <p>
+      Bug real detectado en producción: al abrir la galería de fotos de una feria y mover el cursor, el visor
+      parpadeaba entre pantalla completa y un recuadro chico del tamaño de la tarjeta. Causa: <code class="inline">Lightbox</code>
+      (<code class="inline">position: fixed; inset: 0</code>) se renderizaba anidado dentro de la tarjeta
+      <code class="inline">.feria</code>, que tiene <code class="inline">transform: translateY(-3px)</code> en
+      <code class="inline">:hover</code>. En CSS, un ancestro con <code class="inline">transform</code> se
+      convierte en el <em>containing block</em> de cualquier descendiente <code class="inline">position: fixed</code>
+      — así que cada vez que el cursor entraba/salía del hover de la tarjeta, el "fixed" del visor saltaba entre
+      posicionarse respecto al viewport (sin hover) y respecto a la tarjeta (con hover). Arreglado moviendo
+      <code class="inline">Lightbox</code> a un portal en <code class="inline">document.body</code> (ver la
+      convención en la sección 3). Cualquier overlay a pantalla completa nuevo debe seguir ese mismo patrón, no
+      solo depender de <code class="inline">position: fixed</code> dentro del árbol normal de componentes.
+    </p>
+
+    <h3><code class="inline" style="font-size:1rem">unstable_cache</code> serializa <code class="inline" style="font-size:1rem">Date</code> a string en cache hit (2026-09-17/18)</h3>
+    <p>
+      <code class="inline">TypeError: a.fecha.toISOString is not a function</code> apareció de forma intermitente
+      en los logs de producción. <code class="inline">NoticiasController</code> envuelve las lecturas con
+      <code class="inline">unstable_cache</code> (ver sección 3): en un <em>cache miss</em> el valor devuelto viene
+      recién de Prisma (con <code class="inline">Date</code> reales), pero en un <em>cache hit</em> Next
+      deserializa el valor cacheado desde JSON, y <code class="inline">Date</code> se convierte en
+      <code class="inline">string</code>. El código en <code class="inline">src/app/page.tsx</code> y
+      <code class="inline">src/app/noticias/page.tsx</code> asumía que <code class="inline">fecha</code> siempre
+      era <code class="inline">Date</code> y llamaba <code class="inline">.toISOString()</code> sin verificar.
+      Cualquier dato que pase por <code class="inline">unstable_cache</code> y contenga campos
+      <code class="inline">Date</code> tiene este mismo riesgo aguas abajo — tratar esos campos como
+      <code class="inline">Date | string</code>, nunca solo <code class="inline">Date</code>.
+    </p>
+
+    <h3>CSP bloqueaba <code class="inline" style="font-size:1rem">eval()</code> en modo dev (2026-09-17)</h3>
+    <p>
+      La CSP de <code class="inline">next.config.ts</code> (sección 8) no incluía <code class="inline">'unsafe-eval'</code>
+      en <code class="inline">script-src</code>, correcta para producción pero rompía cosas solo en
+      <code class="inline">next dev</code>: React/Next usan <code class="inline">eval()</code> en desarrollo para
+      HMR y para reconstruir stack traces del debugger. Sin ese permiso, el modo dev queda en un estado roto (se
+      observó, entre otros síntomas, el navbar sin responder a clics) sin que aparezca un error obvio más allá de
+      un mensaje de consola sobre <code class="inline">eval()</code>. La CSP ahora agrega
+      <code class="inline">'unsafe-eval'</code> solo cuando <code class="inline">process.env.NODE_ENV !== "production"</code>.
+    </p>
   </section>
 
   <section id="seguridad">
@@ -563,9 +640,10 @@ npm run dev</pre>
 
   <footer>
     <p class="toplink"><a href="#que-es">↑ Volver al inicio</a></p>
-    <p>Documento generado como parte de la implementación de la galería de fotos (septiembre 2026), pensado para
-    que cualquier próximo desarrollador pueda retomar el proyecto sin depender de contexto que solo tenía quien
-    lo mantuvo hasta ahora.</p>
+    <p>Documento generado como parte de la implementación de la galería de fotos (septiembre 2026) y actualizado
+    tras la ronda de correcciones y mejoras de UX del 17-18 de septiembre (bug del visor de fotos, caché de
+    fechas, aviso de tamaño de imagen y mensajes de éxito/error al publicar), pensado para que cualquier próximo
+    desarrollador pueda retomar el proyecto sin depender de contexto que solo tenía quien lo mantuvo hasta ahora.</p>
   </footer>
 
 </div>
