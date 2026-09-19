@@ -20,13 +20,18 @@ RESTO="${RESTO#*@}"
 HOST_PUERTO="${RESTO%%/*}"
 HOST="${HOST_PUERTO%%:*}"
 PUERTO="${HOST_PUERTO#*:}"
+# Prisma agrega parametros tipo ?connection_limit=... al final; se descartan.
 BASE="${RESTO#*/}"
+BASE="${BASE%%\?*}"
 
 mkdir -p "$BACKUP_DIR"
 FECHA=$(date +%Y-%m-%d_%H-%M)
 ARCHIVO="$BACKUP_DIR/sitecorpac_${FECHA}.sql.gz"
 
-MYSQL_PWD="$PASSWORD" mysqldump -h "$HOST" -P "$PUERTO" -u "$USUARIO" "$BASE" | gzip > "$ARCHIVO"
+# --no-tablespaces: el usuario de la app no tiene el privilegio PROCESS que
+# mysqldump pide por defecto para volcar metadatos de tablespaces; no hace
+# falta para respaldar los datos.
+MYSQL_PWD="$PASSWORD" mysqldump --no-tablespaces -h "$HOST" -P "$PUERTO" -u "$USUARIO" "$BASE" | gzip > "$ARCHIVO"
 
 # Rotación: borra backups más viejos que RETENCION_DIAS.
 find "$BACKUP_DIR" -name "sitecorpac_*.sql.gz" -mtime +"$RETENCION_DIAS" -delete
