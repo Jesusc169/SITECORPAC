@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://sitecorpac.com"),
   title: "SITECORPAC",
   description: "Sindicato de Trabajadores de CORPAC",
-  icons: {
-    icon: "/logo_site.jpg", // asegúrate que exista en /public
-  },
+  // El favicon lo genera Next automáticamente desde src/app/icon.png y
+  // apple-icon.png (convención de archivos): un .jpg aquí no se mostraba
+  // porque la mayoría de navegadores no soporta JPG como favicon.
 };
 
 export default function RootLayout({
