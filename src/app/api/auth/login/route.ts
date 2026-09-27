@@ -1,13 +1,7 @@
 // src/app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
 import { AuthController } from "../../../../controllers/AuthController";
-import { estaBloqueado, registrarFallo, registrarExito } from "@/lib/rateLimiter";
-
-function obtenerIp(req: Request): string {
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "desconocida";
-}
+import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "@/lib/rateLimiter";
 
 export async function POST(req: Request) {
   const ip = obtenerIp(req);

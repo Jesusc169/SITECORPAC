@@ -7,6 +7,31 @@
  */
 import prisma from "@/lib/prisma";
 
+/**
+ * IP real del cliente detrás de nginx. `X-Forwarded-For` puede traer
+ * cualquier valor que el cliente quiera al principio de la lista — nginx
+ * (con `$proxy_add_x_forwarded_for`) solo AGREGA la IP real al final, no la
+ * reemplaza. Confiar en el primer valor (como se hacía antes) dejaba
+ * saltarse el bloqueo de fuerza bruta entero con solo mandar un
+ * X-Forwarded-For distinto en cada intento. `X-Real-IP` sí es confiable: nginx
+ * la fija con `$remote_addr`, que el cliente no puede sobrescribir.
+ */
+export function obtenerIp(req: Request): string {
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const partes = forwardedFor
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (partes.length) return partes[partes.length - 1];
+  }
+
+  return "desconocida";
+}
+
 const MAX_INTENTOS = 5;
 const VENTANA_MS = 15 * 60 * 1000;
 const BLOQUEO_MS = 15 * 60 * 1000;

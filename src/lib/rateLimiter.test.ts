@@ -11,11 +11,40 @@ const prismaMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/prisma", () => ({ default: prismaMock }));
 
-import { estaBloqueado, registrarFallo, registrarExito } from "./rateLimiter";
+import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "./rateLimiter";
 
 beforeEach(() => {
   vi.clearAllMocks();
   prismaMock.login_intento.delete.mockResolvedValue({});
+});
+
+function req(headers: Record<string, string>): Request {
+  return new Request("http://localhost/api/auth/login", { headers });
+}
+
+describe("obtenerIp", () => {
+  it("confía en X-Real-IP (nginx la fija con $remote_addr, el cliente no la puede pisar)", () => {
+    expect(obtenerIp(req({ "x-real-ip": "190.1.2.3" }))).toBe("190.1.2.3");
+  });
+
+  it("si no hay X-Real-IP, usa el ÚLTIMO valor de X-Forwarded-For (el que agrega nginx)", () => {
+    expect(
+      obtenerIp(req({ "x-forwarded-for": "1.1.1.1, 2.2.2.2, 190.9.9.9" }))
+    ).toBe("190.9.9.9");
+  });
+
+  it("ignora IPs falsas que el cliente ponga primero en X-Forwarded-For", () => {
+    // Antes del fix, esto devolvía "666.666.666.666" (el primer valor,
+    // inventado por el atacante) y permitía rotar IPs falsas para saltarse
+    // el bloqueo por fuerza bruta en /api/auth/login.
+    const resultado = obtenerIp(req({ "x-forwarded-for": "666.666.666.666, 190.9.9.9" }));
+    expect(resultado).not.toBe("666.666.666.666");
+    expect(resultado).toBe("190.9.9.9");
+  });
+
+  it("devuelve 'desconocida' si no hay ningún header de IP", () => {
+    expect(obtenerIp(req({}))).toBe("desconocida");
+  });
 });
 
 describe("estaBloqueado", () => {
