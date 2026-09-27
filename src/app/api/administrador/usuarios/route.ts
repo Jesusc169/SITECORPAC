@@ -38,7 +38,10 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const nuevoUsuario = await UsuarioController.crearUsuario(body);
+    const nuevoUsuario = await UsuarioController.crearUsuario(
+      body,
+      usuarioActual.rol === "administrador"
+    );
 
     return NextResponse.json(nuevoUsuario, { status: 201 });
   } catch (error) {

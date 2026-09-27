@@ -3,8 +3,13 @@ import { UserModel } from "@/models/UserModel";
 
 export class UsuarioValidationError extends Error {}
 
-function normalizarRol(rol: unknown): string {
-  return rol === "administrador" ? "administrador" : "secretaria";
+// El permiso "usuarios" es delegable (una secretaria puede tenerlo para
+// gestionar otras cuentas de secretaria), pero solo un administrador real
+// puede otorgar el rol "administrador" — si no, cualquier cuenta con ese
+// permiso podía autoascenderse (o ascender a otra cuenta) a acceso total.
+function normalizarRol(rol: unknown, actorEsAdministrador: boolean): string {
+  if (rol === "administrador" && actorEsAdministrador) return "administrador";
+  return "secretaria";
 }
 
 function normalizarPermisos(permisos: unknown): string[] {
@@ -14,17 +19,20 @@ function normalizarPermisos(permisos: unknown): string[] {
 export const UsuarioController = {
   obtenerUsuarios: () => UserModel.obtenerTodos(),
 
-  crearUsuario: async (input: {
-    nombre?: string;
-    email?: string;
-    password?: string;
-    rol?: string;
-    permisos?: unknown;
-  }) => {
+  crearUsuario: async (
+    input: {
+      nombre?: string;
+      email?: string;
+      password?: string;
+      rol?: string;
+      permisos?: unknown;
+    },
+    actorEsAdministrador: boolean
+  ) => {
     const nombre = (input.nombre || "").trim();
     const email = (input.email || "").trim().toLowerCase();
     const password = input.password || "";
-    const rol = normalizarRol(input.rol);
+    const rol = normalizarRol(input.rol, actorEsAdministrador);
     const permisos = normalizarPermisos(input.permisos);
 
     if (!nombre || !email || !password) {
@@ -47,10 +55,11 @@ export const UsuarioController = {
   actualizarUsuario: async (
     id: number,
     actorId: number,
-    input: { nombre?: string; rol?: string; permisos?: unknown; password?: string }
+    input: { nombre?: string; rol?: string; permisos?: unknown; password?: string },
+    actorEsAdministrador: boolean
   ) => {
     const nombre = (input.nombre || "").trim();
-    const rol = normalizarRol(input.rol);
+    const rol = normalizarRol(input.rol, actorEsAdministrador);
     const permisos = normalizarPermisos(input.permisos);
     const nuevaPassword = input.password || undefined;
 

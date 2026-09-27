@@ -26,12 +26,18 @@ export function esImagenValida(file: File): boolean {
   }
 }
 
+// La extensión es OBLIGATORIA (no basta con un content-type "bonito"): nginx
+// sirve /uploads/** directo desde disco y decide el Content-Type por la
+// extensión del archivo, no por lo que el cliente dijo al subirlo. Antes
+// bastaba con spoofear el content-type del multipart para colar un .html con
+// <script> disfrazado de "documento", que nginx terminaba sirviendo como
+// text/html — es decir, XSS almacenado servido desde el dominio real.
 export function esDocumentoPermitido(file: File): boolean {
   const nombre = file.name.toLowerCase();
   const extensionValida = EXTENSIONES_DOCUMENTO_PERMITIDAS.some((ext) =>
     nombre.endsWith(ext)
   );
-  return TIPOS_DOCUMENTO_PERMITIDOS.has(file.type) || extensionValida;
+  return extensionValida && TIPOS_DOCUMENTO_PERMITIDOS.has(file.type);
 }
 
 export async function guardarImagenNoticia(file: File, indice = 0): Promise<string> {

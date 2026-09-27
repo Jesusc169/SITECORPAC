@@ -26,7 +26,12 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const actualizado = await UsuarioController.actualizarUsuario(id, usuarioActual.id, body);
+    const actualizado = await UsuarioController.actualizarUsuario(
+      id,
+      usuarioActual.id,
+      body,
+      usuarioActual.rol === "administrador"
+    );
 
     return NextResponse.json(actualizado);
   } catch (error) {
