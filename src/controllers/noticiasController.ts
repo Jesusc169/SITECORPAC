@@ -42,15 +42,26 @@ interface DatosNoticiaActualizacion {
 // Lecturas públicas: cacheadas 60s y con el tag "noticias" para poder
 // invalidarlas al instante desde crear/editar/eliminar (revalidateTag más
 // abajo), en vez de forzar cada página a renderizar sin caché en cada visita.
+// Los listados (home y /noticias) solo muestran tarjetas: no traemos
+// `contenido` (TEXT largo) para no leerlo de la BD ni guardarlo en caché.
+const CAMPOS_TARJETA = {
+  id: true,
+  titulo: true,
+  descripcion: true,
+  imagen: true,
+  fecha: true,
+} as const;
+
 const obtenerNoticiasCacheadas = unstable_cache(
-  async () => prisma.noticia.findMany({ orderBy: { fecha: "desc" } }),
+  async () =>
+    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, select: CAMPOS_TARJETA }),
   ["noticias-todas"],
   { revalidate: 60, tags: ["noticias"] }
 );
 
 const obtenerUltimasNoticiasCacheadas = unstable_cache(
   async (limit: number) =>
-    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, take: limit }),
+    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, take: limit, select: CAMPOS_TARJETA }),
   ["noticias-ultimas"],
   { revalidate: 60, tags: ["noticias"] }
 );

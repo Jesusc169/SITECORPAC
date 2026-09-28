@@ -11,6 +11,17 @@ import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
 import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
 
+// Antes esta página se renderizaba desde cero en cada visita (sin caché de
+// página). Ahora se genera la primera vez que alguien abre cada noticia y
+// se reutiliza; publicar/editar/eliminar la invalida al instante vía
+// revalidateTag("noticias") (ver NoticiasController), y como respaldo se
+// regenera cada 60s.
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({
   params,
 }: {

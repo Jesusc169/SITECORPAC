@@ -43,6 +43,11 @@ model noticia {
   autor          String
   noticia_pdf    noticia_pdf[]
   noticia_imagen noticia_imagen[]
+
+  // Listados públicos (home, /noticias, sitemap) ordenan por fecha; el panel
+  // admin ordena por createdAt.
+  @@index([fecha], map: "idx_noticia_fecha")
+  @@index([createdAt], map: "idx_noticia_created")
 }
 
 model noticia_pdf {
@@ -204,6 +209,11 @@ model sorteo {
   actualizado_en  DateTime?         @default(now()) @db.Timestamp(0)
   sorteo_producto sorteo_producto[]
   sorteo_imagen   sorteo_imagen[]
+
+  // Página pública: WHERE estado = 'ACTIVO' ORDER BY fecha_hora DESC.
+  @@index([estado, fecha_hora], map: "idx_sorteo_estado_fecha")
+  // Panel admin: ORDER BY fecha_hora DESC sin filtro.
+  @@index([fecha_hora], map: "idx_sorteo_fecha")
 }
 
 // Galería de hasta 5 fotos por sorteo (misma idea que noticia_imagen).

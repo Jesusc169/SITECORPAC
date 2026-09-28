@@ -46,7 +46,7 @@ export default async function HomePage() {
 
       <section className={styles.contenedorImagen}>
         <Image
-          src="/Fondo_principal.png"
+          src="/Fondo_principal.webp"
           alt="Fondo principal"
           fill
           priority
