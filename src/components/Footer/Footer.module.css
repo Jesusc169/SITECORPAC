@@ -106,6 +106,32 @@
   color: #94a3b8;
 }
 
+.legalLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+}
+
+.legalLinks a {
+  color: #e5e7eb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legalLinks a:hover {
+  color: #ffffff;
+}
+
+/* Sobre el fondo oscuro del footer, el anillo de foco azul global no se
+   distinguiría: se usa celeste claro. */
+.footer a:focus-visible {
+  outline-color: #7dd3fc;
+}
+
 /* ===============================
    RESPONSIVE
 ================================ */

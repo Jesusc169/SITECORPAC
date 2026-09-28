@@ -4,7 +4,11 @@ import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   return (
-    <nav className={`navbar navbar-expand-lg ${styles.navbarCustom}`}>
+    <>
+    <nav
+      className={`navbar navbar-expand-lg ${styles.navbarCustom}`}
+      aria-label="Menú principal"
+    >
       <div className="container-fluid">
         {/* Botón para móvil */}
         <button
@@ -14,7 +18,7 @@ export default function Navbar() {
           data-bs-target="#navbarNavDropdown"
           aria-controls="navbarNavDropdown"
           aria-expanded="false"
-          aria-label="Toggle navigation"
+          aria-label="Abrir o cerrar el menú"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -188,7 +192,7 @@ export default function Navbar() {
             {/* 🔹 Login */}
             <li className="nav-item">
               <Link className={`nav-link ${styles.navLink}`} href="/login">
-                Login
+                Iniciar sesión
               </Link>
             </li>
 
@@ -202,11 +206,15 @@ export default function Navbar() {
               >
                 <i className="bi bi-whatsapp" aria-hidden="true"></i>
                 Únete al SITE
+                <span className="sr-only"> (abre WhatsApp en una pestaña nueva)</span>
               </a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
+    {/* Destino de "Saltar al contenido principal" (ver Cabecera). */}
+    <div id="contenido" tabIndex={-1} />
+    </>
   );
 }

@@ -54,20 +54,24 @@ export default function SorteosView({
       </header>
 
       {/* FILTRO */}
-      <div className={styles.anios}>
+      <div className={styles.anios} role="group" aria-label="Filtrar sorteos por año">
         {aniosDisponibles.map((anio) => (
           <button
             key={`anio-${anio}`}
+            type="button"
             onClick={() => onChangeAnio(anio)}
             className={anioSeleccionado === anio ? styles.activo : ""}
+            aria-pressed={anioSeleccionado === anio}
           >
             {anio}
           </button>
         ))}
         <button
           key="ver-todos"
+          type="button"
           onClick={() => onChangeAnio(null)}
           className={anioSeleccionado === null ? styles.activo : ""}
+          aria-pressed={anioSeleccionado === null}
         >
           Ver todos
         </button>

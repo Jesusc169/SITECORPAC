@@ -1,4 +1,6 @@
 // components/Footer.tsx
+import Link from "next/link";
+import { INSTITUCION } from "@/lib/datosInstitucionales";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -92,8 +94,16 @@ export default function Footer() {
 
         {/* FOOTER LEGAL */}
         <div className={styles.footerBottom}>
+          <nav aria-label="Información legal">
+            <ul className={styles.legalLinks}>
+              <li><Link href="/privacidad">Política de privacidad</Link></li>
+              <li><Link href="/terminos">Términos y condiciones</Link></li>
+              <li><Link href="/cookies">Política de cookies</Link></li>
+              <li><Link href="/accesibilidad">Accesibilidad</Link></li>
+            </ul>
+          </nav>
           <p>
-            © {new Date().getFullYear()} SITECORPAC — Sindicato de Trabajadores de CORPAC
+            © {new Date().getFullYear()} {INSTITUCION.razonSocial} · RUC {INSTITUCION.ruc}
           </p>
         </div>
       </div>

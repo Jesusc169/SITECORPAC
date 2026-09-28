@@ -47,7 +47,9 @@ export default async function HomePage() {
       <section className={styles.contenedorImagen}>
         <Image
           src="/Fondo_principal.webp"
-          alt="Fondo principal"
+          // Decorativa: el texto que importa (h1/h2) va encima como texto
+          // real, así que el lector de pantalla debe omitir la imagen.
+          alt=""
           fill
           priority
           sizes="100vw"

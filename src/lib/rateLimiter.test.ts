@@ -6,16 +6,24 @@ const prismaMock = vi.hoisted(() => ({
     upsert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    deleteMany: vi.fn(),
   },
 }));
 
 vi.mock("@/lib/prisma", () => ({ default: prismaMock }));
 
-import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "./rateLimiter";
+import {
+  estaBloqueado,
+  registrarFallo,
+  registrarExito,
+  obtenerIp,
+  depurarIntentosAntiguos,
+} from "./rateLimiter";
 
 beforeEach(() => {
   vi.clearAllMocks();
   prismaMock.login_intento.delete.mockResolvedValue({});
+  prismaMock.login_intento.deleteMany.mockResolvedValue({ count: 0 });
 });
 
 function req(headers: Record<string, string>): Request {
@@ -113,6 +121,30 @@ describe("registrarFallo", () => {
     expect(prismaMock.login_intento.upsert).toHaveBeenCalled();
     const llamada = prismaMock.login_intento.upsert.mock.calls[0][0];
     expect(llamada.create.fallos).toBe(1);
+  });
+});
+
+describe("depurarIntentosAntiguos", () => {
+  it("borra los registros de más de 24 horas (plazo declarado en /privacidad)", async () => {
+    const antes = Date.now();
+    await depurarIntentosAntiguos();
+
+    const filtro = prismaMock.login_intento.deleteMany.mock.calls[0][0];
+    const limite = filtro.where.primerFalloEn.lt.getTime();
+    expect(antes - limite).toBeGreaterThanOrEqual(24 * 60 * 60 * 1000 - 50);
+    expect(antes - limite).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 50);
+  });
+
+  it("se ejecuta en cada comprobación de bloqueo", async () => {
+    prismaMock.login_intento.findUnique.mockResolvedValue(null);
+    await estaBloqueado("1.2.3.4");
+    expect(prismaMock.login_intento.deleteMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("si la depuración falla, el login no se cae", async () => {
+    prismaMock.login_intento.deleteMany.mockRejectedValue(new Error("DB caída"));
+    prismaMock.login_intento.findUnique.mockResolvedValue(null);
+    await expect(estaBloqueado("1.2.3.4")).resolves.toBeNull();
   });
 });
 

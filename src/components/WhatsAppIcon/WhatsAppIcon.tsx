@@ -34,9 +34,14 @@ export default function WhatsAppIcon() {
         target="_blank"
         rel="noopener noreferrer"
         className={styles.whatsappButton}
+        // El tooltip es solo visual (se oculta hasta el :hover), así que sin
+        // aria-label el lector de pantalla anunciaba un enlace sin nombre.
+        aria-label="Comunícate con el SITE por WhatsApp (abre en una pestaña nueva)"
       >
-        <span className={styles.tooltipText}>Comunícate con el SITE</span>
-        <i className="bi bi-whatsapp"></i>
+        <span className={styles.tooltipText} aria-hidden="true">
+          Comunícate con el SITE
+        </span>
+        <i className="bi bi-whatsapp" aria-hidden="true"></i>
       </a>
     </div>
   );

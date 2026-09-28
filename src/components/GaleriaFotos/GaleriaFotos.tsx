@@ -27,9 +27,11 @@ export default function GaleriaFotos({ imagenes, titulo }: Props) {
             type="button"
             className={styles.tile}
             onClick={() => setAbierta(i)}
-            aria-label={`Ver foto ${i + 1} de ${imagenes.length}`}
+            aria-label={`Ver foto ${i + 1} de ${imagenes.length}${titulo ? ` de ${titulo}` : ""}`}
           >
-            <img src={url} alt={`${titulo ?? "Foto"} ${i + 1}`} loading="lazy" />
+            {/* El nombre lo da el aria-label del botón; alt vacío evita que
+                el lector de pantalla lo anuncie dos veces. */}
+            <img src={url} alt="" loading="lazy" />
           </button>
         ))}
       </div>

@@ -68,6 +68,9 @@ export default function NoticiasHome({ noticias = [] }: Props) {
           {/* CARRUSEL */}
           <div
             className={styles.carruselWrapper}
+            role="region"
+            aria-roledescription="carrusel"
+            aria-label="Noticias destacadas"
             onMouseEnter={() => setPausado(true)}
             onMouseLeave={() => setPausado(false)}
             onFocus={() => setPausado(true)}
@@ -79,11 +82,16 @@ export default function NoticiasHome({ noticias = [] }: Props) {
                 transform: `translateX(-${indexActual * 100}%)`,
               }}
             >
-              {noticias.map((noticia) => (
+              {noticias.map((noticia, i) => (
                 <article
                   key={noticia.id}
                   className={styles.noticiaCard}
-                  aria-label={`Noticia: ${noticia.titulo}`}
+                  aria-roledescription="diapositiva"
+                  aria-label={`Noticia ${i + 1} de ${noticias.length}: ${noticia.titulo}`}
+                  // Las diapositivas fuera de pantalla siguen en el DOM: sin
+                  // `inert`, la tecla Tab entraba a sus enlaces invisibles y
+                  // el lector de pantalla las leía todas.
+                  inert={i !== indexActual}
                 >
                   <div className={styles.imagenWrapper}>
                     <Image
@@ -144,11 +152,13 @@ export default function NoticiasHome({ noticias = [] }: Props) {
                 {noticias.map((_, i) => (
                   <button
                     key={i}
+                    type="button"
                     className={`${styles.indicador} ${
                       i === indexActual ? styles.activo : ""
                     }`}
                     onClick={() => setIndexActual(i)}
                     aria-label={`Ir a noticia ${i + 1}`}
+                    aria-current={i === indexActual ? "true" : undefined}
                   />
                 ))}
               </div>

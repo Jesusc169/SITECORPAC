@@ -1,0 +1,199 @@
+/* ===============================
+   PÁGINAS LEGALES
+   Texto largo: ancho de línea cómodo
+   (~70 caracteres), interlineado amplio
+   y colores con contraste AA o mejor.
+================================ */
+.pagina {
+  padding: 48px 16px 64px;
+}
+
+.documento {
+  max-width: 820px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 44px 48px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  color: #1f2937;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.encabezado {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.titulo {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--sitecorpac-navy);
+  margin: 0 0 6px;
+}
+
+.fecha {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin: 0 0 16px;
+}
+
+.resumen {
+  background: #eff6ff;
+  border-left: 4px solid var(--sitecorpac-blue);
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+/* Índice */
+.indice {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 22px;
+  margin-bottom: 32px;
+}
+
+.indiceTitulo {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--sitecorpac-navy);
+}
+
+.indice ol {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.indice a,
+.cuerpo a,
+.relacionadas a {
+  color: var(--sitecorpac-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Cuerpo */
+.cuerpo h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--sitecorpac-navy);
+  margin: 36px 0 12px;
+  /* Que el título no quede tapado al saltar desde el índice */
+  scroll-margin-top: 16px;
+}
+
+.cuerpo h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 22px 0 8px;
+}
+
+.cuerpo ul,
+.cuerpo ol {
+  padding-left: 24px;
+}
+
+.cuerpo li {
+  margin-bottom: 6px;
+}
+
+/* Tablas (datos que se tratan, cookies) */
+.cuerpo table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  font-size: 0.97rem;
+}
+
+.cuerpo caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  padding-bottom: 6px;
+}
+
+.cuerpo th,
+.cuerpo td {
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.cuerpo th {
+  background: #f1f5f9;
+  color: var(--sitecorpac-navy);
+}
+
+.tablaScroll {
+  overflow-x: auto;
+}
+
+/* Bootstrap pinta <code> en rosado (#d63384), que sobre el gris de la
+   tabla no llega al contraste AA. */
+.cuerpo code {
+  color: #9d174d;
+  font-weight: 600;
+}
+
+.cuerpo dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 12px 0 20px;
+}
+
+.cuerpo dt {
+  font-weight: 700;
+  color: #374151;
+}
+
+.cuerpo dd {
+  margin: 0;
+}
+
+/* Páginas relacionadas */
+.relacionadas {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.relacionadas ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
+
+@media (max-width: 640px) {
+  .pagina {
+    padding: 24px 12px 48px;
+  }
+
+  .documento {
+    padding: 26px 18px;
+    font-size: 1rem;
+  }
+
+  .titulo {
+    font-size: 1.7rem;
+  }
+
+  .cuerpo dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .cuerpo dd {
+    margin-bottom: 10px;
+  }
+}

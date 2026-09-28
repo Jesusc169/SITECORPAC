@@ -19,6 +19,10 @@ const RUTAS_ESTATICAS = [
   "/legislacion/oit",
   "/tramites/beneficio-fallecido",
   "/tramites/prestamos",
+  "/privacidad",
+  "/terminos",
+  "/cookies",
+  "/accesibilidad",
 ];
 
 // Rutas públicas estáticas + una entrada por cada noticia publicada, para que

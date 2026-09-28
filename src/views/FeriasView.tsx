@@ -148,19 +148,21 @@ export default function FeriasView({
 
       {/* FILTRO AÑO */}
       {aniosDisponibles && onChangeAnio && (
-        <div className={styles.filtros}>
+        <div className={styles.filtros} role="group" aria-label="Filtrar ferias por año">
           {aniosDisponibles.map((anio) => (
             <button
               key={anio}
+              type="button"
               onClick={() => onChangeAnio(anio)}
               className={anioSeleccionado === anio ? styles.activo : ""}
+              aria-pressed={anioSeleccionado === anio}
             >
               Año {anio}
             </button>
           ))}
 
           {anioSeleccionado !== null && (
-            <button onClick={() => onChangeAnio(null)}>
+            <button type="button" onClick={() => onChangeAnio(null)}>
               Ver todas
             </button>
           )}

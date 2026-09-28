@@ -36,7 +36,7 @@ export default function LoginView() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h2 className={styles.title}>Iniciar sesión</h2>
+        <h1 className={styles.title}>Iniciar sesión</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <label htmlFor="login-email" className={styles.srOnly}>
@@ -51,6 +51,8 @@ export default function LoginView() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "login-error" : undefined}
             className={styles.input}
           />
           <label htmlFor="login-password" className={styles.srOnly}>
@@ -65,6 +67,8 @@ export default function LoginView() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "login-error" : undefined}
             className={styles.input}
           />
           <button type="submit" className={styles.button}>
@@ -72,7 +76,13 @@ export default function LoginView() {
           </button>
         </form>
 
-        {error && <p className={styles.error}>{error}</p>}
+        {/* role="alert": el lector de pantalla anuncia el error apenas
+            aparece; antes solo se veía en pantalla. */}
+        {error && (
+          <p id="login-error" role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

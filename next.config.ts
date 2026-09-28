@@ -1,14 +1,14 @@
 import type { NextConfig } from "next";
 
-// El sitio solo carga un recurso externo: el bundle JS de Bootstrap desde
-// jsdelivr (ver app/layout.tsx). Las fuentes de Google se autohospedan por
-// next/font en build time, así que no necesitan permiso aparte en la CSP.
+// El sitio no carga recursos externos: el JS de Bootstrap sale del paquete
+// npm (ver components/BootstrapClient) y las fuentes de Google se
+// autohospedan por next/font en build time.
 // En dev, React/Next necesitan eval() para HMR y stack traces del debugger;
 // sin 'unsafe-eval' aquí la consola muestra un error de CSP al arrancar
 // `next dev` (no ocurre en producción, donde next build no usa eval()).
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net${
+  `script-src 'self' 'unsafe-inline'${
     process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""
   }`,
   "style-src 'self' 'unsafe-inline'",

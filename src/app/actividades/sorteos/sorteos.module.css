@@ -138,7 +138,7 @@
   align-items: center;
   justify-content: center;
   background-color: #e5e7eb;
-  color: #6b7280;
+  color: #4b5563; /* #6b7280 daba 3.9:1 sobre este gris; este da ~6:1 (AA) */
   font-size: 0.9rem;
 }
 

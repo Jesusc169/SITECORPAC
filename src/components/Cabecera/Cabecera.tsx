@@ -4,6 +4,11 @@ import styles from "./Cabecera.module.css";
 export default function Cabecera() {
   return (
     <header className={styles.cabecera}>
+      {/* Primer elemento enfocable de cada página pública; el destino
+          (#contenido) está al final del Navbar. */}
+      <a href="#contenido" className="saltar-contenido">
+        Saltar al contenido principal
+      </a>
       <div className={styles.contenedor}>
         {/* Logo + nombre */}
         <div className={styles.marca}>

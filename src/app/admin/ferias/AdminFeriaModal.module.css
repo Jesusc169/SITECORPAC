@@ -123,7 +123,9 @@
 .modalBody textarea:focus {
   outline: none;
   border-color: var(--sitecorpac-blue-light);
-  box-shadow: 0 0 0 1px var(--sitecorpac-blue-light)33;
+  /* Antes: `var(--sitecorpac-blue-light)33`, CSS inválido que el navegador
+     descartaba, así que el foco casi no se notaba. */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
 .modalBody textarea {

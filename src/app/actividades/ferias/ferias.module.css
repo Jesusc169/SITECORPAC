@@ -115,13 +115,17 @@
 
 .filtros button:hover {
   border-color: #fdad01;
-  color: #fdad01;
+  /* El texto dorado #fdad01 sobre blanco daba 1.9:1; este dorado oscuro
+     cumple AA (~5.9:1). */
+  color: #8a5a00;
 }
 
 .filtros .activo {
   background-color: #fdad01;
   border-color: #fdad01;
-  color: #ffffff;
+  /* Blanco sobre este dorado daba 1.9:1 (mínimo AA: 4.5:1); el azul
+     marino da ~9.9:1 y mantiene el dorado de marca. */
+  color: var(--sitecorpac-navy);
   font-weight: 600;
   box-shadow: 0 4px 14px rgba(253, 173, 1, 0.35);
 }

@@ -35,9 +35,23 @@ export function obtenerIp(req: Request): string {
 const MAX_INTENTOS = 5;
 const VENTANA_MS = 15 * 60 * 1000;
 const BLOQUEO_MS = 15 * 60 * 1000;
+// La IP es un dato personal: no se guarda más de lo necesario. Un registro
+// con más de 24h ya no sirve para nada (ventana y bloqueo duran 15 min).
+// Este plazo es el que declara /privacidad; si cambia, actualizar ahí.
+const RETENCION_MS = 24 * 60 * 60 * 1000;
+
+/** Borra registros de intentos fallidos de más de 24 horas, de cualquier IP. */
+export async function depurarIntentosAntiguos(): Promise<void> {
+  await prisma.login_intento
+    .deleteMany({ where: { primerFalloEn: { lt: new Date(Date.now() - RETENCION_MS) } } })
+    .catch(() => {});
+}
 
 /** Devuelve el timestamp (ms) hasta el que sigue bloqueado, o null si puede intentar. */
 export async function estaBloqueado(ip: string): Promise<number | null> {
+  // Se aprovecha cada intento de login para depurar registros viejos.
+  await depurarIntentosAntiguos();
+
   const registro = await prisma.login_intento.findUnique({ where: { ip } });
   if (!registro?.bloqueadoHasta) return null;
 

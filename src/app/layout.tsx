@@ -3,8 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "@/styles/global.css"; // tus estilos globales
 
-import Script from "next/script";
 import { Metadata } from "next";
+import BootstrapClient from "@/components/BootstrapClient/BootstrapClient";
 import { Archivo } from "next/font/google";
 
 const archivo = Archivo({
@@ -35,10 +35,7 @@ export default function RootLayout({
         {children}
 
         {/* 🔹 Bootstrap JS Bundle (incluye Popper.js) para dropdowns, modals, tooltips, etc. */}
-        <Script
-          src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-          strategy="afterInteractive"
-        />
+        <BootstrapClient />
       </body>
     </html>
   );
