@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NoticiasController, NoticiaValidationError } from "@/controllers/noticiasController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { leerVisible } from "@/lib/visibilidad";
 
 export const runtime = "nodejs";
 
@@ -51,6 +52,7 @@ export async function PUT(
       descripcion: formData.get("descripcion") as string,
       contenido: formData.get("contenido") as string,
       autor: formData.get("autor") as string,
+      activo: leerVisible(formData),
       imagenesNuevas: formData.getAll("imagenes") as File[],
       imagenesEliminar,
       imagenPrincipalId: imagenPrincipalIdRaw ? Number(imagenPrincipalIdRaw) : null,

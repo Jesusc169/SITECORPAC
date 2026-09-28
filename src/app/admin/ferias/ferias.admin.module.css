@@ -47,69 +47,18 @@
 }
 
 /* BOTÓN NUEVO (ESTILO BANCO) */
-.newBtn {
-  background: #0b1f3a;
-  color: white;
-  padding: 12px 22px;
-  border-radius: 6px;
-  border: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.newBtn:hover {
-  background: #08172b;
-}
 
 /* =========================================================
    TABLA CONTENEDOR
 ========================================================= */
-.tableWrapper {
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  overflow-x: auto;
-}
 
 /* =========================================================
    TABLA
 ========================================================= */
-.adminTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
 
 /* HEADER TABLA */
-.adminTable thead {
-  background: #0b1f3a;
-}
-
-.adminTable th {
-  padding: 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.8rem;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-}
 
 /* CELDAS */
-.adminTable td {
-  padding: 18px 16px;
-  border-bottom: 1px solid #eef1f5;
-  vertical-align: top;
-  color: #1f2937;
-}
-
-.adminTable tbody tr:hover {
-  background: #f9fafb;
-}
 
 /* =========================================================
    NOMBRE FERIA
@@ -167,46 +116,14 @@
 /* =========================================================
    ACCIONES
 ========================================================= */
-.actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
 
 /* BOTONES ICON */
-.iconBtn {
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: white;
-}
 
 /* EDITAR (gris banco) */
-.edit {
-  background: #374151;
-}
-.edit:hover {
-  background: #111827;
-}
 
 /* DUPLICAR (azul corporativo) */
-.duplicate {
-  background: var(--sitecorpac-blue);
-}
-.duplicate:hover {
-  background: var(--sitecorpac-blue-dark);
-}
 
 /* ELIMINAR (rojo serio) */
-.delete {
-  background: var(--sitecorpac-red-dark);
-}
-.delete:hover {
-  background: #7f1d1d;
-}
 
 /* =========================================================
    MENSAJES
@@ -223,13 +140,6 @@
   text-align: center;
   color: var(--sitecorpac-red);
   font-weight: 600;
-}
-
-.empty {
-  text-align: center;
-  padding: 30px;
-  color: #6b7280;
-  font-style: italic;
 }
 
 .center {

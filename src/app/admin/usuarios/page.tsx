@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import styles from "./usuarios.module.css";
 import { PRIVILEGIOS } from "@/lib/permisos";
+import panel from "@/styles/PanelAdmin.module.css";
 
 interface Usuario {
   id: number;
@@ -163,7 +164,7 @@ export default function UsuariosPage() {
               Administra quién puede entrar al panel y qué secciones puede usar.
             </p>
           </div>
-          <button className={styles.btnPrimary} onClick={abrirCrear}>
+          <button className={panel.botonNuevo} onClick={abrirCrear}>
             + Nuevo usuario
           </button>
         </div>
@@ -173,7 +174,8 @@ export default function UsuariosPage() {
         {cargando ? (
           <p>Cargando...</p>
         ) : (
-          <table className={styles.table}>
+          <div className={panel.contenedorTabla}>
+          <table className={panel.tabla}>
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -186,7 +188,7 @@ export default function UsuariosPage() {
             <tbody>
               {usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: "1rem" }}>
+                  <td colSpan={5} className={panel.vacio}>
                     No hay usuarios registrados
                   </td>
                 </tr>
@@ -219,17 +221,20 @@ export default function UsuariosPage() {
                         <span className={styles.textoMuted}>Sin privilegios</span>
                       )}
                     </td>
-                    <td className={styles.acciones}>
-                      <button onClick={() => abrirEditar(u)}>Editar</button>
-                      <button className={styles.danger} onClick={() => eliminar(u)}>
-                        Eliminar
-                      </button>
+                    <td>
+                      <div className={panel.acciones}>
+                        <button className={panel.boton} onClick={() => abrirEditar(u)}>Editar</button>
+                        <button className={panel.botonPeligro} onClick={() => eliminar(u)}>
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+          </div>
         )}
 
         {modalAbierto && (

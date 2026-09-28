@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./AdminFeriaModal.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 
 /* =========================
    TIPOS
@@ -50,6 +51,7 @@ export default function AdminFeriaModal({
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
+  const [estado, setEstado] = useState(true);
   const selectorImagenes = useSelectorImagenes();
 
   const [empresas, setEmpresas] = useState<number[]>([]);
@@ -68,6 +70,7 @@ export default function AdminFeriaModal({
       setTitulo("");
       setDescripcion("");
       setAnio(new Date().getFullYear());
+      setEstado(true);
       selectorImagenes.resetear([]);
       setEmpresas([]);
       setFechas([]);
@@ -77,6 +80,7 @@ export default function AdminFeriaModal({
     setTitulo(feriaData.titulo ?? "");
     setDescripcion(feriaData.descripcion ?? "");
     setAnio(feriaData.anio ?? new Date().getFullYear());
+    setEstado(feriaData.estado ?? true);
     selectorImagenes.resetear(
       Array.isArray(feriaData.evento_feria_imagen)
         ? feriaData.evento_feria_imagen.map((img: any) => ({ id: img.id, url: img.url }))
@@ -171,6 +175,7 @@ export default function AdminFeriaModal({
     formData.append("titulo", titulo.trim());
     formData.append("descripcion", descripcion.trim());
     formData.append("anio", String(anio));
+    formData.append("estado", String(estado));
 
     if (feriaData) {
       // Edición: puede combinar fotos existentes + nuevas + una eliminación.
@@ -201,6 +206,8 @@ export default function AdminFeriaModal({
         </div>
 
         <div className={styles.modalBody}>
+          <InterruptorVisible visible={estado} onChange={setEstado} tipo="feria" />
+
           <label>Título</label>
           <input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
 

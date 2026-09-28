@@ -1,4 +1,5 @@
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { invalidarCache } from "@/lib/invalidarCache";
 import { SorteoModel } from "@/models/sorteoModel";
 import { guardarImagenSorteo, borrarImagenSorteo } from "@/lib/archivosSorteo";
 import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
@@ -40,7 +41,7 @@ function fechaValida(fecha: Date): Date {
 }
 
 // Lectura pública cacheada 60s, con tag "sorteos" para invalidarla al
-// instante desde crear/editar/duplicar/eliminar (revalidateTag más abajo).
+// instante desde crear/editar/duplicar/eliminar (invalidarCache más abajo).
 const obtenerSorteosPublicosCacheados = unstable_cache(
   async (anio: number | null) => SorteoModel.obtenerActivos(anio),
   ["sorteos-publicos"],
@@ -98,7 +99,7 @@ export const SorteoController = {
       imagenes: imagenesData,
     });
 
-    revalidateTag("sorteos", "max");
+    invalidarCache("sorteos");
     return sorteo;
   },
 
@@ -194,7 +195,7 @@ export const SorteoController = {
       imagen,
     });
 
-    revalidateTag("sorteos", "max");
+    invalidarCache("sorteos");
     return sorteo;
   },
 
@@ -217,7 +218,7 @@ export const SorteoController = {
       })),
     });
 
-    revalidateTag("sorteos", "max");
+    invalidarCache("sorteos");
     return nuevo;
   },
 
@@ -231,6 +232,6 @@ export const SorteoController = {
     }
 
     await SorteoModel.eliminar(id);
-    revalidateTag("sorteos", "max");
+    invalidarCache("sorteos");
   },
 };

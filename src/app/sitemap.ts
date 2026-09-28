@@ -34,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const noticias = await prisma.noticia.findMany({
+    where: { activo: true },
     select: { id: true, updatedAt: true },
     orderBy: { fecha: "desc" },
   });

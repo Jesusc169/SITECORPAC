@@ -1,4 +1,5 @@
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { invalidarCache } from "@/lib/invalidarCache";
 import { DirectorioModel } from "@/models/directorioModel";
 import { guardarFotoDirectorio, borrarFotoDirectorio } from "@/lib/archivosDirectorio";
 import type { directorio } from "@prisma/client";
@@ -24,7 +25,7 @@ interface DatosMiembroParcial {
 }
 
 // Lectura pública cacheada 60s, con tag "directorio" para invalidarla al
-// instante desde crear/editar/eliminar (revalidateTag más abajo). Antes
+// instante desde crear/editar/eliminar (invalidarCache más abajo). Antes
 // tenía su propia caché manual en la ruta (una variable en memoria), pero
 // eso da un resultado distinto por cada proceso de PM2 en modo cluster;
 // esto vive en la caché de datos de Next, compartida por igual.
@@ -75,7 +76,7 @@ export const DirectorioController = {
       orden: nuevoOrden,
     });
 
-    revalidateTag("directorio", "max");
+    invalidarCache("directorio");
     return miembro;
   },
 
@@ -103,7 +104,7 @@ export const DirectorioController = {
     if (fotoUrl !== miembro.fotoUrl) data.fotoUrl = fotoUrl;
 
     const actualizado = await DirectorioModel.actualizar(id, data);
-    revalidateTag("directorio", "max");
+    invalidarCache("directorio");
     return actualizado;
   },
 
@@ -113,7 +114,7 @@ export const DirectorioController = {
 
     await borrarFotoDirectorio(miembro.fotoUrl);
     const eliminado = await DirectorioModel.eliminar(id);
-    revalidateTag("directorio", "max");
+    invalidarCache("directorio");
     return eliminado;
   },
 };

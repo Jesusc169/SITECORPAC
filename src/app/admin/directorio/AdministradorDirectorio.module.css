@@ -35,21 +35,7 @@
    BOTÓN AGREGAR
    ====================================================== */
 .btnAgregar {
-  background-color: var(--sitecorpac-blue);
-  color: #ffffff;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  cursor: pointer;
   margin-bottom: 2rem;
-  transition: background-color 0.15s ease;
-}
-
-.btnAgregar:hover {
-  background-color: #0b5ed7;
 }
 
 /* ======================================================
@@ -71,8 +57,9 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+  border: 1px solid #dbe3ec;
+  border-top: 4px solid var(--sitecorpac-azul-oscuro);
+  box-shadow: 0 4px 14px rgba(11, 42, 74, 0.06);
 }
 
 /* Foto */
@@ -108,34 +95,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.actions button {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #1f2937;
-  cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease;
-}
-
-/* Editar */
-.actions button:first-child:hover {
-  background-color: #f3f4f6;
-  border-color: #cbd5e1;
-}
-
-/* Eliminar */
-.actions button:last-child {
-  color: var(--sitecorpac-red-dark);
-  border-color: #fecaca;
-}
-
-.actions button:last-child:hover {
-  background-color: #fee2e2;
 }
 
 /* ======================================================

@@ -67,32 +67,6 @@
   font-size: 0.9rem;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.table thead {
-  background-color: var(--sitecorpac-navy);
-  color: #fff;
-}
-
-.table th,
-.table td {
-  padding: 0.85rem 1rem;
-  text-align: left;
-  font-size: 0.92rem;
-  border-bottom: 1px solid #eef0f2;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
 .badgeRol {
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
@@ -129,25 +103,6 @@
 .textoMuted {
   color: #94a3b8;
   font-size: 0.85rem;
-}
-
-.acciones {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.acciones button {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  border-radius: 6px;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-.acciones .danger {
-  border-color: #fecaca;
-  color: var(--sitecorpac-red-dark);
 }
 
 /* ---------- Modal ---------- */

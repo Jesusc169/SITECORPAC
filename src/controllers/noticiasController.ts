@@ -1,6 +1,7 @@
 // src/controllers/noticiasController.ts
 import prisma from "@/lib/prisma";
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { invalidarCache } from "@/lib/invalidarCache";
 import { NoticiaModel } from "@/models/noticiaModel";
 import {
   esImagenValida,
@@ -24,6 +25,7 @@ interface DatosNoticia {
   imagenFiles: File[];
   imagenPrincipalIndex: number;
   pdfFiles: File[];
+  activo: boolean;
 }
 
 interface DatosNoticiaActualizacion {
@@ -31,6 +33,7 @@ interface DatosNoticiaActualizacion {
   descripcion: string;
   contenido: string | null;
   autor: string;
+  activo: boolean;
   imagenesNuevas: File[];
   imagenesEliminar: number[];
   imagenPrincipalId: number | null;
@@ -40,10 +43,13 @@ interface DatosNoticiaActualizacion {
 }
 
 // Lecturas públicas: cacheadas 60s y con el tag "noticias" para poder
-// invalidarlas al instante desde crear/editar/eliminar (revalidateTag más
+// invalidarlas al instante desde crear/editar/eliminar (invalidarCache más
 // abajo), en vez de forzar cada página a renderizar sin caché en cada visita.
 // Los listados (home y /noticias) solo muestran tarjetas: no traemos
 // `contenido` (TEXT largo) para no leerlo de la BD ni guardarlo en caché.
+// Todas las lecturas públicas filtran `activo: true`: una noticia desactivada
+// desde el panel desaparece del inicio, del listado, del detalle (404) y del
+// sitemap, pero sigue en la BD y en el panel.
 const CAMPOS_TARJETA = {
   id: true,
   titulo: true,
@@ -54,22 +60,22 @@ const CAMPOS_TARJETA = {
 
 const obtenerNoticiasCacheadas = unstable_cache(
   async () =>
-    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, select: CAMPOS_TARJETA }),
+    prisma.noticia.findMany({ where: { activo: true }, orderBy: { fecha: "desc" }, select: CAMPOS_TARJETA }),
   ["noticias-todas"],
   { revalidate: 60, tags: ["noticias"] }
 );
 
 const obtenerUltimasNoticiasCacheadas = unstable_cache(
   async (limit: number) =>
-    prisma.noticia.findMany({ orderBy: { fecha: "desc" }, take: limit, select: CAMPOS_TARJETA }),
+    prisma.noticia.findMany({ where: { activo: true }, orderBy: { fecha: "desc" }, take: limit, select: CAMPOS_TARJETA }),
   ["noticias-ultimas"],
   { revalidate: 60, tags: ["noticias"] }
 );
 
 const obtenerNoticiaPorIdCacheada = unstable_cache(
   async (id: number) =>
-    prisma.noticia.findUnique({
-      where: { id },
+    prisma.noticia.findFirst({
+      where: { id, activo: true },
       include: {
         noticia_pdf: { orderBy: { orden: "asc" } },
         noticia_imagen: { orderBy: { orden: "asc" } },
@@ -163,11 +169,12 @@ export class NoticiasController {
       imagen: imagenPath,
       fecha: now,
       updatedAt: now,
+      activo: input.activo,
       pdfs: pdfsData,
       imagenes: imagenesData,
     });
 
-    revalidateTag("noticias", "max");
+    invalidarCache("noticias");
     return noticia;
   }
 
@@ -295,10 +302,11 @@ export class NoticiasController {
       contenido: input.contenido || null,
       autor: input.autor,
       imagen: imagenPath,
+      activo: input.activo,
       updatedAt: new Date(),
     });
 
-    revalidateTag("noticias", "max");
+    invalidarCache("noticias");
     return actualizada;
   }
 
@@ -316,7 +324,7 @@ export class NoticiasController {
     }
 
     await NoticiaModel.eliminar(id);
-    revalidateTag("noticias", "max");
+    invalidarCache("noticias");
     return true;
   }
 }

@@ -41,6 +41,7 @@ export const FeriaModel = {
     descripcion: string;
     anio: number;
     imagen_portada: string | null;
+    estado?: boolean;
     fechas: { fecha: Date; hora_inicio: string; hora_fin: string; ubicacion: string; zona: string | null }[];
     empresas: number[];
     imagenes?: { url: string; orden: number; principal: boolean }[];
@@ -51,6 +52,7 @@ export const FeriaModel = {
         descripcion: data.descripcion,
         anio: data.anio,
         imagen_portada: data.imagen_portada,
+        estado: data.estado ?? true,
         evento_feria_fecha: { create: data.fechas },
         evento_feria_empresa: { create: data.empresas.map((empresa_id) => ({ empresa_id })) },
         evento_feria_imagen: { create: data.imagenes ?? [] },
@@ -61,7 +63,7 @@ export const FeriaModel = {
 
   actualizar: async (
     id: number,
-    data: { titulo: string; descripcion: string; imagen_portada?: string | null }
+    data: { titulo: string; descripcion: string; imagen_portada?: string | null; estado?: boolean }
   ) => {
     return prisma.evento_feria.update({
       where: { id },

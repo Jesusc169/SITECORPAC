@@ -1,6 +1,9 @@
 "use client";
 
 import styles from "./sorteos.admin.module.css";
+import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
+import { formatearFechaHoraPeru } from "@/lib/fechas";
+import panel from "@/styles/PanelAdmin.module.css";
 
 /* =========================
 TIPOS
@@ -53,15 +56,14 @@ export default function SorteosAdminView({
           <p>Gestione los sorteos del sindicato</p>
         </div>
 
-        <button className={styles.newBtn} onClick={onNuevo}>
+        <button className={panel.botonNuevo} onClick={onNuevo}>
           + Nuevo Sorteo
         </button>
       </header>
 
       {/* ================= TABLA ================= */}
-      <div className={styles.card}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+      <div className={panel.contenedorTabla}>
+          <table className={panel.tabla}>
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -69,7 +71,7 @@ export default function SorteosAdminView({
                 <th>Fecha</th>
                 <th>Lugar</th>
                 <th>Estado</th>
-                <th className={styles.actionsHeader}>Acciones</th>
+                <th>Acciones</th>
               </tr>
             </thead>
 
@@ -83,50 +85,45 @@ export default function SorteosAdminView({
 
                     <td>
                       {s.fecha_hora
-                        ? new Date(s.fecha_hora).toLocaleString("es-PE")
+                        ? formatearFechaHoraPeru(s.fecha_hora)
                         : "-"}
                     </td>
 
                     <td>{s.lugar || "SITECORPAC"}</td>
 
                     <td>
-                      <span
-                        className={`${styles.badge} ${
-                          s.estado === "ACTIVO"
-                            ? styles.active
-                            : styles.inactive
-                        }`}
-                      >
-                        {s.estado || "ACTIVO"}
-                      </span>
+                      <EtiquetaVisible visible={s.estado !== "INACTIVO"} masculino />
                     </td>
 
                     {/* ================= ACCIONES ================= */}
-                    <td className={styles.actionsCell}>
-                      <div className={styles.actions}>
+                    <td>
+                      <div className={panel.acciones}>
                         {/* EDITAR */}
                         <button
-                          className={`${styles.actionBtn} ${styles.edit}`}
+                          className={panel.botonIcono}
                           onClick={() => onEditar(s)}
                           title="Editar"
+                          aria-label={`Editar ${s.nombre}`}
                         >
                           ✏️
                         </button>
 
                         {/* DUPLICAR */}
                         <button
-                          className={`${styles.actionBtn} ${styles.duplicate}`}
+                          className={panel.botonIcono}
                           onClick={() => s.id && onDuplicar(s.id)}
                           title="Duplicar"
+                          aria-label={`Duplicar ${s.nombre}`}
                         >
                           📄
                         </button>
 
                         {/* ELIMINAR */}
                         <button
-                          className={`${styles.actionBtn} ${styles.delete}`}
+                          className={`${panel.botonIcono} ${panel.botonPeligro}`}
                           onClick={() => s.id && onEliminar(s.id)}
                           title="Eliminar"
+                          aria-label={`Eliminar ${s.nombre}`}
                         >
                           🗑️
                         </button>
@@ -136,14 +133,13 @@ export default function SorteosAdminView({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: 40 }}>
+                  <td colSpan={6} className={panel.vacio}>
                     No hay sorteos registrados
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache } from "next/cache";
+import { invalidarCache } from "@/lib/invalidarCache";
 import { FeriaModel } from "@/models/feriaModel";
 import { guardarImagenFeria, borrarImagenFeria } from "@/lib/archivosFeria";
 import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
@@ -25,7 +26,7 @@ function normalizarFechas(fechas: FechaInput[]) {
 }
 
 // Lectura pública cacheada 60s, con tag "ferias" para invalidarla al
-// instante desde crear/editar/duplicar/eliminar (revalidateTag más abajo).
+// instante desde crear/editar/duplicar/eliminar (invalidarCache más abajo).
 const obtenerFeriasPublicasCacheadas = unstable_cache(
   async (anio: number | null, skip: number, take: number) =>
     FeriaModel.obtenerPublicas({ anio, skip, take }),
@@ -59,6 +60,7 @@ export const FeriaController = {
     imagenPrincipalIndex: number;
     empresas: number[];
     fechas: FechaInput[];
+    estado: boolean;
   }) => {
     const titulo = input.titulo?.trim();
     const descripcion = input.descripcion?.trim();
@@ -95,12 +97,13 @@ export const FeriaController = {
       descripcion,
       anio: input.anio,
       imagen_portada,
+      estado: input.estado,
       fechas: normalizarFechas(input.fechas),
       empresas: input.empresas,
       imagenes: imagenesData,
     });
 
-    revalidateTag("ferias", "max");
+    invalidarCache("ferias");
     return feria;
   },
 
@@ -115,6 +118,7 @@ export const FeriaController = {
       imagenPrincipalNuevaIndex: number | null;
       empresas: number[];
       fechas: FechaInput[];
+      estado: boolean;
     }
   ) => {
     const feriaActual = await FeriaModel.obtenerPorId(id);
@@ -187,13 +191,14 @@ export const FeriaController = {
       titulo: input.titulo,
       descripcion: input.descripcion,
       imagen_portada,
+      estado: input.estado,
     });
 
     await FeriaModel.reemplazarEmpresas(id, input.empresas);
     await FeriaModel.reemplazarFechas(id, normalizarFechas(input.fechas));
 
     const feria = await FeriaModel.obtenerPorId(id);
-    revalidateTag("ferias", "max");
+    invalidarCache("ferias");
     return feria;
   },
 
@@ -216,7 +221,7 @@ export const FeriaController = {
       empresas: original.evento_feria_empresa.map((e) => e.empresa_id),
     });
 
-    revalidateTag("ferias", "max");
+    invalidarCache("ferias");
     return nuevaFeria;
   },
 
@@ -231,6 +236,6 @@ export const FeriaController = {
 
     await FeriaModel.eliminarRelaciones(id);
     await FeriaModel.eliminar(id);
-    revalidateTag("ferias", "max");
+    invalidarCache("ferias");
   },
 };

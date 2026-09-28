@@ -48,6 +48,7 @@ const inputBase = {
   imagenFiles: [] as File[],
   imagenPrincipalIndex: 0,
   pdfFiles: [] as File[],
+  activo: true,
 };
 
 beforeEach(() => {
@@ -121,5 +122,31 @@ describe("NoticiasController.crearNoticiaCompleta", () => {
       })
     ).resolves.toEqual({ id: 1 });
     expect(NoticiaModel.crear).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Visibilidad de la noticia (interruptor del panel)", () => {
+  it("guarda la noticia como oculta cuando activo es false", async () => {
+    await NoticiasController.crearNoticiaCompleta({ ...inputBase, activo: false });
+    expect(NoticiaModel.crear).toHaveBeenCalledWith(expect.objectContaining({ activo: false }));
+  });
+
+  it("al editar, guarda el nuevo estado de visibilidad", async () => {
+    (NoticiaModel.obtenerPorId as any).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
+    (NoticiaModel.actualizar as any).mockResolvedValue({ id: 7 });
+    await NoticiasController.actualizarNoticiaCompleta(7, {
+      titulo: "Asamblea",
+      descripcion: "resumen",
+      contenido: null,
+      autor: "SITECORPAC",
+      activo: false,
+      imagenesNuevas: [],
+      imagenesEliminar: [],
+      imagenPrincipalId: null,
+      imagenPrincipalNuevaIndex: null,
+      pdfFilesNuevos: [],
+      pdfsEliminar: [],
+    });
+    expect(NoticiaModel.actualizar).toHaveBeenCalledWith(7, expect.objectContaining({ activo: false }));
   });
 });

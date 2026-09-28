@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 
 interface Props {
   onClose: () => void;
@@ -15,6 +16,7 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
   const [descripcion, setDescripcion] = useState("");
   const [contenido, setContenido] = useState("");
   const [autor, setAutor] = useState("SITECORPAC");
+  const [activo, setActivo] = useState(true);
 
   const selectorImagenes = useSelectorImagenes();
 
@@ -52,6 +54,7 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
       formData.append("descripcion", descripcion);
       formData.append("contenido", contenido);
       formData.append("autor", autor);
+      formData.append("activo", String(activo));
 
       selectorImagenes.aplicarAFormData(formData, {
         nuevas: "imagenes",
@@ -72,7 +75,10 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
 
       onSuccess();
       onClose();
-      mostrarToast("exito", "Noticia publicada correctamente");
+      mostrarToast(
+        "exito",
+        activo ? "Noticia publicada correctamente" : "Noticia guardada como oculta (no se ve en el sitio)"
+      );
     } catch (error) {
       console.error(error);
       mostrarToast(
@@ -102,6 +108,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
 
           {/* BODY */}
           <div className="modal-body">
+
+            <InterruptorVisible visible={activo} onChange={setActivo} tipo="noticia" />
 
             <div className="mb-3">
               <label className="form-label fw-semibold">Título</label>

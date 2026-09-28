@@ -3,6 +3,7 @@ import { FeriaController } from "@/controllers/feriaController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { leerVisible } from "@/lib/visibilidad";
 
 /* =========================
    GET – Feria por ID
@@ -71,6 +72,7 @@ export async function PUT(
         : null,
       empresas: empresasRaw ? JSON.parse(empresasRaw) : [],
       fechas: fechasRaw ? JSON.parse(fechasRaw) : [],
+      estado: leerVisible(formData, "estado"),
     });
 
     if (!feria) {

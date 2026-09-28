@@ -10,6 +10,7 @@ import Cabecera from "@/components/Cabecera/Cabecera";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
 import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
+import { ZONA_PERU } from "@/lib/fechas";
 
 // Antes esta página se renderizaba desde cero en cada visita (sin caché de
 // página). Ahora se genera la primera vez que alguien abre cada noticia y
@@ -90,7 +91,7 @@ export default async function NoticiaPage({
 
         <p className={styles.noticiaMeta}>
           Publicado el{" "}
-          {new Date(noticia.fecha).toLocaleDateString("es-PE")} por{" "}
+          {new Date(noticia.fecha).toLocaleDateString("es-PE", { timeZone: ZONA_PERU })} por{" "}
           {noticia.autor}
         </p>
 

@@ -41,6 +41,8 @@ model noticia {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime
   autor          String
+  // false = oculta en el sitio público (se sigue viendo en el panel admin).
+  activo         Boolean          @default(true)
   noticia_pdf    noticia_pdf[]
   noticia_imagen noticia_imagen[]
 

@@ -48,124 +48,17 @@
   margin-top: 4px;
 }
 
-.newBtn {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
-  border: none;
-  padding: 12px 22px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.newBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(29, 78, 216, 0.25);
-}
-
 /* =====================================================
    CARD
 ===================================================== */
-.card {
-  background: var(--bg-card);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
-}
 
 /* =====================================================
    TABLA
 ===================================================== */
-.tableWrapper {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.table thead th {
-  background: #f1f5f9;
-  padding: 14px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-}
-
-.table tbody td {
-  padding: 14px;
-  font-size: 0.9rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-main);
-}
-
-.table tbody tr:hover {
-  background: var(--bg-muted);
-}
-
-.actionsHeader,
-.actionsCell {
-  position: sticky;
-  right: 0;
-  background: #fff;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.actionBtn {
-  border: none;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #f1f5f9;
-  transition: 0.15s;
-}
-
-.actionBtn:hover {
-  background: #e2e8f0;
-}
-
-.edit {
-  color: var(--primary);
-}
-
-.delete {
-  color: var(--danger);
-}
-
-.duplicate {
-  color: #047857;
-}
 
 /* =====================================================
    BADGES
 ===================================================== */
-.badge {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.active {
-  background: #dcfce7;
-  color: var(--success);
-}
-
-.inactive {
-  background: #fee2e2;
-  color: var(--danger);
-}
 
 /* =====================================================
    MODAL OVERLAY

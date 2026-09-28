@@ -1,5 +1,6 @@
 import styles from "@/app/actividades/sorteos/sorteos.module.css";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import { formatearFechaHoraPeru } from "@/lib/fechas";
 
 interface SorteoProducto {
   id?: number;
@@ -149,7 +150,7 @@ export default function SorteosView({
                   <span>
                     📅{" "}
                     {fechaValida
-                      ? fecha.toLocaleDateString("es-PE", {
+                      ? formatearFechaHoraPeru(fecha, {
                           day: "2-digit",
                           month: "long",
                           year: "numeric",

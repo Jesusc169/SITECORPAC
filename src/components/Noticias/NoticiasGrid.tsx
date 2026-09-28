@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./NoticiasGrid.module.css";
+import { ZONA_PERU } from "@/lib/fechas";
 
 interface Noticia {
   id: number;
@@ -24,6 +25,7 @@ function formatearFecha(fecha: string | null) {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    timeZone: ZONA_PERU,
   });
 }
 

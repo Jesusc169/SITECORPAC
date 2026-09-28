@@ -108,7 +108,9 @@
   font-size: 13px;
 }
 
-.modalBody input,
+/* :not([type="checkbox"]): el interruptor "Visible en el sitio web" usa el
+   estilo de Bootstrap; este fondo blanco le borraría la perilla. */
+.modalBody input:not([type="checkbox"]),
 .modalBody textarea,
 .modalBody select {
   width: 100%;
@@ -119,7 +121,7 @@
   background: #ffffff;
 }
 
-.modalBody input:focus,
+.modalBody input:not([type="checkbox"]):focus,
 .modalBody textarea:focus {
   outline: none;
   border-color: var(--sitecorpac-blue-light);

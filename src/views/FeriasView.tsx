@@ -2,6 +2,7 @@
 
 import styles from "@/app/actividades/ferias/ferias.module.css";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import { formatearFechaSola } from "@/lib/fechas";
 
 // =========================
 // Tipos
@@ -63,7 +64,8 @@ function formatHora(hora: string) {
 }
 
 function formatFecha(fecha: string) {
-  return new Date(fecha).toLocaleDateString("es-PE", {
+  // Fecha sin hora guardada como medianoche UTC: en hora de Perú se veía un día antes.
+  return formatearFechaSola(fecha, {
     day: "2-digit",
     month: "long",
     year: "numeric",

@@ -11,6 +11,10 @@
   --sitecorpac-blue: #1d4ed8;
   --sitecorpac-blue-light: #2563eb;
   --sitecorpac-blue-dark: #1e40af;
+  /* Azul oscuro de la marca: nombre SITECORPAC en la cabecera y
+     encabezados de las tablas del panel. */
+  --sitecorpac-azul-oscuro: #0b2a4a;
+  --sitecorpac-azul-oscuro-hover: #123c66;
 }
 
 /* Reset básico */

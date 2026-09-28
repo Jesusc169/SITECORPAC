@@ -29,6 +29,7 @@ export const NoticiaModel = {
     imagen: string | null;
     fecha: Date;
     updatedAt: Date;
+    activo: boolean;
     pdfs: { url: string; nombre: string; orden: number }[];
     imagenes: { url: string; orden: number; principal: boolean }[];
   }) => {
@@ -45,7 +46,7 @@ export const NoticiaModel = {
 
   actualizar: async (
     id: number,
-    data: Partial<Pick<noticia, "titulo" | "descripcion" | "contenido" | "autor" | "imagen" | "updatedAt">>
+    data: Partial<Pick<noticia, "titulo" | "descripcion" | "contenido" | "autor" | "imagen" | "updatedAt" | "activo">>
   ) => {
     return prisma.noticia.update({
       where: { id },
@@ -87,8 +88,9 @@ export const NoticiaModel = {
     await prisma.noticia_imagen.update({ where: { id }, data: { principal: true } });
   },
 
+  // Tablero del panel: "Noticias publicadas" = las visibles en el sitio.
   contar: async () => {
-    return prisma.noticia.count();
+    return prisma.noticia.count({ where: { activo: true } });
   },
 
   obtenerUltimosTitulos: async (take: number) => {

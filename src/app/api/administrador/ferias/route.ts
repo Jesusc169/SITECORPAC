@@ -3,6 +3,7 @@ import { FeriaController, FeriaValidationError } from "@/controllers/feriaContro
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { leerVisible } from "@/lib/visibilidad";
 
 /* =========================
    GET – LISTAR FERIAS
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       empresas: JSON.parse((formData.get("empresas") as string) || "[]"),
       fechas: JSON.parse((formData.get("fechas") as string) || "[]"),
+      estado: leerVisible(formData, "estado"),
     });
 
     return NextResponse.json(feria, { status: 201 });

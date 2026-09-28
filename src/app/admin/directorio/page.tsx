@@ -7,6 +7,7 @@ import styles from "@/app/admin/directorio/AdministradorDirectorio.module.css";
 // 🔹 Modales
 import ModalAgregarMiembro from "./components/modals/ModalAgregarMiembro";
 import ModalEditarMiembro from "./components/modals/ModalEditarMiembro";
+import panel from "@/styles/PanelAdmin.module.css";
 
 interface Miembro {
   id: number;
@@ -136,7 +137,7 @@ export default function AdminDirectorioPage() {
         <h1>Directorio de Representantes</h1>
 
         <button
-          className={styles.btnAgregar}
+          className={`${panel.botonNuevo} ${styles.btnAgregar}`}
           onClick={() => setShowAgregarModal(true)}
         >
           + Agregar Miembro
@@ -178,11 +179,11 @@ export default function AdminDirectorioPage() {
                   </div>
 
                   <div className={styles.actions}>
-                    <button onClick={() => setEditarMiembro(miembro)}>
+                    <button className={panel.boton} onClick={() => setEditarMiembro(miembro)}>
                       Editar
                     </button>
 
-                    <button onClick={() => handleEliminarMiembro(miembro.id)}>
+                    <button className={panel.botonPeligro} onClick={() => handleEliminarMiembro(miembro.id)}>
                       Eliminar
                     </button>
                   </div>

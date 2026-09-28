@@ -1,0 +1,150 @@
+/* =========================================================
+   ESTILO COMÚN DEL PANEL ADMINISTRATIVO
+   Tablas, botones de acción y botón "+ Nuevo" iguales en
+   noticias, ferias, sorteos, directorio y usuarios.
+   Encabezado en el azul oscuro de la marca (el del nombre
+   SITECORPAC en la cabecera del sitio).
+========================================================= */
+
+/* ---------- Botón principal ("+ Nuevo ...") ---------- */
+.botonNuevo {
+  background: var(--sitecorpac-azul-oscuro);
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+
+.botonNuevo:hover {
+  background: var(--sitecorpac-azul-oscuro-hover);
+}
+
+/* ---------- Contenedor con scroll horizontal ---------- */
+.contenedorTabla {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(11, 42, 74, 0.06);
+}
+
+/* ---------- Tabla ---------- */
+.tabla {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla thead th {
+  background: var(--sitecorpac-azul-oscuro);
+  color: #ffffff;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tabla tbody td {
+  padding: 0.85rem 1rem;
+  color: #1f2937;
+  border-bottom: 1px solid #e5eaf0;
+  vertical-align: middle;
+}
+
+.tabla tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.tabla tbody tr:hover {
+  background: #eef4fa;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Fila "No hay ... registradas" */
+.vacio {
+  text-align: center;
+  padding: 1.75rem 1rem !important;
+  color: #526173 !important;
+  font-style: italic;
+}
+
+/* ---------- Acciones (Editar / Duplicar / Eliminar) ---------- */
+.acciones {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: nowrap; /* Editar y Eliminar siempre en la misma línea */
+}
+
+.boton,
+.botonPeligro,
+.botonIcono {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.boton {
+  background: #e8eef5;
+  color: var(--sitecorpac-azul-oscuro);
+  padding: 0.35rem 0.8rem;
+}
+
+.boton:hover {
+  background: #d6e1ec;
+}
+
+.botonPeligro {
+  background: #fdecec;
+  color: #a51c1c;
+  padding: 0.35rem 0.8rem;
+}
+
+.botonPeligro:hover {
+  background: #fbd5d5;
+}
+
+/* Botones con ícono (✏️ 📄 🗑️): mismo tamaño y fondo que los de texto */
+.botonIcono {
+  background: #e8eef5;
+  padding: 0.35rem 0.6rem;
+  min-width: 36px;
+  font-size: 0.95rem;
+}
+
+.botonIcono:hover {
+  background: #d6e1ec;
+}
+
+.botonIcono.botonPeligro {
+  background: #fdecec;
+}
+
+.botonIcono.botonPeligro:hover {
+  background: #fbd5d5;
+}
+
+@media (max-width: 576px) {
+  .tabla thead th,
+  .tabla tbody td {
+    padding: 0.6rem 0.65rem;
+    font-size: 0.8rem;
+  }
+}

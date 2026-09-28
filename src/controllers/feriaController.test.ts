@@ -42,6 +42,7 @@ const inputBase = {
   imagenPrincipalIndex: 0,
   empresas: [] as number[],
   fechas: [] as any[],
+  estado: true,
 };
 
 beforeEach(() => {
@@ -80,5 +81,13 @@ describe("FeriaController.crearFeria", () => {
       FeriaController.crearFeria({ ...inputBase, imagenFiles: [fakeFile(1024)] })
     ).resolves.toEqual({ id: 1 });
     expect(FeriaModel.crear).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Visibilidad de la feria (interruptor del panel)", () => {
+  it("guarda la feria como oculta cuando estado es false", async () => {
+    (FeriaModel.crear as any).mockResolvedValue({ id: 3 });
+    await FeriaController.crearFeria({ ...inputBase, estado: false });
+    expect(FeriaModel.crear).toHaveBeenCalledWith(expect.objectContaining({ estado: false }));
   });
 });

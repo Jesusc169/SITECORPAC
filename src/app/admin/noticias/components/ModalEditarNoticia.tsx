@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 
 interface NoticiaPdf {
   id: number;
@@ -22,6 +23,7 @@ interface Noticia {
   descripcion?: string;
   contenido?: string;
   autor: string;
+  activo?: boolean;
   imagen?: string | null;
   noticia_pdf?: NoticiaPdf[];
   noticia_imagen?: NoticiaImagen[];
@@ -44,6 +46,7 @@ export default function ModalEditarNoticia({
   const [descripcion, setDescripcion] = useState("");
   const [contenido, setContenido] = useState("");
   const [autor, setAutor] = useState("");
+  const [activo, setActivo] = useState(true);
 
   const selectorImagenes = useSelectorImagenes();
 
@@ -58,6 +61,7 @@ export default function ModalEditarNoticia({
     setDescripcion(noticia.descripcion || "");
     setContenido(noticia.contenido || "");
     setAutor(noticia.autor);
+    setActivo(noticia.activo ?? true);
     setPdfsExistentes(noticia.noticia_pdf || []);
     setPdfsAEliminar([]);
     setPdfsNuevos([]);
@@ -108,6 +112,7 @@ export default function ModalEditarNoticia({
       formData.append("descripcion", descripcion);
       formData.append("contenido", contenido);
       formData.append("autor", autor);
+      formData.append("activo", String(activo));
 
       selectorImagenes.aplicarAFormData(formData);
 
@@ -156,6 +161,8 @@ export default function ModalEditarNoticia({
 
           {/* BODY */}
           <div className="modal-body">
+
+            <InterruptorVisible visible={activo} onChange={setActivo} tipo="noticia" />
 
             <div className="mb-3">
               <label className="form-label fw-semibold">Título</label>

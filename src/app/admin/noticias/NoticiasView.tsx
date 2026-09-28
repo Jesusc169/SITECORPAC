@@ -8,6 +8,8 @@ import ModalEditarNoticia from "./components/ModalEditarNoticia";
 import ModalEliminarNoticia from "./components/ModalEliminarNoticia";
 import Toast from "@/components/Toast/Toast";
 import { useToast } from "@/components/Toast/useToast";
+import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
+import panel from "@/styles/PanelAdmin.module.css";
 
 /* ===============================
    INTERFACE
@@ -17,6 +19,7 @@ interface Noticia {
   titulo: string;
   fecha: string;
   autor: string;
+  activo?: boolean;
 }
 
 /* ===============================
@@ -91,7 +94,7 @@ export default function NoticiasView() {
       <div className={styles.header}>
         <h1>Administración de Noticias</h1>
         <button
-          className={styles.btnPrimary}
+          className={panel.botonNuevo}
           onClick={() => setShowCrear(true)}
         >
           + Nueva noticia
@@ -101,19 +104,21 @@ export default function NoticiasView() {
       {/* ===============================
           TABLA
       ================================ */}
-      <table className={styles.table}>
+      <div className={panel.contenedorTabla}>
+      <table className={panel.tabla}>
         <thead>
           <tr>
             <th>Título</th>
             <th>Fecha</th>
             <th>Autor</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {noticias.length === 0 ? (
             <tr>
-              <td colSpan={4} style={{ textAlign: "center", padding: "1rem" }}>
+              <td colSpan={5} className={panel.vacio}>
                 No hay noticias registradas
               </td>
             </tr>
@@ -123,8 +128,11 @@ export default function NoticiasView() {
                 <td>{n.titulo}</td>
                 <td>{formatearFecha(n.fecha)}</td>
                 <td>{n.autor}</td>
-                <td className={styles.actions}>
+                <td><EtiquetaVisible visible={n.activo ?? true} /></td>
+                <td>
+                  <div className={panel.acciones}>
                   <button
+                    className={panel.boton}
                     onClick={() => {
                       setNoticiaSeleccionada(n);
                       setShowEditar(true);
@@ -134,7 +142,7 @@ export default function NoticiasView() {
                   </button>
 
                   <button
-                    className={styles.danger}
+                    className={panel.botonPeligro}
                     onClick={() => {
                       setNoticiaSeleccionada(n);
                       setShowEliminar(true);
@@ -142,12 +150,14 @@ export default function NoticiasView() {
                   >
                     Eliminar
                   </button>
+                  </div>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
+      </div>
 
       {/* ===============================
           MODALES

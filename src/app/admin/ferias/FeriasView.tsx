@@ -6,6 +6,9 @@ import AdminFeriaModal from "./AdminFeriaModal";
 import * as feriaService from "@/services/feria.admin.service";
 import Toast from "@/components/Toast/Toast";
 import { useToast } from "@/components/Toast/useToast";
+import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
+import { formatearFechaSola } from "@/lib/fechas";
+import panel from "@/styles/PanelAdmin.module.css";
 
 export default function FeriasView() {
   const [ferias, setFerias] = useState<any[]>([]);
@@ -160,27 +163,28 @@ export default function FeriasView() {
           <p className={styles.subtitle}>Gestión institucional de ferias</p>
         </div>
 
-        <button className={styles.newBtn} onClick={handleNuevaFeria}>
-          ➕ Nueva Feria
+        <button className={panel.botonNuevo} onClick={handleNuevaFeria}>
+          + Nueva Feria
         </button>
       </div>
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.adminTable}>
+      <div className={panel.contenedorTabla}>
+        <table className={panel.tabla}>
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Año</th>
               <th>Fecha / Lugar</th>
               <th>Empresas</th>
-              <th className={styles.actionsCol}>Acciones</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
 
           <tbody>
             {feriasOrdenadas.length === 0 && (
               <tr>
-                <td colSpan={5} className={styles.empty}>
+                <td colSpan={6} className={panel.vacio}>
                   No hay ferias registradas
                 </td>
               </tr>
@@ -211,7 +215,7 @@ export default function FeriasView() {
                         {fechas.slice(0, 2).map((f: any, index: number) => (
                           <div key={f.id} className={styles.fechaItem}>
                             <strong>Fecha {index + 1}:</strong>{" "}
-                            {new Date(f.fecha).toLocaleDateString()}
+                            {formatearFechaSola(f.fecha)}
                             <br />
                             <span className={styles.muted}>
                               📍 {f.ubicacion}
@@ -236,25 +240,33 @@ export default function FeriasView() {
                     )}
                   </td>
 
+                  <td><EtiquetaVisible visible={feria.estado ?? true} /></td>
+
                   <td>
-                    <div className={styles.actions}>
+                    <div className={panel.acciones}>
                       <button
-                        className={`${styles.iconBtn} ${styles.edit}`}
+                        className={panel.botonIcono}
                         onClick={() => handleEdit(feria.id)}
+                        title="Editar"
+                        aria-label={`Editar ${feria.titulo}`}
                       >
                         ✏️
                       </button>
 
                       <button
-                        className={`${styles.iconBtn} ${styles.duplicate}`}
+                        className={panel.botonIcono}
                         onClick={() => handleDuplicar(feria.id)}
+                        title="Duplicar"
+                        aria-label={`Duplicar ${feria.titulo}`}
                       >
                         📄
                       </button>
 
                       <button
-                        className={`${styles.iconBtn} ${styles.delete}`}
+                        className={`${panel.botonIcono} ${panel.botonPeligro}`}
                         onClick={() => handleDelete(feria.id)}
+                        title="Eliminar"
+                        aria-label={`Eliminar ${feria.titulo}`}
                       >
                         🗑️
                       </button>

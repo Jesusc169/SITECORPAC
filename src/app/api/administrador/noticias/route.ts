@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NoticiasController, NoticiaValidationError } from "@/controllers/noticiasController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { leerVisible } from "@/lib/visibilidad";
 
 export const runtime = "nodejs";
 
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
       imagenFiles: formData.getAll("imagenes") as File[],
       imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       pdfFiles: formData.getAll("pdfs") as File[],
+      activo: leerVisible(formData),
     });
 
     return NextResponse.json(nuevaNoticia, { status: 201 });

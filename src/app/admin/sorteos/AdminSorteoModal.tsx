@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import styles from "./sorteos.admin.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
+import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
 
 interface Premio {
   nombre: string;
@@ -31,6 +33,7 @@ export default function AdminSorteoModal({
     fecha: "",
     hora: "",
     premios: [] as Premio[],
+    visible: true,
   };
 
   const [form, setForm] = useState(emptyForm);
@@ -41,16 +44,18 @@ export default function AdminSorteoModal({
   ========================================================= */
   useEffect(() => {
     if (initialData) {
-      const fechaISO = initialData.fecha_hora
-        ? new Date(initialData.fecha_hora).toISOString()
-        : "";
+      // En hora de Perú: antes se leía en UTC (toISOString) y cada edición
+      // corría la hora del sorteo.
+      const { fecha, hora } = initialData.fecha_hora
+        ? partesPeru(initialData.fecha_hora)
+        : { fecha: "", hora: "" };
 
       setForm({
         id: initialData.id ?? null,
         titulo: initialData.nombre ?? "",
         descripcion: initialData.descripcion ?? "",
-        fecha: fechaISO ? fechaISO.split("T")[0] : "",
-        hora: fechaISO ? fechaISO.split("T")[1].slice(0, 5) : "",
+        fecha,
+        hora,
         premios:
           (initialData.premios ?? initialData.sorteo_producto)?.map(
             (p: any) => ({
@@ -59,6 +64,7 @@ export default function AdminSorteoModal({
               cantidad: p.cantidad ?? 1,
             })
           ) ?? [],
+        visible: initialData.estado !== "INACTIVO",
       });
       selectorImagenes.resetear(
         Array.isArray(initialData.sorteo_imagen)
@@ -118,8 +124,9 @@ export default function AdminSorteoModal({
         return;
       }
 
-      const fechaHora = `${form.fecha}T${form.hora}:00`;
-      const anio = new Date(form.fecha).getFullYear();
+      // Con la zona de Perú explícita: el servidor (UTC) ya no la interpreta como UTC.
+      const fechaHora = fechaHoraPeru(form.fecha, form.hora);
+      const anio = Number(form.fecha.slice(0, 4));
 
       const formData = new FormData();
 
@@ -128,7 +135,7 @@ export default function AdminSorteoModal({
       formData.append("lugar", "Sede principal SITECORPAC");
       formData.append("fecha_hora", fechaHora);
       formData.append("anio", anio.toString());
-      formData.append("estado", "ACTIVO");
+      formData.append("estado", form.visible ? "ACTIVO" : "INACTIVO");
       formData.append("premios", JSON.stringify(form.premios || []));
 
       if (form.id) {
@@ -162,6 +169,13 @@ export default function AdminSorteoModal({
         </div>
 
         <div className={styles.modalBody}>
+          <InterruptorVisible
+            visible={form.visible}
+            onChange={(visible) => setForm((prev) => ({ ...prev, visible }))}
+            tipo="sorteo"
+            masculino
+          />
+
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label>Título</label>
