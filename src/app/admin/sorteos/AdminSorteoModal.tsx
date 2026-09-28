@@ -7,6 +7,9 @@ import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
 
+/** Valor que se usaba fijo antes de existir el campo; se propone al crear. */
+const LUGAR_POR_DEFECTO = "Sede principal SITECORPAC";
+
 interface Premio {
   nombre: string;
   descripcion: string;
@@ -30,6 +33,7 @@ export default function AdminSorteoModal({
     id: null as number | null,
     titulo: "",
     descripcion: "",
+    lugar: LUGAR_POR_DEFECTO,
     fecha: "",
     hora: "",
     premios: [] as Premio[],
@@ -54,6 +58,7 @@ export default function AdminSorteoModal({
         id: initialData.id ?? null,
         titulo: initialData.nombre ?? "",
         descripcion: initialData.descripcion ?? "",
+        lugar: initialData.lugar?.trim() || LUGAR_POR_DEFECTO,
         fecha,
         hora,
         premios:
@@ -119,7 +124,7 @@ export default function AdminSorteoModal({
   ========================================================= */
   const handleSave = async () => {
     try {
-      if (!form.titulo || !form.descripcion || !form.fecha || !form.hora) {
+      if (!form.titulo || !form.descripcion || !form.lugar.trim() || !form.fecha || !form.hora) {
         alert("Completa todos los campos obligatorios");
         return;
       }
@@ -132,7 +137,7 @@ export default function AdminSorteoModal({
 
       formData.append("nombre", form.titulo);
       formData.append("descripcion", form.descripcion);
-      formData.append("lugar", "Sede principal SITECORPAC");
+      formData.append("lugar", form.lugar.trim());
       formData.append("fecha_hora", fechaHora);
       formData.append("anio", anio.toString());
       formData.append("estado", form.visible ? "ACTIVO" : "INACTIVO");
@@ -202,6 +207,18 @@ export default function AdminSorteoModal({
                 type="time"
                 name="hora"
                 value={form.hora}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label htmlFor="sorteo-lugar">Lugar</label>
+              <input
+                id="sorteo-lugar"
+                name="lugar"
+                maxLength={150}
+                placeholder="Ej.: Sede principal SITECORPAC"
+                value={form.lugar}
                 onChange={handleChange}
               />
             </div>

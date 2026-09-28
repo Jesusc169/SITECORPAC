@@ -79,3 +79,6 @@ public/images/uploads/
 
 # opcional: cualquier imagen generada en prod
 public/images/temp/
+
+# Documentación privada (SRS, manuales, informe técnico): solo local, no se versiona
+/docs/

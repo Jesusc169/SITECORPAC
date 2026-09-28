@@ -166,7 +166,7 @@ export default function AdminFeriaModal({
      GUARDAR
      ========================= */
   const handleSubmit = () => {
-    if (!titulo.trim() || !descripcion.trim() || !anio) {
+    if (!titulo.trim() || !descripcion.trim() || !anio || anio < 2000 || anio > 2100) {
       alert("Completa los campos obligatorios");
       return;
     }
@@ -221,6 +221,7 @@ export default function AdminFeriaModal({
           <input
             type="number"
             min={2000}
+            max={2100}
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
           />

@@ -84,6 +84,41 @@ describe("FeriaController.crearFeria", () => {
   });
 });
 
+describe("FeriaController.actualizarFeria – año", () => {
+  const edicionBase = {
+    titulo: "Feria",
+    descripcion: "resumen",
+    imagenesNuevas: [] as File[],
+    imagenesEliminar: [] as number[],
+    imagenPrincipalId: null,
+    imagenPrincipalNuevaIndex: null,
+    empresas: [] as number[],
+    fechas: [] as any[],
+    estado: true,
+  };
+
+  beforeEach(() => {
+    (FeriaModel.obtenerPorId as any).mockResolvedValue({ id: 5, evento_feria_imagen: [] });
+  });
+
+  it("guarda el año editado", async () => {
+    await FeriaController.actualizarFeria(5, { ...edicionBase, anio: 2027 });
+    expect(FeriaModel.actualizar).toHaveBeenCalledWith(5, expect.objectContaining({ anio: 2027 }));
+  });
+
+  it("conserva el año actual si no llega", async () => {
+    await FeriaController.actualizarFeria(5, edicionBase);
+    expect((FeriaModel.actualizar as any).mock.calls[0][1]).not.toHaveProperty("anio");
+  });
+
+  it("rechaza un año inválido", async () => {
+    await expect(
+      FeriaController.actualizarFeria(5, { ...edicionBase, anio: 26 })
+    ).rejects.toBeInstanceOf(FeriaValidationError);
+    expect(FeriaModel.actualizar).not.toHaveBeenCalled();
+  });
+});
+
 describe("Visibilidad de la feria (interruptor del panel)", () => {
   it("guarda la feria como oculta cuando estado es false", async () => {
     (FeriaModel.crear as any).mockResolvedValue({ id: 3 });

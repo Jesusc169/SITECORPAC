@@ -51,6 +51,18 @@ beforeEach(() => {
 });
 
 describe("SorteoController.crearSorteo", () => {
+  it("rechaza un sorteo sin lugar", async () => {
+    await expect(
+      SorteoController.crearSorteo({ ...inputBase, lugar: "   " })
+    ).rejects.toBeInstanceOf(SorteoValidationError);
+  });
+
+  it("rechaza un lugar de más de 150 caracteres", async () => {
+    await expect(
+      SorteoController.crearSorteo({ ...inputBase, lugar: "x".repeat(151) })
+    ).rejects.toBeInstanceOf(SorteoValidationError);
+  });
+
   it("rechaza más de 5 fotos", async () => {
     const imagenFiles = Array.from({ length: 6 }, () => fakeFile(1024));
     await expect(

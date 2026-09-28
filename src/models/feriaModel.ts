@@ -63,7 +63,7 @@ export const FeriaModel = {
 
   actualizar: async (
     id: number,
-    data: { titulo: string; descripcion: string; imagen_portada?: string | null; estado?: boolean }
+    data: { titulo: string; descripcion: string; imagen_portada?: string | null; estado?: boolean; anio?: number }
   ) => {
     return prisma.evento_feria.update({
       where: { id },

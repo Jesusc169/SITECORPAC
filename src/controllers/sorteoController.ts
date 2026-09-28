@@ -7,6 +7,17 @@ import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 
 export class SorteoValidationError extends Error {}
 
+/** La columna sorteo.lugar es VARCHAR(150) y el lugar es obligatorio. */
+const MAX_LUGAR = 150;
+function normalizarLugar(lugar: string): string {
+  const limpio = (lugar ?? "").trim();
+  if (!limpio) throw new SorteoValidationError("Indica el lugar del sorteo");
+  if (limpio.length > MAX_LUGAR) {
+    throw new SorteoValidationError(`El lugar no puede superar ${MAX_LUGAR} caracteres`);
+  }
+  return limpio;
+}
+
 type Estado = "ACTIVO" | "INACTIVO";
 
 interface Premio {
@@ -59,6 +70,7 @@ export const SorteoController = {
   obtenerSorteoPorId: (id: number) => SorteoModel.obtenerPorId(id),
 
   crearSorteo: async (input: DatosSorteo) => {
+    const lugar = normalizarLugar(input.lugar);
     const imagenesValidas = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenesValidas.length > MAX_IMAGENES_GALERIA) {
       throw new SorteoValidationError(`Máximo ${MAX_IMAGENES_GALERIA} fotos por sorteo`);
@@ -90,7 +102,7 @@ export const SorteoController = {
     const sorteo = await SorteoModel.crear({
       nombre: input.nombre,
       descripcion: input.descripcion,
-      lugar: input.lugar,
+      lugar,
       anio: input.anio,
       estado: input.estado,
       fecha_hora: fechaValida(input.fecha_hora),
@@ -119,6 +131,7 @@ export const SorteoController = {
       imagenPrincipalNuevaIndex: number | null;
     }
   ) => {
+    const lugar = normalizarLugar(input.lugar);
     const sorteoActual = await SorteoModel.obtenerPorId(id);
     if (!sorteoActual) return null;
 
@@ -187,7 +200,7 @@ export const SorteoController = {
     const sorteo = await SorteoModel.actualizar(id, {
       nombre: input.nombre,
       descripcion: input.descripcion,
-      lugar: input.lugar,
+      lugar,
       anio: input.anio,
       estado: input.estado,
       fecha_hora: input.fecha_hora,

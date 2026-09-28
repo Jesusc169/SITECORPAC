@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { FeriaController } from "@/controllers/feriaController";
+import { FeriaController, FeriaValidationError } from "@/controllers/feriaController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -73,6 +73,7 @@ export async function PUT(
       empresas: empresasRaw ? JSON.parse(empresasRaw) : [],
       fechas: fechasRaw ? JSON.parse(fechasRaw) : [],
       estado: leerVisible(formData, "estado"),
+      anio: formData.get("anio") ? Number(formData.get("anio")) : null,
     });
 
     if (!feria) {
@@ -81,7 +82,7 @@ export async function PUT(
 
     return NextResponse.json(feria);
   } catch (error) {
-    if (error instanceof ArchivoInvalidoError) {
+    if (error instanceof ArchivoInvalidoError || error instanceof FeriaValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

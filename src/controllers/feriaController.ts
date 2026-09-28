@@ -119,8 +119,14 @@ export const FeriaController = {
       empresas: number[];
       fechas: FechaInput[];
       estado: boolean;
+      /** Año con el que se filtra la feria en el sitio; si no llega o es inválido se conserva el actual. */
+      anio?: number | null;
     }
   ) => {
+    if (input.anio != null && !(Number.isInteger(input.anio) && input.anio >= 2000 && input.anio <= 2100)) {
+      throw new FeriaValidationError("El año de la feria no es válido");
+    }
+
     const feriaActual = await FeriaModel.obtenerPorId(id);
     if (!feriaActual) return null;
 
@@ -192,6 +198,7 @@ export const FeriaController = {
       descripcion: input.descripcion,
       imagen_portada,
       estado: input.estado,
+      ...(input.anio != null ? { anio: input.anio } : {}),
     });
 
     await FeriaModel.reemplazarEmpresas(id, input.empresas);
