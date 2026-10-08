@@ -43,18 +43,19 @@
 ================================ */
 .noticiaImagenWrapper {
   position: relative;
-  max-width: 520px;
+  max-width: 640px;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 1 / 1;
   margin: 0 auto 30px;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #e5e7eb;
+  background-color: #eef3f7;
   border: 1px solid #e5e7eb;
 }
 
+/* contain: el afiche se ve completo, sin recortes */
 .noticiaImagenPage {
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 

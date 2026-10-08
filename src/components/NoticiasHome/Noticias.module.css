@@ -135,11 +135,12 @@
   aspect-ratio: 3 / 2;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #e5e7eb;
+  background-color: #eef3f7;
 }
 
+/* contain: los afiches suelen traer texto y con cover se cortaban */
 .imagen {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* ===============================
