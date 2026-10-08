@@ -20,12 +20,10 @@
   position: relative;
   width: 100%;
   aspect-ratio: 3 / 2;
-  background-color: #eef3f7;
 }
 
-/* contain: los afiches suelen traer texto y con cover se cortaban */
 .imagenWrapper img {
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .body {

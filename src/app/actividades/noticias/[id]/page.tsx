@@ -83,7 +83,7 @@ export default async function NoticiaPage({
               src={noticia.imagen}
               alt={noticia.titulo}
               fill
-              sizes="(max-width: 680px) 100vw, 640px"
+              sizes="(max-width: 600px) 100vw, 520px"
               className={styles.noticiaImagenPage}
             />
           </div>
