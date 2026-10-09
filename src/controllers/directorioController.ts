@@ -3,6 +3,8 @@ import { invalidarCache } from "@/lib/invalidarCache";
 import { DirectorioModel } from "@/models/directorioModel";
 import { guardarFotoDirectorio, borrarFotoDirectorio } from "@/lib/archivosDirectorio";
 import type { directorio } from "@prisma/client";
+import { moverAPapelera } from "@/lib/papelera";
+import type { ActorRegistro } from "@/lib/registro";
 
 interface DatosMiembro {
   nombre: string;
@@ -108,13 +110,11 @@ export const DirectorioController = {
     return actualizado;
   },
 
-  eliminarMiembro: async (id: number): Promise<directorio | null> => {
-    const miembro = await DirectorioModel.obtenerPorId(id);
-    if (!miembro) return null;
-
-    await borrarFotoDirectorio(miembro.fotoUrl);
-    const eliminado = await DirectorioModel.eliminar(id);
-    invalidarCache("directorio");
-    return eliminado;
+  // Va a la papelera (30 días, se puede restaurar). La foto se borra
+  // recién cuando vence. Devuelve el nombre, o null si no existía.
+  eliminarMiembro: async (id: number, actor?: ActorRegistro | null): Promise<string | null> => {
+    const nombre = await moverAPapelera("directorio", id, actor);
+    if (nombre) invalidarCache("directorio");
+    return nombre;
   },
 };

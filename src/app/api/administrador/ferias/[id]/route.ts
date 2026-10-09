@@ -5,6 +5,7 @@ import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
+import { instantanea } from "@/lib/historial";
 
 /* =========================
    GET – Feria por ID
@@ -62,6 +63,7 @@ export async function PUT(
     const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
     const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
 
+    const antes = await instantanea("ferias", feriaId);
     const feria = await FeriaController.actualizarFeria(feriaId, {
       titulo: formData.get("titulo") as string,
       descripcion: formData.get("descripcion") as string,
@@ -86,6 +88,8 @@ export async function PUT(
       accion: "editar",
       modulo: "ferias",
       entidadId: feriaId,
+      antes,
+      despues: await instantanea("ferias", feriaId),
       detalle: `Editó la feria "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData, "estado"))})`,
       request: req,
     });
@@ -121,14 +125,14 @@ export async function DELETE(
     const feriaId = Number(id);
 
     const titulo = await nombreEntidad("ferias", feriaId);
-    await FeriaController.eliminarFeria(feriaId);
+    await FeriaController.eliminarFeria(feriaId, usuarioActual);
 
     await registrarActividad({
       usuario: usuarioActual,
       accion: "eliminar",
       modulo: "ferias",
       entidadId: feriaId,
-      detalle: `Eliminó la feria "${titulo ?? `#${feriaId}`}"`,
+      detalle: `Eliminó la feria "${titulo ?? `#${feriaId}`}" (queda 30 días en la papelera)`,
       request: req,
     });
 

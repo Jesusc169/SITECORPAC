@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { EmpresaController } from "@/controllers/empresaController";
-import { verificarSesion } from "@/lib/auth";
+import { obtenerUsuarioActual } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const sesion = await verificarSesion();
-    if (!sesion) {
+    const usuarioActual = await obtenerUsuarioActual();
+    if (!usuarioActual) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 

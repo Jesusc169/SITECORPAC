@@ -5,7 +5,10 @@ import {
   archivosSubidos,
   estadoRespaldos,
   estadoCertificado,
+  estadoAlertas,
 } from "@/lib/estadoServidor";
+import { depurarPapelera, DIAS_PAPELERA } from "@/lib/papelera";
+import prisma from "@/lib/prisma";
 import {
   depurarRegistroAntiguo,
   MODULOS_REGISTRO,
@@ -43,6 +46,8 @@ export function calcularAlertas(d: {
   ultimoRespaldo: string | null;
   erroresUltimas24h: number;
   ipsBloqueadas: number;
+  alertasInstaladas?: boolean;
+  alertasUltimaRevision?: string | null;
   ahora?: number;
 }): Alerta[] {
   const ahora = d.ahora ?? Date.now();
@@ -81,6 +86,17 @@ export function calcularAlertas(d: {
     alertas.push({ gravedad: "aviso", texto: `${d.ipsBloqueadas} IP(s) bloqueada(s) ahora por intentos fallidos de inicio de sesión.` });
   }
 
+  // Las alertas por correo corren cada 10 min: si la última pasada tiene más
+  // de 30 min, el cron dejó de funcionar y nadie se enteraría de un problema.
+  if (d.alertasInstaladas === false) {
+    alertas.push({ gravedad: "aviso", texto: "Las alertas por correo no están instaladas en el servidor." });
+  } else if (
+    d.alertasUltimaRevision &&
+    ahora - new Date(d.alertasUltimaRevision).getTime() > 30 * 60 * 1000
+  ) {
+    alertas.push({ gravedad: "error", texto: "Las alertas por correo dejaron de ejecutarse (más de 30 minutos sin revisar)." });
+  }
+
   if (d.memoriaTotal > 0 && d.memoriaLibre / d.memoriaTotal < 0.1) {
     alertas.push({ gravedad: "aviso", texto: "Queda menos del 10% de memoria libre en el servidor." });
   }
@@ -102,6 +118,8 @@ export function leerFiltros(params: URLSearchParams): FiltrosRegistro {
   const nivel = params.get("nivel");
   const usuario = params.get("usuario");
   const texto = params.get("q")?.trim().slice(0, 100) || null;
+  const entidad = params.get("entidad");
+  const entidadId = entidad && /^\d{1,9}$/.test(entidad) ? Number(entidad) : null;
 
   if (modulo && !(MODULOS_REGISTRO as readonly string[]).includes(modulo)) {
     throw new SistemaValidationError("Módulo no válido");
@@ -125,6 +143,7 @@ export function leerFiltros(params: URLSearchParams): FiltrosRegistro {
     nivel: nivel || null,
     usuario: usuarioFiltro,
     texto,
+    entidadId,
   };
 }
 
@@ -138,7 +157,8 @@ export function celdaCsv(valor: unknown): string {
 export const SistemaController = {
   async estado() {
     const desde24h = new Date(Date.now() - DIA);
-    const [version, maquina, archivos, respaldos, certificado, totales, bytesBD, pingMs, intentos, errores24h, errores, actividad24h] =
+    await depurarPapelera().catch(() => 0);
+    const [version, maquina, archivos, respaldos, certificado, totales, bytesBD, pingMs, intentos, errores24h, errores, actividad24h, alertasCorreo, enPapelera] =
       await Promise.all([
         leerVersion(),
         estadoMaquina(),
@@ -152,6 +172,8 @@ export const SistemaController = {
         RegistroModel.contarDesde(desde24h, { nivel: "error" }),
         RegistroModel.ultimosErrores(5),
         RegistroModel.contarDesde(desde24h, { accion: { in: ["crear", "editar", "eliminar", "duplicar"] } }),
+        estadoAlertas(),
+        prisma.papelera.count(),
       ]);
 
     const ahora = Date.now();
@@ -168,6 +190,8 @@ export const SistemaController = {
       ultimoRespaldo: respaldos.ultimo?.fecha ?? null,
       erroresUltimas24h: errores24h,
       ipsBloqueadas: bloqueadas.length,
+      alertasInstaladas: alertasCorreo.instaladas,
+      alertasUltimaRevision: alertasCorreo.ultimaRevision,
     });
 
     return {
@@ -183,6 +207,8 @@ export const SistemaController = {
       errores24h,
       ultimosErrores: errores.map((e) => ({ ...e, fecha: e.fecha.toISOString() })),
       retencionDias: RETENCION_REGISTRO_DIAS,
+      alertasCorreo,
+      papelera: { cantidad: enPapelera, dias: DIAS_PAPELERA },
     };
   },
 

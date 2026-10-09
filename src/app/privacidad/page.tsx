@@ -122,14 +122,31 @@ export default function PrivacidadPage() {
                 Nombre, fecha y hora, acción realizada en el panel (crear,
                 editar o eliminar contenido, iniciar o cerrar sesión) y
                 dirección IP. También los intentos fallidos de inicio de sesión
-                con el correo usado.
+                con el correo usado, y cómo estaba el contenido antes y después
+                de cada edición.
               </td>
               <td>
-                Saber quién hizo cada cambio, resolver problemas y detectar
-                accesos indebidos. Solo lo ve el administrador del sistema.
+                Saber quién hizo cada cambio, poder deshacerlo, resolver
+                problemas y detectar accesos indebidos. Solo lo ve el
+                administrador del sistema.
               </td>
               <td>
                 Se elimina automáticamente a los 180 días.
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Contenido eliminado desde el panel</th>
+              <td>
+                Noticias, ferias, sorteos y miembros del Directorio que se
+                eliminan, con sus fotos y documentos.
+              </td>
+              <td>
+                Poder recuperar algo que se eliminó por error. Solo lo ve el
+                administrador del sistema; no aparece en el sitio público.
+              </td>
+              <td>
+                Se borra definitivamente a los 30 días (o antes, si el
+                administrador lo vacía).
               </td>
             </tr>
             <tr>

@@ -92,3 +92,30 @@ describe("celdaCsv", () => {
     expect(celdaCsv(null)).toBe('""');
   });
 });
+
+describe("calcularAlertas: alertas por correo", () => {
+  it("avisa si no están instaladas", () => {
+    const a = calcularAlertas({ ...sano, alertasInstaladas: false });
+    expect(a).toHaveLength(1);
+    expect(a[0].gravedad).toBe("aviso");
+  });
+
+  it("error si dejaron de ejecutarse (más de 30 min)", () => {
+    const a = calcularAlertas({
+      ...sano,
+      alertasInstaladas: true,
+      alertasUltimaRevision: new Date(AHORA - 45 * 60 * 1000).toISOString(),
+    });
+    expect(a[0].gravedad).toBe("error");
+  });
+
+  it("nada si revisaron hace poco", () => {
+    expect(
+      calcularAlertas({
+        ...sano,
+        alertasInstaladas: true,
+        alertasUltimaRevision: new Date(AHORA - 5 * 60 * 1000).toISOString(),
+      })
+    ).toEqual([]);
+  });
+});

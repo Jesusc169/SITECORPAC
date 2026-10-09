@@ -4,6 +4,7 @@ import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
+import { instantanea } from "@/lib/historial";
 
 export const runtime = "nodejs";
 
@@ -48,6 +49,7 @@ export async function PUT(
     const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
     const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
 
+    const antes = await instantanea("noticias", id);
     const noticiaActualizada = await NoticiasController.actualizarNoticiaCompleta(id, {
       titulo: formData.get("titulo") as string,
       descripcion: formData.get("descripcion") as string,
@@ -73,6 +75,8 @@ export async function PUT(
       accion: "editar",
       modulo: "noticias",
       entidadId: id,
+      antes,
+      despues: await instantanea("noticias", id),
       detalle: `Editó la noticia "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData))})`,
       request,
     });
@@ -112,7 +116,7 @@ export async function DELETE(
     }
 
     const titulo = await nombreEntidad("noticias", id);
-    const eliminada = await NoticiasController.eliminarNoticiaCompleta(id);
+    const eliminada = await NoticiasController.eliminarNoticiaCompleta(id, usuarioActual);
 
     if (!eliminada) {
       return NextResponse.json({ message: "Noticia no encontrada" }, { status: 404 });
@@ -123,7 +127,7 @@ export async function DELETE(
       accion: "eliminar",
       modulo: "noticias",
       entidadId: id,
-      detalle: `Eliminó la noticia "${titulo ?? `#${id}`}"`,
+      detalle: `Eliminó la noticia "${titulo ?? `#${id}`}" (queda 30 días en la papelera)`,
       request,
     });
 

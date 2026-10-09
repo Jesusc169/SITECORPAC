@@ -226,3 +226,31 @@ export function estadoCertificado(): Promise<EstadoCertificado> {
     );
   });
 }
+
+export interface EstadoAlertas {
+  instaladas: boolean;
+  ultimaRevision: string | null;
+  destinatario: string | null;
+  resumenDiario: boolean;
+  ultimoCorreo: { fecha: string; asunto: string } | null;
+}
+
+/** Lo que dejó escrito /root/alertas_sitecorpac.sh en su última pasada. */
+export async function estadoAlertas(): Promise<EstadoAlertas> {
+  const ruta = process.env.ALERTAS_ESTADO || "/var/lib/sitecorpac-alertas/estado.json";
+  try {
+    const j = JSON.parse(await fs.readFile(/*turbopackIgnore: true*/ ruta, "utf8"));
+    return {
+      instaladas: true,
+      ultimaRevision: typeof j.ultimaRevision === "string" ? j.ultimaRevision : null,
+      destinatario: typeof j.destinatario === "string" ? j.destinatario : null,
+      resumenDiario: j.resumenDiario !== false,
+      ultimoCorreo:
+        j.ultimoCorreo && typeof j.ultimoCorreo.fecha === "string"
+          ? { fecha: j.ultimoCorreo.fecha, asunto: String(j.ultimoCorreo.asunto ?? "") }
+          : null,
+    };
+  } catch {
+    return { instaladas: false, ultimaRevision: null, destinatario: null, resumenDiario: false, ultimoCorreo: null };
+  }
+}

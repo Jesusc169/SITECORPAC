@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export interface FiltrosRegistro {
   desde?: Date | null;
@@ -10,6 +10,7 @@ export interface FiltrosRegistro {
   // de login fallidos, errores del sistema)
   usuario?: number | "anonimo" | null;
   texto?: string | null;
+  entidadId?: number | null;
 }
 
 function construirWhere(f: FiltrosRegistro): Prisma.registro_actividadWhereInput {
@@ -22,6 +23,7 @@ function construirWhere(f: FiltrosRegistro): Prisma.registro_actividadWhereInput
     };
   }
   if (f.modulo) where.modulo = f.modulo;
+  if (f.entidadId) where.entidadId = f.entidadId;
   if (f.nivel) where.nivel = f.nivel;
   if (f.usuario === "anonimo") where.usuarioId = null;
   else if (typeof f.usuario === "number") where.usuarioId = f.usuario;
@@ -36,13 +38,25 @@ function construirWhere(f: FiltrosRegistro): Prisma.registro_actividadWhereInput
 }
 
 export const RegistroModel = {
-  listar: (f: FiltrosRegistro, saltar: number, tomar: number) =>
-    prisma.registro_actividad.findMany({
+  // Sin `antes`/`despues` (pueden ser textos largos); `conCambios` dice qué
+  // filas tienen historial para mostrar el botón «Ver cambios».
+  listar: async (f: FiltrosRegistro, saltar: number, tomar: number) => {
+    const filas = await prisma.registro_actividad.findMany({
       where: construirWhere(f),
       orderBy: [{ fecha: "desc" }, { id: "desc" }],
       skip: saltar,
       take: tomar,
-    }),
+      omit: { antes: true, despues: true },
+    });
+    const conHistorial = await prisma.registro_actividad.findMany({
+      where: { id: { in: filas.map((x) => x.id) }, NOT: { antes: { equals: Prisma.DbNull } } },
+      select: { id: true },
+    });
+    const ids = new Set(conHistorial.map((x) => x.id));
+    return filas.map((x) => ({ ...x, conCambios: ids.has(x.id) }));
+  },
+
+  obtener: (id: number) => prisma.registro_actividad.findUnique({ where: { id } }),
 
   contar: (f: FiltrosRegistro) =>
     prisma.registro_actividad.count({ where: construirWhere(f) }),

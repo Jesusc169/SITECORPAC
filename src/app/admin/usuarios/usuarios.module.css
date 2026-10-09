@@ -182,3 +182,18 @@
     margin-left: 0;
   }
 }
+
+/* Estado de la cuenta */
+.badgeActiva {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badgeInactiva {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.filaInactiva td {
+  color: #94a3b8;
+}

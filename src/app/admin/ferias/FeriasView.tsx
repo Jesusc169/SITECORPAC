@@ -108,7 +108,7 @@ export default function FeriasView() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("¿Eliminar esta feria definitivamente?")) return;
+    if (!confirm("¿Eliminar esta feria?\n\nSe guardará 30 días en la papelera: el administrador puede recuperarla.")) return;
 
     try {
       await feriaService.eliminarFeria(id);

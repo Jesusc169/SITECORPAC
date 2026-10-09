@@ -7,6 +7,7 @@ const SIN_PASSWORD = {
   rol: true,
   permisos: true,
   createdAt: true,
+  activo: true,
 } as const;
 
 export const UserModel = {
@@ -15,6 +16,10 @@ export const UserModel = {
       orderBy: { id: "asc" },
       select: SIN_PASSWORD,
     });
+  },
+
+  obtenerPorId: async (id: number) => {
+    return prisma.user.findUnique({ where: { id }, select: SIN_PASSWORD });
   },
 
   existeEmail: async (email: string) => {
@@ -41,8 +46,26 @@ export const UserModel = {
   ) => {
     return prisma.user.update({
       where: { id },
-      data,
+      // Contraseña nueva = se cierran todas las sesiones abiertas de esa cuenta
+      data: data.password ? { ...data, sesionVersion: { increment: 1 } } : data,
+      select: { ...SIN_PASSWORD, sesionVersion: true },
+    });
+  },
+
+  cambiarActivo: async (id: number, activo: boolean) => {
+    return prisma.user.update({
+      where: { id },
+      // Al desactivar también se cierran sus sesiones abiertas
+      data: activo ? { activo } : { activo, sesionVersion: { increment: 1 } },
       select: SIN_PASSWORD,
+    });
+  },
+
+  cerrarSesiones: async (id: number) => {
+    return prisma.user.update({
+      where: { id },
+      data: { sesionVersion: { increment: 1 } },
+      select: { ...SIN_PASSWORD, sesionVersion: true },
     });
   },
 

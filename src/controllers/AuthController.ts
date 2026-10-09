@@ -1,6 +1,13 @@
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { firmarTokenSesion } from "../lib/auth";
+
+/** Contraseña correcta, pero la cuenta fue desactivada por un administrador. */
+export class CuentaDesactivadaError extends Error {
+  constructor() {
+    super("Tu cuenta está desactivada. Comunícate con el administrador del sitio.");
+  }
+}
 
 // Hash "señuelo" para comparar contra él cuando el correo no existe, así el
 // tiempo de respuesta no delata si la cuenta existe o no.
@@ -17,17 +24,16 @@ export class AuthController {
     // respuesta qué correos tienen cuenta en el sitio.
     const isValid = await bcrypt.compare(password, user?.password ?? HASH_SENUELO);
     if (!user || !isValid) throw new Error("Credenciales inválidas");
+    // Solo se avisa DESPUÉS de validar la contraseña: así no se puede usar
+    // este mensaje para averiguar qué correos tienen cuenta.
+    if (!user.activo) throw new CuentaDesactivadaError();
 
     // 8h, igual que el maxAge de la cookie en /api/auth/login — antes el
     // JWT duraba 24h pero la cookie se borraba a las 8h, una inconsistencia
     // inofensiva (el navegador descarta la cookie primero) pero confusa.
-    const token = jwt.sign(
-      { id: user.id, email: user.email, rol: user.rol },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "8h", algorithm: "HS256" }
-    );
+    const token = firmarTokenSesion(user);
 
-    const { password: _password, ...userSinPassword } = user;
+    const { password: _password, sesionVersion: _sv, ...userSinPassword } = user;
 
     return { token, user: userSinPassword };
   }

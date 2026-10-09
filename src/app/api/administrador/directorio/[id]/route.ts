@@ -4,6 +4,7 @@ import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { registrarActividad, registrarError, nombreEntidad } from "@/lib/registro";
+import { instantanea } from "@/lib/historial";
 
 /* =========================
    Utilidad fechas
@@ -41,6 +42,7 @@ export async function PUT(request: Request) {
     const periodoFin = formData.get("periodoFin") as string | null;
     const foto = formData.get("foto") as File | null;
 
+    const antes = await instantanea("directorio", id);
     const actualizado = await DirectorioController.actualizarMiembro(id, {
       nombre: nombre ?? undefined,
       cargo: cargo ?? undefined,
@@ -63,6 +65,8 @@ export async function PUT(request: Request) {
       accion: "editar",
       modulo: "directorio",
       entidadId: id,
+      antes,
+      despues: await instantanea("directorio", id),
       detalle: `Editó a ${(await nombreEntidad("directorio", id)) ?? `#${id}`} en el directorio${foto && foto.size > 0 ? " (nueva foto)" : ""}`,
       request,
     });
@@ -100,7 +104,7 @@ export async function DELETE(request: Request) {
     }
 
     const miembro = await nombreEntidad("directorio", id);
-    const eliminado = await DirectorioController.eliminarMiembro(id);
+    const eliminado = await DirectorioController.eliminarMiembro(id, usuarioActual);
 
     if (!eliminado) {
       return NextResponse.json(
@@ -114,7 +118,7 @@ export async function DELETE(request: Request) {
       accion: "eliminar",
       modulo: "directorio",
       entidadId: id,
-      detalle: `Quitó a ${miembro ?? `#${id}`} del directorio`,
+      detalle: `Quitó a ${miembro ?? `#${id}`} del directorio (queda 30 días en la papelera)`,
       request,
     });
 

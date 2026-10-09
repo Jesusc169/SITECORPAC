@@ -14,9 +14,66 @@ type Seguridad = Awaited<ReturnType<typeof SistemaController.seguridad>>;
 type Usuarios = Awaited<ReturnType<typeof SistemaController.usuarios>>;
 type PaginaRegistro = Awaited<ReturnType<typeof SistemaController.listarRegistro>>;
 
+interface ItemPapelera {
+  id: number;
+  modulo: string;
+  entidadId: number;
+  titulo: string;
+  eliminadoEn: string;
+  eliminadoPor: string | null;
+  expiraEn: string;
+  archivos: number;
+}
+
+interface CambioCampo {
+  campo: string;
+  antes: unknown;
+  despues: unknown;
+  restaurable: boolean;
+}
+
+interface DetalleCambios {
+  id: number;
+  fecha: string;
+  usuario: string | null;
+  modulo: string;
+  entidadId: number | null;
+  detalle: string | null;
+  cambios: CambioCampo[];
+  existe: boolean;
+  puedeRestaurar: boolean;
+}
+
+const NOMBRE_CAMPO: Record<string, string> = {
+  titulo: "Título",
+  nombre: "Nombre",
+  descripcion: "Descripción",
+  contenido: "Contenido",
+  autor: "Autor",
+  activo: "Visible en el sitio",
+  estado: "Visible en el sitio",
+  imagen: "Foto principal",
+  imagen_portada: "Foto principal",
+  imagenes: "Fotos",
+  documentos: "Documentos (PDF)",
+  anio: "Año",
+  fechas: "Fechas y lugares",
+  empresas: "Empresas",
+  lugar: "Lugar",
+  fecha_hora: "Fecha y hora",
+  premios: "Premios",
+  cargo: "Cargo",
+  correo: "Correo",
+  telefono: "Teléfono",
+  fotoUrl: "Foto",
+  periodoInicio: "Inicio del periodo",
+  periodoFin: "Fin del periodo",
+};
+
 const PESTANAS = [
   { id: "resumen", label: "Resumen" },
   { id: "registro", label: "Registro de actividad" },
+  { id: "papelera", label: "Papelera" },
   { id: "seguridad", label: "Seguridad" },
   { id: "usuarios", label: "Usuarios" },
 ] as const;
@@ -80,6 +137,21 @@ function hace(valor: string | null | undefined): string {
   const h = Math.round(min / 60);
   if (h < 48) return `hace ${h} h`;
   return `hace ${Math.round(h / 24)} días`;
+}
+
+/** Valor de un campo del historial, legible. */
+function valorCampo(campo: string, v: unknown): string {
+  if (v === null || v === undefined || v === "") return "(vacío)";
+  if (typeof v === "boolean") return v ? "Sí" : "No";
+  if (campo === "estado" && (v === "ACTIVO" || v === "INACTIVO")) return v === "ACTIVO" ? "Sí" : "No";
+  if (Array.isArray(v)) return v.length ? v.map((x) => String(x).split("/").pop()).join("\n") : "(ninguno)";
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v)) {
+    return campo === "fecha_hora" ? fecha(v) : formatearFechaHoraPeru(v, { dateStyle: "medium" });
+  }
+  if (typeof v === "string" && v.startsWith("/") && /\.(jpe?g|png|webp|gif|pdf|docx?)$/i.test(v)) {
+    return v.split("/").pop() as string;
+  }
+  return String(v);
 }
 
 function porcentaje(usado: number, total: number): number {
@@ -212,6 +284,7 @@ function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string
             />
             <Dato k="Respaldos guardados" v={e.respaldos.disponible ? `${e.respaldos.cantidad} · ${bytes(e.respaldos.bytesTotal)}` : "—"} />
             <Dato k="Archivos subidos" v={`${e.archivos.archivos} · ${bytes(e.archivos.bytes)}`} />
+            <Dato k="En la papelera" v={`${e.papelera.cantidad} elemento(s)`} />
           </dl>
           <p className={styles.nota}>Respaldo automático diario a las 3:00 a. m.; se guardan 30 días.</p>
         </Tarjeta>
@@ -226,6 +299,28 @@ function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string
             <Dato k="Emisor" v={e.certificado.emisor ?? "—"} />
           </dl>
           <p className={styles.nota}>Let&apos;s Encrypt (gratuito). Se renueva solo cuando faltan 30 días.</p>
+        </Tarjeta>
+
+        <Tarjeta titulo="Alertas por correo">
+          {e.alertasCorreo.instaladas ? (
+            <dl>
+              <Dato k="Se envían a" v={e.alertasCorreo.destinatario ?? "—"} />
+              <Dato k="Última revisión" v={hace(e.alertasCorreo.ultimaRevision)} />
+              <Dato
+                k="Último correo"
+                v={e.alertasCorreo.ultimoCorreo ? fecha(e.alertasCorreo.ultimoCorreo.fecha) : "Ninguno todavía"}
+              />
+              <Dato k="Resumen diario (8:00 a. m.)" v={e.alertasCorreo.resumenDiario ? "Activado" : "Desactivado"} />
+            </dl>
+          ) : (
+            <p className={styles.nota}>No instaladas en este servidor.</p>
+          )}
+          {e.alertasCorreo.ultimoCorreo?.asunto && (
+            <p className={styles.nota}>Último aviso: «{e.alertasCorreo.ultimoCorreo.asunto}»</p>
+          )}
+          <p className={styles.nota}>
+            Revisa cada 10 minutos: errores, ataques a contraseñas, cuentas desactivadas, respaldo y certificado.
+          </p>
         </Tarjeta>
 
         <Tarjeta titulo="Últimos errores">
@@ -254,7 +349,7 @@ function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string
 /* =========================================================
    REGISTRO DE ACTIVIDAD
 ========================================================= */
-const FILTROS_VACIOS = { desde: "", hasta: "", modulo: "", nivel: "", usuario: "", q: "" };
+const FILTROS_VACIOS = { desde: "", hasta: "", modulo: "", nivel: "", usuario: "", q: "", entidad: "" };
 type Filtros = typeof FILTROS_VACIOS;
 
 function Registro({
@@ -272,6 +367,8 @@ function Registro({
   const [datos, setDatos] = useState<PaginaRegistro | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
+  const [verCambios, setVerCambios] = useState<number | null>(null);
+  const [recarga, setRecarga] = useState(0);
 
   useEffect(() => {
     setFiltros(filtrosIniciales);
@@ -304,7 +401,7 @@ function Registro({
     return () => {
       cancelado = true;
     };
-  }, [query, pagina]);
+  }, [query, pagina, recarga]);
 
   const totalPaginas = datos ? Math.max(1, Math.ceil(datos.total / datos.porPagina)) : 1;
   const cambiar = (k: keyof Filtros, v: string) => setFiltros((f) => ({ ...f, [k]: v }));
@@ -390,6 +487,23 @@ function Registro({
         </div>
       </form>
 
+      {aplicados.entidad && (
+        <div className={`${styles.alerta} ${styles.alertaOk}`}>
+          Mostrando solo el historial de {NOMBRE_MODULO[aplicados.modulo] ?? "este elemento"} #{aplicados.entidad}.{" "}
+          <button
+            className={styles.enlace}
+            onClick={() => {
+              const f = { ...aplicados, entidad: "", modulo: "" };
+              setFiltros(f);
+              setAplicados(f);
+              setPagina(1);
+            }}
+          >
+            Ver todo
+          </button>
+        </div>
+      )}
+
       {error && <div className={styles.alertaError + " " + styles.alerta}>{error}</div>}
 
       <div className={panel.contenedorTabla}>
@@ -426,7 +540,17 @@ function Registro({
                     <Nivel nivel={f.nivel} /> {NOMBRE_ACCION[f.accion] ?? f.accion}
                   </td>
                   <td>{NOMBRE_MODULO[f.modulo] ?? f.modulo}</td>
-                  <td className={styles.celdaDetalle}>{f.detalle}</td>
+                  <td className={styles.celdaDetalle}>
+                    {f.detalle}
+                    {f.conCambios && (
+                      <>
+                        {" "}
+                        <button className={styles.enlace} onClick={() => setVerCambios(f.id)}>
+                          Ver cambios
+                        </button>
+                      </>
+                    )}
+                  </td>
                   <td className={styles.celdaIp}>{f.ip ?? "—"}</td>
                 </tr>
               ))
@@ -454,6 +578,282 @@ function Registro({
           </div>
         </div>
       )}
+
+      {verCambios !== null && (
+        <ModalCambios
+          id={verCambios}
+          alCerrar={() => setVerCambios(null)}
+          alRestaurar={() => {
+            setVerCambios(null);
+            setRecarga((n) => n + 1);
+          }}
+          verHistorial={(modulo, entidad) => {
+            const f = { ...FILTROS_VACIOS, modulo, entidad: String(entidad) };
+            setVerCambios(null);
+            setFiltros(f);
+            setAplicados(f);
+            setPagina(1);
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+/* =========================================================
+   MODAL: QUÉ CAMBIÓ EN UNA EDICIÓN
+========================================================= */
+function ModalCambios({
+  id,
+  alCerrar,
+  alRestaurar,
+  verHistorial,
+}: {
+  id: number;
+  alCerrar: () => void;
+  alRestaurar: () => void;
+  verHistorial: (modulo: string, entidad: number) => void;
+}) {
+  const [d, setD] = useState<DetalleCambios | null>(null);
+  const [error, setError] = useState("");
+  const [restaurando, setRestaurando] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/administrador/sistema/historial/${id}`)
+      .then(async (r) => {
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "No se pudo cargar");
+        setD(j);
+      })
+      .catch((e: Error) => setError(e.message));
+  }, [id]);
+
+  useEffect(() => {
+    const esc = (ev: KeyboardEvent) => ev.key === "Escape" && alCerrar();
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [alCerrar]);
+
+  const restaurar = async () => {
+    if (!d) return;
+    if (
+      !confirm(
+        "¿Volver los textos a como estaban ANTES de este cambio? Las fotos y archivos no se tocan. Esta restauración también queda en el registro y se puede deshacer igual."
+      )
+    )
+      return;
+    setRestaurando(true);
+    setError("");
+    try {
+      const r = await fetch(`/api/administrador/sistema/historial/${id}`, { method: "POST" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "No se pudo restaurar");
+      alRestaurar();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setRestaurando(false);
+    }
+  };
+
+  return (
+    <div className={styles.modalFondo} onClick={alCerrar}>
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-cambios"
+        onClick={(ev) => ev.stopPropagation()}
+      >
+        <div className={styles.modalCabecera}>
+          <h2 id="titulo-cambios">Qué cambió</h2>
+          <button className={panel.boton} onClick={alCerrar} aria-label="Cerrar">
+            ✕
+          </button>
+        </div>
+
+        {error && <div className={`${styles.alerta} ${styles.alertaError}`}>{error}</div>}
+        {!d && !error && <p>Cargando…</p>}
+
+        {d && (
+          <>
+            <p className={styles.nota}>
+              {d.detalle} — {d.usuario ?? "—"}, {fecha(d.fecha)}
+            </p>
+            {d.cambios.length === 0 ? (
+              <p>Se guardó sin cambiar nada.</p>
+            ) : (
+              <div className={panel.contenedorTabla}>
+                <table className={panel.tabla}>
+                  <thead>
+                    <tr>
+                      <th scope="col">Campo</th>
+                      <th scope="col">Antes</th>
+                      <th scope="col">Después</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.cambios.map((c) => (
+                      <tr key={c.campo}>
+                        <td>
+                          <strong>{NOMBRE_CAMPO[c.campo] ?? c.campo}</strong>
+                          {!c.restaurable && <div className={styles.muted}>solo lectura</div>}
+                        </td>
+                        <td className={styles.celdaAntes}>{valorCampo(c.campo, c.antes)}</td>
+                        <td className={styles.celdaDespues}>{valorCampo(c.campo, c.despues)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className={styles.modalPie}>
+              {d.entidadId && (
+                <button className={panel.boton} onClick={() => verHistorial(d.modulo, d.entidadId as number)}>
+                  Ver todo el historial de este elemento
+                </button>
+              )}
+              {d.puedeRestaurar ? (
+                <button className={panel.botonNuevo} onClick={restaurar} disabled={restaurando}>
+                  {restaurando ? "Restaurando…" : "↶ Restaurar versión anterior"}
+                </button>
+              ) : (
+                !d.existe && <span className={styles.muted}>Este elemento ya no existe (revisa la Papelera).</span>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   PAPELERA
+========================================================= */
+function PapeleraTab() {
+  const [items, setItems] = useState<ItemPapelera[] | null>(null);
+  const [error, setError] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [trabajando, setTrabajando] = useState<number | null>(null);
+
+  const cargar = useCallback(() => {
+    fetch("/api/administrador/sistema/papelera")
+      .then(async (r) => {
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "No se pudo cargar la papelera");
+        setItems(j);
+      })
+      .catch((e: Error) => setError(e.message));
+  }, []);
+
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
+
+  const accion = async (it: ItemPapelera, tipo: "restaurar" | "borrar") => {
+    const pregunta =
+      tipo === "restaurar"
+        ? `¿Restaurar "${it.titulo}"? Vuelve al sitio tal como estaba, con sus fotos y su mismo enlace.`
+        : `¿Borrar DEFINITIVAMENTE "${it.titulo}"? Se eliminan también sus archivos del servidor. No se puede deshacer.`;
+    if (!confirm(pregunta)) return;
+    setTrabajando(it.id);
+    setError("");
+    setMensaje("");
+    try {
+      const r = await fetch(`/api/administrador/sistema/papelera/${it.id}`, {
+        method: tipo === "restaurar" ? "POST" : "DELETE",
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "No se pudo completar");
+      setMensaje(
+        tipo === "restaurar"
+          ? `"${it.titulo}" se restauró y ya está de nuevo en ${NOMBRE_MODULO[it.modulo] ?? it.modulo}.`
+          : `"${it.titulo}" se borró definitivamente.`
+      );
+      cargar();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setTrabajando(null);
+    }
+  };
+
+  return (
+    <>
+      <p className={styles.nota}>
+        Lo que se elimina en el panel (noticias, ferias, sorteos y miembros del directorio) queda aquí 30 días y
+        después se borra solo. Al restaurar vuelve con sus fotos, documentos y el mismo enlace.
+      </p>
+      {mensaje && (
+        <div className={`${styles.alerta} ${styles.alertaOk}`} role="status">
+          {mensaje}
+        </div>
+      )}
+      {error && <div className={`${styles.alerta} ${styles.alertaError}`}>{error}</div>}
+
+      <div className={panel.contenedorTabla}>
+        <table className={panel.tabla}>
+          <thead>
+            <tr>
+              <th scope="col">Elemento</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Eliminado</th>
+              <th scope="col">Se borra el</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items === null ? (
+              <tr>
+                <td colSpan={5} className={panel.vacio}>
+                  Cargando…
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={5} className={panel.vacio}>
+                  La papelera está vacía.
+                </td>
+              </tr>
+            ) : (
+              items.map((it) => (
+                <tr key={it.id}>
+                  <td>
+                    <strong>{it.titulo}</strong>
+                    <div className={styles.muted}>{it.archivos} archivo(s)</div>
+                  </td>
+                  <td>{NOMBRE_MODULO[it.modulo] ?? it.modulo}</td>
+                  <td>
+                    {fecha(it.eliminadoEn)}
+                    <div className={styles.muted}>por {it.eliminadoPor ?? "—"}</div>
+                  </td>
+                  <td>{formatearFechaHoraPeru(it.expiraEn, { dateStyle: "medium" })}</td>
+                  <td>
+                    <div className={panel.acciones} style={{ flexWrap: "wrap" }}>
+                      <button
+                        className={panel.botonNuevo}
+                        disabled={trabajando === it.id}
+                        onClick={() => accion(it, "restaurar")}
+                      >
+                        Restaurar
+                      </button>
+                      <button
+                        className={panel.botonPeligro}
+                        disabled={trabajando === it.id}
+                        onClick={() => accion(it, "borrar")}
+                      >
+                        Borrar definitivamente
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
@@ -670,6 +1070,7 @@ export default function SistemaView({
           {pestana === "registro" && (
             <Registro usuarios={usuarios} modulos={modulos} filtrosIniciales={filtrosRegistro} />
           )}
+          {pestana === "papelera" && <PapeleraTab />}
           {pestana === "seguridad" && <SeguridadTab s={seguridad} alCambiar={() => router.refresh()} />}
           {pestana === "usuarios" && <UsuariosTab u={usuarios} irARegistro={irARegistro} />}
         </div>

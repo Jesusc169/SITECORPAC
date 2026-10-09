@@ -94,13 +94,19 @@ model prestamo_requisitos {
 }
 
 model user {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String   @unique(map: "User_email_key")
-  password  String
-  rol       String
-  permisos  Json?
-  createdAt DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  email         String   @unique(map: "User_email_key")
+  password      String
+  rol           String
+  permisos      Json?
+  createdAt     DateTime @default(now())
+  // false = cuenta desactivada: no puede iniciar sesión y sus sesiones
+  // abiertas dejan de valer, pero la cuenta y su historial se conservan.
+  activo        Boolean  @default(true)
+  // Va dentro del JWT. Al subirla (cambio de contraseña, desactivar,
+  // "cerrar sesiones") todos los tokens emitidos antes dejan de valer.
+  sesionVersion Int      @default(0)
 }
 
 model beneficio_fallecido {
@@ -330,8 +336,34 @@ model registro_actividad {
   detalle   String?  @db.VarChar(500)
   ip        String?  @db.VarChar(64)
   nivel     String   @default("info") @db.VarChar(10)
+  // Historial de cambios: cómo estaba antes y cómo quedó después de una
+  // edición (solo en acciones "editar"/"restaurar" de contenido).
+  antes     Json?
+  despues   Json?
 
   @@index([fecha], map: "idx_registro_fecha")
   @@index([modulo, fecha], map: "idx_registro_modulo_fecha")
   @@index([usuarioId, fecha], map: "idx_registro_usuario_fecha")
+  @@index([modulo, entidadId], map: "idx_registro_entidad")
+}
+
+// Papelera: lo que se elimina en el panel se guarda aquí 30 días (registro
+// completo con sus fotos, fechas, premios...) para poder restaurarlo con el
+// mismo id. Los archivos se quedan en disco hasta que vence; al vencer se
+// borran solo si ningún otro registro los usa (una feria duplicada comparte
+// las imágenes de la original). Ver lib/papelera.ts.
+model papelera {
+  id             Int      @id @default(autoincrement())
+  modulo         String   @db.VarChar(30)
+  entidadId      Int
+  titulo         String   @db.VarChar(255)
+  datos          Json
+  archivos       Json
+  eliminadoEn    DateTime @default(now())
+  eliminadoPorId Int?
+  eliminadoPor   String?  @db.VarChar(120)
+  expiraEn       DateTime
+
+  @@index([expiraEn], map: "idx_papelera_expira")
+  @@index([modulo, entidadId], map: "idx_papelera_entidad")
 }

@@ -112,7 +112,7 @@ export default function AdminDirectorioPage() {
 
   // 🔹 Eliminar
   const handleEliminarMiembro = async (id: number) => {
-    if (!confirm("¿Seguro quieres eliminar este miembro?")) return;
+    if (!confirm("¿Seguro quieres eliminar este miembro?\n\nSe guardará 30 días en la papelera: el administrador puede recuperarlo.")) return;
 
     try {
       const res = await fetch(`/api/administrador/directorio/${id}`, {

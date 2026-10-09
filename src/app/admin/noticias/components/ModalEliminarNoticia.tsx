@@ -63,6 +63,9 @@ export default function ModalEliminarNoticia({
             <div className="modal-body">
               ¿Seguro que deseas eliminar{" "}
               <strong>{noticia.titulo}</strong>?
+              <p className="text-muted small mb-0 mt-2">
+                Se guardará 30 días en la papelera: el administrador puede recuperarla.
+              </p>
             </div>
 
             {/* FOOTER */}

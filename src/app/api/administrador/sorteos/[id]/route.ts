@@ -4,6 +4,7 @@ import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
+import { instantanea } from "@/lib/historial";
 
 export const runtime = "nodejs";
 
@@ -107,6 +108,7 @@ export async function PUT(
     const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
     const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
 
+    const antes = await instantanea("sorteos", sorteoId);
     const actualizado = await SorteoController.actualizarSorteo(sorteoId, {
       nombre,
       descripcion,
@@ -132,6 +134,8 @@ export async function PUT(
       accion: "editar",
       modulo: "sorteos",
       entidadId: sorteoId,
+      antes,
+      despues: await instantanea("sorteos", sorteoId),
       detalle: `Editó el sorteo "${nombre}" (${textoVisible(estado !== "INACTIVO")})`,
       request,
     });
@@ -171,14 +175,14 @@ export async function DELETE(
     }
 
     const nombreSorteo = await nombreEntidad("sorteos", sorteoId);
-    await SorteoController.eliminarSorteo(sorteoId);
+    await SorteoController.eliminarSorteo(sorteoId, usuarioActual);
 
     await registrarActividad({
       usuario: usuarioActual,
       accion: "eliminar",
       modulo: "sorteos",
       entidadId: sorteoId,
-      detalle: `Eliminó el sorteo "${nombreSorteo ?? `#${sorteoId}`}"`,
+      detalle: `Eliminó el sorteo "${nombreSorteo ?? `#${sorteoId}`}" (queda 30 días en la papelera)`,
       request,
     });
 

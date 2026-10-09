@@ -1,6 +1,7 @@
 // src/app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
-import { AuthController } from "../../../../controllers/AuthController";
+import { AuthController, CuentaDesactivadaError } from "../../../../controllers/AuthController";
+import { opcionesCookieSesion } from "@/lib/auth";
 import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "@/lib/rateLimiter";
 import { registrarActividad } from "@/lib/registro";
 
@@ -75,16 +76,23 @@ export async function POST(req: Request) {
     });
 
     // 🔐 Cookie segura para middleware
-    response.cookies.set("token", token, {
-      httpOnly: true, // ⛔ JS no puede leerla
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/", // 👈 disponible para todo el sitio
-      maxAge: 60 * 60 * 8, // 8 horas (ajusta si quieres)
-    });
+    // httpOnly (JS no puede leerla), 8 horas, igual que el JWT
+    response.cookies.set("token", token, opcionesCookieSesion());
 
     return response;
   } catch (err: any) {
+    if (err instanceof CuentaDesactivadaError) {
+      // La contraseña era correcta: no cuenta como intento de adivinarla.
+      await registrarActividad({
+        accion: "login_fallido",
+        modulo: "sesion",
+        nivel: "aviso",
+        detalle: `Intento de entrar con una cuenta desactivada. Correo: ${correoParaRegistro(correoIntentado)}`,
+        request: req,
+      });
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
+
     await registrarFallo(ip);
     await registrarActividad({
       accion: "login_fallido",

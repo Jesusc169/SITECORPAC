@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/models/UserModel", () => ({
   UserModel: {
+    obtenerPorId: vi.fn().mockResolvedValue({ id: 7, rol: "secretaria", activo: true }),
+    cambiarActivo: vi.fn(),
+    cerrarSesiones: vi.fn(),
     existeEmail: vi.fn(),
     crear: vi.fn(),
     actualizar: vi.fn(),
@@ -136,5 +139,43 @@ describe("UsuarioController.eliminarUsuario", () => {
   it("si permite eliminar la cuenta de otro usuario", async () => {
     (UserModel.eliminar as any).mockResolvedValue({ id: 9 });
     await expect(UsuarioController.eliminarUsuario(9, 5)).resolves.toBeDefined();
+  });
+});
+
+describe("Protección de cuentas de administrador", () => {
+  it("una secretaria con permiso 'usuarios' no puede editar a un administrador", async () => {
+    (UserModel.obtenerPorId as any).mockResolvedValueOnce({ id: 1, rol: "administrador", activo: true });
+    await expect(
+      UsuarioController.actualizarUsuario(1, 5, { nombre: "X", password: "nueva-clave-123" }, false)
+    ).rejects.toThrow("Solo un administrador");
+    expect(UserModel.actualizar).not.toHaveBeenCalled();
+  });
+
+  it("una secretaria no puede eliminar ni desactivar a un administrador", async () => {
+    (UserModel.obtenerPorId as any).mockResolvedValue({ id: 1, rol: "administrador", activo: true });
+    await expect(UsuarioController.eliminarUsuario(1, 5, false)).rejects.toThrow(UsuarioValidationError);
+    await expect(UsuarioController.cambiarActivo(1, 5, false, false)).rejects.toThrow(UsuarioValidationError);
+    await expect(UsuarioController.cerrarSesiones(1, false)).rejects.toThrow(UsuarioValidationError);
+    (UserModel.obtenerPorId as any).mockResolvedValue({ id: 7, rol: "secretaria", activo: true });
+  });
+
+  it("un administrador sí puede editar a otro administrador", async () => {
+    (UserModel.obtenerPorId as any).mockResolvedValueOnce({ id: 1, rol: "administrador", activo: true });
+    (UserModel.actualizar as any).mockResolvedValue({ id: 1 });
+    await expect(
+      UsuarioController.actualizarUsuario(1, 2, { nombre: "Admin", rol: "administrador" }, true)
+    ).resolves.toBeDefined();
+  });
+});
+
+describe("UsuarioController.cambiarActivo", () => {
+  it("no deja desactivar la propia cuenta", async () => {
+    await expect(UsuarioController.cambiarActivo(5, 5, false, true)).rejects.toThrow(UsuarioValidationError);
+  });
+
+  it("desactiva la cuenta de otro usuario", async () => {
+    (UserModel.cambiarActivo as any).mockResolvedValue({ id: 7, activo: false });
+    await UsuarioController.cambiarActivo(7, 5, false, true);
+    expect(UserModel.cambiarActivo).toHaveBeenCalledWith(7, false);
   });
 });

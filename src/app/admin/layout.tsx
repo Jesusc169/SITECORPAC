@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { obtenerUsuarioActual } from "@/lib/auth";
 import InactivityGuard from "@/components/InactivityGuard/InactivityGuard";
 
 export default async function AdminLayout({
@@ -7,11 +7,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token");
-
-  // 🔒 BLOQUEO TOTAL NIVEL BANCO
-  if (!token) {
+  // No basta con que exista la cookie: la sesión tiene que seguir vigente
+  // (cuenta activa y sin "cerrar sesiones" / cambio de contraseña posterior).
+  const usuario = await obtenerUsuarioActual();
+  if (!usuario) {
     redirect("/login");
   }
 

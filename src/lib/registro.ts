@@ -7,6 +7,7 @@
  * registro falla, solo se escribe en el log de PM2 y se sigue.
  */
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { obtenerIp } from "@/lib/rateLimiter";
 
 export const MODULOS_REGISTRO = [
@@ -53,6 +54,9 @@ export interface DatosRegistro {
   detalle?: string | null;
   request?: Request | null;
   nivel?: NivelRegistro;
+  // Historial de cambios (ver lib/historial.ts)
+  antes?: Prisma.InputJsonValue | null;
+  despues?: Prisma.InputJsonValue | null;
 }
 
 /** Recorta el texto al largo de la columna, sin cortar a medio carácter. */
@@ -78,6 +82,8 @@ export async function registrarActividad(datos: DatosRegistro): Promise<void> {
         detalle: recortarDetalle(datos.detalle),
         ip: datos.request ? obtenerIp(datos.request).slice(0, 64) : null,
         nivel: datos.nivel ?? "info",
+        ...(datos.antes != null ? { antes: datos.antes } : {}),
+        ...(datos.despues != null ? { despues: datos.despues } : {}),
       },
     });
   } catch (e) {

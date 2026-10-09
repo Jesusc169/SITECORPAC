@@ -14,6 +14,8 @@ import {
   MAX_DOCUMENTO_BYTES,
 } from "@/lib/archivosNoticia";
 import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { moverAPapelera } from "@/lib/papelera";
+import type { ActorRegistro } from "@/lib/registro";
 
 export class NoticiaValidationError extends Error {}
 
@@ -311,19 +313,12 @@ export class NoticiasController {
   }
 
   // 🔴 Eliminar noticia y sus archivos
-  static async eliminarNoticiaCompleta(id: number) {
-    const noticia = await NoticiaModel.obtenerPorId(id);
-    if (!noticia) return null;
+  // Va a la papelera (30 días, se puede restaurar). Los archivos se borran
+  // recién cuando vence; ver lib/papelera.ts.
+  static async eliminarNoticiaCompleta(id: number, actor?: ActorRegistro | null) {
+    const titulo = await moverAPapelera("noticias", id, actor);
+    if (!titulo) return null;
 
-    await borrarImagenNoticia(noticia.imagen);
-    for (const img of noticia.noticia_imagen) {
-      await borrarImagenNoticia(img.url);
-    }
-    for (const pdf of noticia.noticia_pdf) {
-      await borrarDocumentoNoticia(pdf.url);
-    }
-
-    await NoticiaModel.eliminar(id);
     invalidarCache("noticias");
     return true;
   }

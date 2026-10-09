@@ -113,7 +113,7 @@ export default function SorteosAdminClient() {
   ELIMINAR
   ========================================= */
   const onEliminar = async (id: number) => {
-    if (!confirm("¿Eliminar sorteo?")) return;
+    if (!confirm("¿Eliminar sorteo?\n\nSe guardará 30 días en la papelera: el administrador puede recuperarlo.")) return;
 
     try {
       await eliminarSorteo(id);

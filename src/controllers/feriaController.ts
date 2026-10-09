@@ -4,6 +4,8 @@ import { FeriaModel } from "@/models/feriaModel";
 import { guardarImagenFeria, borrarImagenFeria } from "@/lib/archivosFeria";
 import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
+import { moverAPapelera } from "@/lib/papelera";
+import type { ActorRegistro } from "@/lib/registro";
 
 export class FeriaValidationError extends Error {}
 
@@ -232,17 +234,12 @@ export const FeriaController = {
     return nuevaFeria;
   },
 
-  eliminarFeria: async (id: number) => {
-    const feria = await FeriaModel.obtenerPorId(id);
-    if (feria) {
-      await borrarImagenFeria(feria.imagen_portada);
-      for (const img of feria.evento_feria_imagen) {
-        await borrarImagenFeria(img.url);
-      }
-    }
-
-    await FeriaModel.eliminarRelaciones(id);
-    await FeriaModel.eliminar(id);
+  // Va a la papelera (30 días). Antes borraba las imágenes del disco al
+  // instante, y una feria duplicada (que comparte esas imágenes) se quedaba
+  // sin fotos; ahora se borran al vencer y solo si nadie más las usa.
+  eliminarFeria: async (id: number, actor?: ActorRegistro | null) => {
+    const titulo = await moverAPapelera("ferias", id, actor);
     invalidarCache("ferias");
+    return titulo;
   },
 };

@@ -4,6 +4,8 @@ import { SorteoModel } from "@/models/sorteoModel";
 import { guardarImagenSorteo, borrarImagenSorteo } from "@/lib/archivosSorteo";
 import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
+import { moverAPapelera } from "@/lib/papelera";
+import type { ActorRegistro } from "@/lib/registro";
 
 export class SorteoValidationError extends Error {}
 
@@ -235,16 +237,10 @@ export const SorteoController = {
     return nuevo;
   },
 
-  eliminarSorteo: async (id: number) => {
-    const sorteo = await SorteoModel.obtenerPorId(id);
-    if (sorteo) {
-      await borrarImagenSorteo(sorteo.imagen);
-      for (const img of sorteo.sorteo_imagen) {
-        await borrarImagenSorteo(img.url);
-      }
-    }
-
-    await SorteoModel.eliminar(id);
+  // Va a la papelera (30 días, se puede restaurar). Ver lib/papelera.ts.
+  eliminarSorteo: async (id: number, actor?: ActorRegistro | null) => {
+    const nombre = await moverAPapelera("sorteos", id, actor);
     invalidarCache("sorteos");
+    return nombre;
   },
 };

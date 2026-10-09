@@ -16,6 +16,21 @@ function normalizarPermisos(permisos: unknown): string[] {
   return Array.isArray(permisos) ? permisos : [];
 }
 
+/**
+ * Una cuenta con el permiso "usuarios" pero sin rol administrador (una
+ * secretaria) solo puede gestionar cuentas de secretaria. Antes podía
+ * editar al administrador — incluida su contraseña — y quedarse con el
+ * panel; o bajarlo a secretaria sin querer (normalizarRol).
+ */
+async function obtenerObjetivo(id: number, actorEsAdministrador: boolean) {
+  const objetivo = await UserModel.obtenerPorId(id);
+  if (!objetivo) throw new UsuarioValidationError("Usuario no encontrado");
+  if (objetivo.rol === "administrador" && !actorEsAdministrador) {
+    throw new UsuarioValidationError("Solo un administrador puede modificar la cuenta de un administrador");
+  }
+  return objetivo;
+}
+
 export const UsuarioController = {
   obtenerUsuarios: () => UserModel.obtenerTodos(),
 
@@ -67,6 +82,8 @@ export const UsuarioController = {
       throw new UsuarioValidationError("El nombre es obligatorio");
     }
 
+    await obtenerObjetivo(id, actorEsAdministrador);
+
     // Evita que alguien se quite a sí mismo el permiso de usuarios
     // y quede sin forma de revertirlo.
     if (id === actorId && rol !== "administrador" && !permisos.includes("usuarios")) {
@@ -89,11 +106,32 @@ export const UsuarioController = {
     });
   },
 
-  eliminarUsuario: async (id: number, actorId: number) => {
+  eliminarUsuario: async (id: number, actorId: number, actorEsAdministrador = false) => {
     if (id === actorId) {
       throw new UsuarioValidationError("No puedes eliminar tu propia cuenta");
     }
 
+    await obtenerObjetivo(id, actorEsAdministrador);
     return UserModel.eliminar(id);
+  },
+
+  /** Desactivar (o reactivar) una cuenta sin borrarla. */
+  cambiarActivo: async (
+    id: number,
+    actorId: number,
+    activo: boolean,
+    actorEsAdministrador: boolean
+  ) => {
+    if (id === actorId) {
+      throw new UsuarioValidationError("No puedes desactivar tu propia cuenta");
+    }
+    await obtenerObjetivo(id, actorEsAdministrador);
+    return UserModel.cambiarActivo(id, activo);
+  },
+
+  /** Cierra todas las sesiones abiertas de esa cuenta en cualquier equipo. */
+  cerrarSesiones: async (id: number, actorEsAdministrador: boolean) => {
+    await obtenerObjetivo(id, actorEsAdministrador);
+    return UserModel.cerrarSesiones(id);
   },
 };

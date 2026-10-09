@@ -13,6 +13,7 @@ interface Usuario {
   rol: string;
   permisos: string[] | null;
   createdAt: string;
+  activo: boolean;
 }
 
 interface FormState {
@@ -134,6 +135,32 @@ export default function UsuariosPage() {
     }
   };
 
+  const accionCuenta = async (
+    u: Usuario,
+    accion: "desactivar" | "activar" | "cerrar_sesiones"
+  ) => {
+    const preguntas = {
+      desactivar: `¿Desactivar la cuenta de "${u.nombre}"? No podrá entrar al panel y se cerrarán sus sesiones abiertas. Su historial se conserva y puedes reactivarla cuando quieras.`,
+      activar: `¿Reactivar la cuenta de "${u.nombre}"? Podrá volver a entrar con su contraseña.`,
+      cerrar_sesiones: `¿Cerrar todas las sesiones abiertas de "${u.nombre}"? Tendrá que volver a iniciar sesión en todos sus equipos.`,
+    };
+    if (!confirm(preguntas[accion])) return;
+    try {
+      const res = await fetch(`/api/administrador/usuarios/${u.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accion }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "No se pudo completar la acción");
+      }
+      await cargarUsuarios();
+    } catch (e: any) {
+      alert(e.message || "No se pudo completar la acción");
+    }
+  };
+
   const eliminar = async (u: Usuario) => {
     if (!confirm(`¿Eliminar el acceso de "${u.nombre}"? Esta acción no se puede deshacer.`)) {
       return;
@@ -182,19 +209,20 @@ export default function UsuariosPage() {
                 <th>Correo</th>
                 <th>Rol</th>
                 <th>Privilegios</th>
+                <th>Estado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className={panel.vacio}>
+                  <td colSpan={6} className={panel.vacio}>
                     No hay usuarios registrados
                   </td>
                 </tr>
               ) : (
                 usuarios.map((u) => (
-                  <tr key={u.id}>
+                  <tr key={u.id} className={u.activo ? undefined : styles.filaInactiva}>
                     <td>{u.nombre}</td>
                     <td>{u.email}</td>
                     <td>
@@ -222,8 +250,32 @@ export default function UsuariosPage() {
                       )}
                     </td>
                     <td>
-                      <div className={panel.acciones}>
+                      <span className={`${styles.badgeRol} ${u.activo ? styles.badgeActiva : styles.badgeInactiva}`}>
+                        {u.activo ? "Activa" : "Desactivada"}
+                      </span>
+                    </td>
+                    <td>
+                      {/* aquí son hasta 4 botones: se permite que bajen de línea */}
+                      <div className={panel.acciones} style={{ flexWrap: "wrap" }}>
                         <button className={panel.boton} onClick={() => abrirEditar(u)}>Editar</button>
+                        {u.activo ? (
+                          <>
+                            <button
+                              className={panel.boton}
+                              onClick={() => accionCuenta(u, "cerrar_sesiones")}
+                              title="Cierra su sesión en todos los equipos"
+                            >
+                              Cerrar sesiones
+                            </button>
+                            <button className={panel.boton} onClick={() => accionCuenta(u, "desactivar")}>
+                              Desactivar
+                            </button>
+                          </>
+                        ) : (
+                          <button className={panel.boton} onClick={() => accionCuenta(u, "activar")}>
+                            Reactivar
+                          </button>
+                        )}
                         <button className={panel.botonPeligro} onClick={() => eliminar(u)}>
                           Eliminar
                         </button>
