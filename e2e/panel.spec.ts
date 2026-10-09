@@ -61,11 +61,25 @@ test("ciclo completo de una noticia: crear, ver, editar, historial, eliminar y r
   await expect(page.getByText('Editó la noticia "Asamblea E2E editada"')).toBeVisible();
   await page.getByRole("button", { name: "Ver cambios" }).first().click();
   await expect(page.getByRole("dialog")).toContainText("Asamblea E2E editada");
+  // El foco entra a la ventana y Escape la cierra
+  await expect(page.getByRole("dialog").getByRole("button", { name: "Cerrar" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Ver cambios" }).first()).toBeFocused();
+  // con el botón Cerrar también
+  await page.getByRole("button", { name: "Ver cambios" }).first().click();
   await page.getByRole("dialog").getByRole("button", { name: "Cerrar" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 
   // Eliminar → papelera → restaurar
   await page.goto("/admin/noticias");
-  await page.locator("tr", { hasText: "Asamblea E2E editada" }).getByRole("button", { name: "Eliminar" }).click();
+  const filaEditada = page.locator("tr", { hasText: "Asamblea E2E editada" });
+  // Escape cierra la ventana de eliminar sin borrar nada
+  await filaEditada.getByRole("button", { name: "Eliminar" }).click();
+  await page.locator(".modal-footer").getByRole("button", { name: "Cancelar" }).focus();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".modal-footer")).toHaveCount(0);
+  await filaEditada.getByRole("button", { name: "Eliminar" }).click();
   await page.locator(".modal-footer").getByRole("button", { name: "Eliminar" }).click();
   await expect(page.getByText("Asamblea E2E editada")).toHaveCount(0);
 
@@ -115,4 +129,16 @@ test("desactivar una cuenta la deja fuera; reactivarla la deja entrar", async ({
   await fila.getByRole("button", { name: "Reactivar" }).click();
   await expect(fila.getByText("Activa", { exact: true })).toBeVisible();
   await entrar(sec, "secretaria@e2e.test");
+});
+
+test("al crear una feria, las empresas se eligen con el teclado", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.goto("/admin/ferias");
+  await page.getByRole("button", { name: /Nueva Feria/i }).click();
+  await page.getByPlaceholder("Buscar empresa...").click();
+  const opcion = page.getByRole("button", { name: "Empresa E2E", exact: true });
+  await opcion.focus();
+  await page.keyboard.press("Enter");
+  // queda elegida: aparece como etiqueta con su botón × para quitarla
+  await expect(page.locator("span", { hasText: "Empresa E2E" }).getByRole("button", { name: "×" })).toBeVisible();
 });

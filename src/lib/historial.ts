@@ -80,7 +80,9 @@ export async function instantanea(
             (x) =>
               `${x.fecha.toISOString().slice(0, 10)} ${x.hora_inicio}–${x.hora_fin} · ${x.ubicacion}${x.zona ? ` (${x.zona})` : ""}`
           ),
-          empresas: f.evento_feria_empresa.map((e) => e.empresa.nombre).sort(),
+          empresas: f.evento_feria_empresa
+            .map((e) => e.empresa.nombre)
+            .sort((a, b) => a.localeCompare(b, "es")),
         };
       }
       case "sorteos": {

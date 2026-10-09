@@ -27,37 +27,36 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
     const previo = document.activeElement as HTMLElement | null;
     cerrarRef.current?.focus();
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") setIndice((i) => (i + 1) % imagenes.length);
-      if (e.key === "ArrowLeft") setIndice((i) => (i - 1 + imagenes.length) % imagenes.length);
-
-      // Mantiene el foco dentro del visor mientras está abierto.
-      if (e.key === "Tab" && dialogRef.current) {
-        const enfocables = dialogRef.current.querySelectorAll<HTMLElement>("button");
-        if (!enfocables.length) return;
-        const primero = enfocables[0];
-        const ultimo = enfocables[enfocables.length - 1];
-        if (e.shiftKey && document.activeElement === primero) {
-          e.preventDefault();
-          ultimo.focus();
-        } else if (!e.shiftKey && document.activeElement === ultimo) {
-          e.preventDefault();
-          primero.focus();
-        }
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-
     return () => {
       document.body.style.overflow = original;
-      window.removeEventListener("keydown", onKeyDown);
       previo?.focus();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imagenes.length]);
 
   if (imagenes.length === 0) return null;
+
+  // El foco está siempre dentro del visor (entra al abrir y Tab no sale), así
+  // que el teclado se atiende aquí mismo en vez de en window.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") onClose();
+    if (e.key === "ArrowRight") setIndice((i) => (i + 1) % imagenes.length);
+    if (e.key === "ArrowLeft") setIndice((i) => (i - 1 + imagenes.length) % imagenes.length);
+
+    // Mantiene el foco dentro del visor mientras está abierto.
+    if (e.key === "Tab" && dialogRef.current) {
+      const enfocables = dialogRef.current.querySelectorAll<HTMLElement>("button");
+      const primero = enfocables[0];
+      const ultimo = enfocables[enfocables.length - 1];
+      if (e.shiftKey && document.activeElement === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    }
+  };
 
   // Portal a document.body: si el lightbox se quedara anidado dentro de la
   // tarjeta que lo abre (feria/sorteo), un simple `transform` en su :hover
@@ -68,7 +67,9 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
     <div
       ref={dialogRef}
       className={styles.overlay}
-      onClick={onClose}
+      // Cierra solo si el clic fue en el fondo oscuro, no en la foto ni en los botones
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={onKeyDown}
       role="dialog"
       aria-modal="true"
       aria-label={titulo || "Galería de fotos"}
@@ -101,7 +102,7 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
         </button>
       )}
 
-      <div className={styles.imagenWrap} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.imagenWrap}>
         <img
           src={imagenes[indice]}
           alt={titulo ? `${titulo} — foto ${indice + 1} de ${imagenes.length}` : `Foto ${indice + 1} de ${imagenes.length}`}
@@ -124,7 +125,7 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
       )}
 
       {imagenes.length > 1 && (
-        <div className={styles.miniaturas} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.miniaturas}>
           {imagenes.map((url, i) => (
             // Antes era un <div> con onClick: se podía usar con el mouse
             // pero no con el teclado.

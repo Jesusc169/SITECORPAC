@@ -63,3 +63,34 @@ test("el contenido cargado en la base aparece en las páginas", async ({ page })
 test("una página inexistente da 404", async ({ page }) => {
   expect((await page.goto("/esta-pagina-no-existe"))?.status()).toBe(404);
 });
+
+test("visor de fotos: se abre, se recorre con las flechas y se cierra con Escape", async ({ page }) => {
+  await page.goto("/noticias");
+  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Ver más" }).click();
+  const abrir = page.getByRole("button", { name: /^Ver foto 1 de 2/ });
+  await abrir.click();
+  const visor = page.getByRole("dialog");
+  await expect(visor).toContainText("Foto 1 de 2");
+  await expect(page.getByRole("button", { name: "Cerrar galería" })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(visor).toContainText("Foto 2 de 2");
+  await page.keyboard.press("ArrowLeft");
+  await expect(visor).toContainText("Foto 1 de 2");
+  // Tab no se escapa del visor
+  for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
+  expect(await visor.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(visor).toHaveCount(0);
+  await expect(abrir).toBeFocused();
+});
+
+test("visor de fotos: clic en la foto no cierra; clic en el fondo sí", async ({ page }) => {
+  await page.goto("/noticias");
+  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Ver más" }).click();
+  await page.getByRole("button", { name: /^Ver foto 2 de 2/ }).click();
+  const visor = page.getByRole("dialog");
+  await visor.locator("img").first().click();
+  await expect(visor).toBeVisible();
+  await visor.click({ position: { x: 5, y: 5 } });
+  await expect(visor).toHaveCount(0);
+});

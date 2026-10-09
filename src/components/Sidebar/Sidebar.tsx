@@ -68,9 +68,11 @@ export default function Sidebar() {
 
       {/* Overlay */}
       {open && (
-        <div
+        <button
+          type="button"
           className={styles.overlay}
           onClick={() => setOpen(false)}
+          aria-label="Cerrar menú"
         />
       )}
 

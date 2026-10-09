@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar/Sidebar";
@@ -628,11 +628,18 @@ function ModalCambios({
       .catch((e: Error) => setError(e.message));
   }, [id]);
 
+  // <dialog> nativo abierto con showModal(): el navegador pone el fondo,
+  // atrapa el foco, cierra con Escape (evento "close") y al cerrar devuelve
+  // el foco al botón «Ver cambios» que lo abrió.
+  const dialogoRef = useRef<HTMLDialogElement>(null);
+  // Sin close() al desmontar: en desarrollo React monta dos veces y lo
+  // cerraría al instante. Al quitarse del DOM, el navegador lo retira solo.
   useEffect(() => {
-    const esc = (ev: KeyboardEvent) => ev.key === "Escape" && alCerrar();
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, [alCerrar]);
+    dialogoRef.current?.showModal();
+  }, []);
+  // Cerrar con close() (y no desmontando) para que el navegador devuelva el
+  // foco al botón que abrió la ventana; el evento "close" llama a onClose.
+  const cerrar = () => dialogoRef.current?.close();
 
   const restaurar = async () => {
     if (!d) return;
@@ -657,17 +664,10 @@ function ModalCambios({
   };
 
   return (
-    <div className={styles.modalFondo} onClick={alCerrar}>
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="titulo-cambios"
-        onClick={(ev) => ev.stopPropagation()}
-      >
+    <dialog ref={dialogoRef} className={styles.modal} aria-labelledby="titulo-cambios" onClose={alCerrar}>
         <div className={styles.modalCabecera}>
           <h2 id="titulo-cambios">Qué cambió</h2>
-          <button className={panel.boton} onClick={alCerrar} aria-label="Cerrar">
+          <button className={panel.boton} onClick={cerrar} aria-label="Cerrar" autoFocus>
             ✕
           </button>
         </div>
@@ -724,8 +724,7 @@ function ModalCambios({
             </div>
           </>
         )}
-      </div>
-    </div>
+    </dialog>
   );
 }
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import styles from "../noticias.module.css";
+
 export default function ModalEliminarNoticia({
   noticia,
   onClose,
@@ -29,33 +32,29 @@ export default function ModalEliminarNoticia({
     }
   };
 
-  return (
-    <>
-      {/* BACKDROP */}
-      <div
-        className="modal-backdrop show"
-        onClick={onClose}
-      />
+  // <dialog> nativo: fondo oscuro, foco atrapado y Escape los pone el
+  // navegador (Escape dispara "close" → onClose).
+  const dialogoRef = useRef<HTMLDialogElement>(null);
+  // Sin close() al desmontar: en desarrollo React monta dos veces y lo
+  // cerraría al instante. Al quitarse del DOM, el navegador lo retira solo.
+  useEffect(() => {
+    dialogoRef.current?.showModal();
+  }, []);
+  // Cerrar con close() (y no desmontando) para que el navegador devuelva el
+  // foco al botón que abrió la ventana; el evento "close" llama a onClose.
+  const cerrar = () => dialogoRef.current?.close();
 
-      {/* MODAL */}
-      <div
-        className="modal show d-block"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div
-          className="modal-dialog"
-          onClick={(e) => e.stopPropagation()} // evita cerrar al clickear dentro
-        >
+  return (
+    <dialog ref={dialogoRef} className={styles.dialogoEliminar} aria-labelledby="titulo-eliminar" onClose={onClose}>
           <div className="modal-content">
             {/* HEADER */}
             <div className="modal-header">
-              <h5 className="modal-title">Eliminar noticia</h5>
+              <h5 className="modal-title" id="titulo-eliminar">Eliminar noticia</h5>
               <button
                 type="button"
                 className="btn-close"
                 aria-label="Cerrar"
-                onClick={onClose}
+                onClick={cerrar}
               />
             </div>
 
@@ -73,7 +72,8 @@ export default function ModalEliminarNoticia({
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={onClose}
+                onClick={cerrar}
+                autoFocus
               >
                 Cancelar
               </button>
@@ -87,8 +87,6 @@ export default function ModalEliminarNoticia({
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </>
+    </dialog>
   );
 }

@@ -248,13 +248,14 @@ export default function AdminFeriaModal({
                   <div className={styles.comboEmpty}>Sin resultados</div>
                 )}
                 {empresasFiltradas.map((emp) => (
-                  <div
+                  <button
+                    type="button"
                     key={emp.id}
                     className={styles.comboItem}
                     onClick={() => addEmpresa(emp.id)}
                   >
                     {emp.nombre}
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

@@ -6,6 +6,10 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 1035;
+  /* es un <button>: sin borde ni relleno propios */
+  border: 0;
+  padding: 0;
+  cursor: default;
 }
 
 /* ===============================

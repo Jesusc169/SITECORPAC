@@ -49,6 +49,9 @@ async function main() {
 
   const ahora = new Date();
   await prisma.noticia.create({ data: { titulo: "Bienvenida E2E", descripcion: "Noticia de ejemplo", contenido: "Texto de ejemplo", autor: "SITECORPAC", updatedAt: ahora } });
+  // Noticia con galería (dos fotos además de la principal) para probar el visor
+  await prisma.noticia.create({ data: { titulo: "Galería E2E", descripcion: "Con fotos", autor: "SITECORPAC", imagen: "/logo_site.jpg", updatedAt: ahora,
+    noticia_imagen: { create: [{ url: "/logo_site.jpg", orden: 1, principal: true }, { url: "/Fondo_principal.webp", orden: 2 }, { url: "/logo_site.jpg", orden: 3 }] } } });
   const empresa = await prisma.empresa.create({ data: { nombre: "Empresa E2E", logo_url: "/logo_site.jpg" } });
   await prisma.evento_feria.create({ data: { titulo: "Feria E2E", descripcion: "Precios accesibles", anio: ahora.getFullYear(), evento_feria_fecha: { create: [{ fecha: ahora, hora_inicio: "09:00", hora_fin: "17:00", ubicacion: "Sede" }] }, evento_feria_empresa: { create: [{ empresa_id: empresa.id }] } } });
   await prisma.sorteo.create({ data: { nombre: "Sorteo E2E", descripcion: "Para afiliados", lugar: "Sede", fecha_hora: ahora, anio: ahora.getFullYear(), sorteo_producto: { create: [{ nombre: "TV", cantidad: 1 }] } } });
