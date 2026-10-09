@@ -3,6 +3,7 @@ import { SorteoController, SorteoValidationError } from "@/controllers/sorteoCon
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
 
 export const runtime = "nodejs";
 
@@ -126,13 +127,22 @@ export async function PUT(
       return NextResponse.json({ error: "Sorteo no encontrado" }, { status: 404 });
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "editar",
+      modulo: "sorteos",
+      entidadId: sorteoId,
+      detalle: `Editó el sorteo "${nombre}" (${textoVisible(estado !== "INACTIVO")})`,
+      request,
+    });
+
     return NextResponse.json(actualizado);
   } catch (error) {
     if (error instanceof ArchivoInvalidoError || error instanceof SorteoValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("ERROR PUT:", error);
+    await registrarError("sorteos", "Editar sorteo", error, request);
     return NextResponse.json(
       { error: "Error actualizando sorteo" },
       { status: 500 }
@@ -160,11 +170,21 @@ export async function DELETE(
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
+    const nombreSorteo = await nombreEntidad("sorteos", sorteoId);
     await SorteoController.eliminarSorteo(sorteoId);
+
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "eliminar",
+      modulo: "sorteos",
+      entidadId: sorteoId,
+      detalle: `Eliminó el sorteo "${nombreSorteo ?? `#${sorteoId}`}"`,
+      request,
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("ERROR DELETE:", error);
+    await registrarError("sorteos", "Eliminar sorteo", error, request);
     return NextResponse.json(
       { error: "Error eliminando sorteo" },
       { status: 500 }

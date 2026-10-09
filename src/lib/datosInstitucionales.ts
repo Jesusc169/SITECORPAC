@@ -17,4 +17,4 @@ export const INSTITUCION = {
 } as const;
 
 /** Fecha de la última revisión de los textos legales (mostrar en cada página). */
-export const FECHA_POLITICAS = "28 de septiembre de 2026";
+export const FECHA_POLITICAS = "8 de octubre de 2026";

@@ -4,6 +4,7 @@ import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
+import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
 
 /* =========================
    GET – LISTAR FERIAS
@@ -18,7 +19,7 @@ export async function GET() {
     const ferias = await FeriaController.obtenerFeriasAdmin();
     return NextResponse.json(ferias);
   } catch (error) {
-    console.error(error);
+    await registrarError("ferias", "Listar ferias", error);
     return NextResponse.json(
       { error: "Error al listar ferias" },
       { status: 500 }
@@ -50,13 +51,22 @@ export async function POST(req: Request) {
       estado: leerVisible(formData, "estado"),
     });
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "crear",
+      modulo: "ferias",
+      entidadId: idDe(feria),
+      detalle: `Creó la feria "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData, "estado"))})`,
+      request: req,
+    });
+
     return NextResponse.json(feria, { status: 201 });
   } catch (error) {
     if (error instanceof FeriaValidationError || error instanceof ArchivoInvalidoError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("POST FERIA ERROR:", error);
+    await registrarError("ferias", "Crear feria", error, req);
     return NextResponse.json(
       { error: "Error al crear feria" },
       { status: 500 }

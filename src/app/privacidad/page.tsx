@@ -117,6 +117,22 @@ export default function PrivacidadPage() {
               </td>
             </tr>
             <tr>
+              <th scope="row">Personal que administra el sitio (registro de actividad)</th>
+              <td>
+                Nombre, fecha y hora, acción realizada en el panel (crear,
+                editar o eliminar contenido, iniciar o cerrar sesión) y
+                dirección IP. También los intentos fallidos de inicio de sesión
+                con el correo usado.
+              </td>
+              <td>
+                Saber quién hizo cada cambio, resolver problemas y detectar
+                accesos indebidos. Solo lo ve el administrador del sistema.
+              </td>
+              <td>
+                Se elimina automáticamente a los 180 días.
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Dirigentes del Directorio</th>
               <td>Nombre, cargo, correo, teléfono, foto y periodo del cargo.</td>
               <td>

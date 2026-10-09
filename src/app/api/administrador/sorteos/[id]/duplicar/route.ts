@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SorteoController } from "@/controllers/sorteoController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, nombreEntidad, idDe } from "@/lib/registro";
 
 export async function POST(
   req: Request,
@@ -29,9 +30,18 @@ export async function POST(
       );
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "duplicar",
+      modulo: "sorteos",
+      entidadId: idDe(nuevo),
+      detalle: `Duplicó el sorteo "${(await nombreEntidad("sorteos", sorteoId)) ?? `#${sorteoId}`}"`,
+      request: req,
+    });
+
     return NextResponse.json(nuevo);
   } catch (error) {
-    console.error("ERROR DUPLICAR:", error);
+    await registrarError("sorteos", "Duplicar sorteo", error, req);
     return NextResponse.json(
       { error: "Error duplicando sorteo" },
       { status: 500 }

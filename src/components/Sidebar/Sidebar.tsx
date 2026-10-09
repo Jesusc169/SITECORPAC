@@ -124,6 +124,20 @@ export default function Sidebar() {
                   </li>
                 )
               )}
+              {/* Solo el rol administrador: no es un privilegio asignable */}
+              {usuario?.rol === "administrador" && (
+                <li>
+                  <Link
+                    href="/admin/sistema"
+                    className={`${styles.link} ${
+                      isActive("/admin/sistema") ? styles.active : ""
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    Sistema y registros
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         </div>

@@ -3,6 +3,7 @@ import { NoticiasController, NoticiaValidationError } from "@/controllers/notici
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
+import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
 
 export const runtime = "nodejs";
 
@@ -19,7 +20,7 @@ export async function GET() {
     const noticias = await NoticiasController.obtenerNoticiasAdmin();
     return NextResponse.json(noticias);
   } catch (error) {
-    console.error("ERROR GET NOTICIAS:", error);
+    await registrarError("noticias", "Listar noticias", error);
     return NextResponse.json(
       { message: "Error al obtener noticias" },
       { status: 500 }
@@ -52,13 +53,22 @@ export async function POST(request: Request) {
       activo: leerVisible(formData),
     });
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "crear",
+      modulo: "noticias",
+      entidadId: idDe(nuevaNoticia),
+      detalle: `Creó la noticia "${formData.get("titulo")?.toString().trim() ?? ""}" (${textoVisible(leerVisible(formData))})`,
+      request,
+    });
+
     return NextResponse.json(nuevaNoticia, { status: 201 });
   } catch (error) {
     if (error instanceof NoticiaValidationError) {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
 
-    console.error("ERROR CREANDO NOTICIA:", error);
+    await registrarError("noticias", "Crear noticia", error, request);
     return NextResponse.json(
       { message: "Error interno del servidor" },
       { status: 500 }

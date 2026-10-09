@@ -313,3 +313,25 @@ model login_intento {
   primerFalloEn  DateTime
   bloqueadoHasta DateTime?
 }
+
+// Bitácora del panel: quién hizo qué y cuándo (crear, editar, borrar,
+// iniciar sesión...) y los errores del servidor, para que soporte pueda
+// revisar qué pasó sin entrar al servidor. Se guarda el nombre del usuario
+// (no solo el id) para que el registro siga legible si la cuenta se borra.
+// Se depura sola a los 180 días (ver lib/registro.ts y /privacidad).
+model registro_actividad {
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime @default(now())
+  usuarioId Int?
+  usuario   String?  @db.VarChar(120)
+  accion    String   @db.VarChar(30)
+  modulo    String   @db.VarChar(30)
+  entidadId Int?
+  detalle   String?  @db.VarChar(500)
+  ip        String?  @db.VarChar(64)
+  nivel     String   @default("info") @db.VarChar(10)
+
+  @@index([fecha], map: "idx_registro_fecha")
+  @@index([modulo, fecha], map: "idx_registro_modulo_fecha")
+  @@index([usuarioId, fecha], map: "idx_registro_usuario_fecha")
+}

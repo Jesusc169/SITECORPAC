@@ -3,6 +3,7 @@ import { NoticiasController, NoticiaValidationError } from "@/controllers/notici
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
+import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
 
 export const runtime = "nodejs";
 
@@ -67,13 +68,22 @@ export async function PUT(
       return NextResponse.json({ message: "Noticia no encontrada" }, { status: 404 });
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "editar",
+      modulo: "noticias",
+      entidadId: id,
+      detalle: `Editó la noticia "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData))})`,
+      request,
+    });
+
     return NextResponse.json(noticiaActualizada);
   } catch (error) {
     if (error instanceof NoticiaValidationError) {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
 
-    console.error(error);
+    await registrarError("noticias", "Editar noticia", error, request);
     return NextResponse.json(
       { message: "Error al actualizar noticia" },
       { status: 500 }
@@ -101,15 +111,25 @@ export async function DELETE(
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
     }
 
+    const titulo = await nombreEntidad("noticias", id);
     const eliminada = await NoticiasController.eliminarNoticiaCompleta(id);
 
     if (!eliminada) {
       return NextResponse.json({ message: "Noticia no encontrada" }, { status: 404 });
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "eliminar",
+      modulo: "noticias",
+      entidadId: id,
+      detalle: `Eliminó la noticia "${titulo ?? `#${id}`}"`,
+      request,
+    });
+
     return NextResponse.json({ message: "Noticia eliminada correctamente" });
   } catch (error) {
-    console.error(error);
+    await registrarError("noticias", "Eliminar noticia", error, request);
     return NextResponse.json(
       { message: "Error al eliminar noticia" },
       { status: 500 }

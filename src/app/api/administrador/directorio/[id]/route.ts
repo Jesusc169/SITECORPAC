@@ -3,6 +3,7 @@ import { DirectorioController } from "@/controllers/directorioController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, nombreEntidad } from "@/lib/registro";
 
 /* =========================
    Utilidad fechas
@@ -57,13 +58,22 @@ export async function PUT(request: Request) {
       );
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "editar",
+      modulo: "directorio",
+      entidadId: id,
+      detalle: `Editó a ${(await nombreEntidad("directorio", id)) ?? `#${id}`} en el directorio${foto && foto.size > 0 ? " (nueva foto)" : ""}`,
+      request,
+    });
+
     return NextResponse.json(actualizado);
   } catch (error) {
     if (error instanceof ArchivoInvalidoError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("Error al actualizar miembro:", error);
+    await registrarError("directorio", "Editar miembro", error, request);
     return NextResponse.json(
       { error: "Error al actualizar miembro" },
       { status: 500 }
@@ -89,6 +99,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
+    const miembro = await nombreEntidad("directorio", id);
     const eliminado = await DirectorioController.eliminarMiembro(id);
 
     if (!eliminado) {
@@ -98,9 +109,18 @@ export async function DELETE(request: Request) {
       );
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "eliminar",
+      modulo: "directorio",
+      entidadId: id,
+      detalle: `Quitó a ${miembro ?? `#${id}`} del directorio`,
+      request,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error al eliminar miembro:", error);
+    await registrarError("directorio", "Quitar miembro", error, request);
     return NextResponse.json(
       { error: "Error al eliminar miembro" },
       { status: 500 }

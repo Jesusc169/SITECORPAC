@@ -3,6 +3,7 @@ import { DirectorioController } from "@/controllers/directorioController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, idDe } from "@/lib/registro";
 
 /* =========================
    Utilidad fechas
@@ -25,7 +26,7 @@ export async function GET() {
     const miembros = await DirectorioController.obtenerDirectorio();
     return NextResponse.json(miembros);
   } catch (error) {
-    console.error("Error al obtener directorio:", error);
+    await registrarError("directorio", "Listar directorio", error);
     return NextResponse.json(
       { error: "Error al obtener directorio" },
       { status: 500 }
@@ -70,13 +71,22 @@ export async function POST(req: Request) {
       fotoFile: foto,
     });
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "crear",
+      modulo: "directorio",
+      entidadId: idDe(nuevoMiembro),
+      detalle: `Agregó a ${nombre} (${cargo}) al directorio`,
+      request: req,
+    });
+
     return NextResponse.json(nuevoMiembro, { status: 201 });
   } catch (error) {
     if (error instanceof ArchivoInvalidoError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("Error al crear miembro:", error);
+    await registrarError("directorio", "Agregar miembro", error, req);
     return NextResponse.json(
       { error: "Error al crear miembro" },
       { status: 500 }

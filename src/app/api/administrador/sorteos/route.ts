@@ -3,6 +3,7 @@ import { SorteoController, SorteoValidationError } from "@/controllers/sorteoCon
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
 
 /* =========================================
 GET - LISTAR
@@ -17,7 +18,7 @@ export async function GET() {
     const sorteos = await SorteoController.obtenerSorteosAdmin();
     return NextResponse.json(sorteos);
   } catch (error) {
-    console.error("ERROR GET:", error);
+    await registrarError("sorteos", "Listar sorteos", error);
     return NextResponse.json(
       { error: "Error obteniendo sorteos" },
       { status: 500 }
@@ -103,13 +104,22 @@ export async function POST(req: Request) {
       imagenUrl,
     });
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "crear",
+      modulo: "sorteos",
+      entidadId: idDe(nuevo),
+      detalle: `Creó el sorteo "${nombre}" (${textoVisible(estado !== "INACTIVO")})`,
+      request: req,
+    });
+
     return NextResponse.json(nuevo);
   } catch (error) {
     if (error instanceof ArchivoInvalidoError || error instanceof SorteoValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("ERROR CREAR:", error);
+    await registrarError("sorteos", "Crear sorteo", error, req);
     return NextResponse.json(
       { error: "Error creando sorteo" },
       { status: 500 }

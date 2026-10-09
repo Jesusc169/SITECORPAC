@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { UsuarioController, UsuarioValidationError } from "@/controllers/usuarioController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, nombreEntidad } from "@/lib/registro";
 
 export const runtime = "nodejs";
 
@@ -33,13 +34,27 @@ export async function PUT(
       usuarioActual.rol === "administrador"
     );
 
+    const cambios = [
+      body?.rol ? `rol ${body.rol}` : null,
+      Array.isArray(body?.permisos) ? `permisos: ${body.permisos.join(", ") || "ninguno"}` : null,
+      body?.password ? "cambió la contraseña" : null,
+    ].filter(Boolean);
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "editar",
+      modulo: "usuarios",
+      entidadId: id,
+      detalle: `Editó la cuenta de ${(await nombreEntidad("usuarios", id)) ?? `#${id}`}${cambios.length ? ` (${cambios.join("; ")})` : ""}`,
+      request,
+    });
+
     return NextResponse.json(actualizado);
   } catch (error) {
     if (error instanceof UsuarioValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("ERROR EDITAR USUARIO:", error);
+    await registrarError("usuarios", "Editar usuario", error, request);
     return NextResponse.json(
       { error: "Error al actualizar usuario" },
       { status: 500 }
@@ -66,7 +81,18 @@ export async function DELETE(
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
+    const cuenta = await nombreEntidad("usuarios", id);
     await UsuarioController.eliminarUsuario(id, usuarioActual.id);
+
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "eliminar",
+      modulo: "usuarios",
+      entidadId: id,
+      detalle: `Eliminó la cuenta de ${cuenta ?? `#${id}`}`,
+      request,
+      nivel: "aviso",
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -74,7 +100,7 @@ export async function DELETE(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("ERROR ELIMINAR USUARIO:", error);
+    await registrarError("usuarios", "Eliminar usuario", error, request);
     return NextResponse.json(
       { error: "Error al eliminar usuario" },
       { status: 500 }

@@ -2,6 +2,14 @@
 import { NextResponse } from "next/server";
 import { AuthController } from "../../../../controllers/AuthController";
 import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "@/lib/rateLimiter";
+import { registrarActividad } from "@/lib/registro";
+
+// Solo se guarda lo que parece un correo: si alguien escribió su contraseña
+// en el campo equivocado, no debe quedar en el registro.
+function correoParaRegistro(valor: unknown): string {
+  const texto = typeof valor === "string" ? valor.trim() : "";
+  return /^[^\s@]+@[^\s@]+$/.test(texto) ? texto.slice(0, 120) : "(no es un correo válido)";
+}
 
 export async function POST(req: Request) {
   const ip = obtenerIp(req);
@@ -12,14 +20,24 @@ export async function POST(req: Request) {
   const bloqueadoHasta = await estaBloqueado(ip);
   if (bloqueadoHasta) {
     const minutos = Math.max(1, Math.ceil((bloqueadoHasta - Date.now()) / 60000));
+    await registrarActividad({
+      accion: "login_bloqueado",
+      modulo: "sesion",
+      nivel: "aviso",
+      detalle: `Intento de inicio de sesión desde una IP bloqueada (faltan ${minutos} min)`,
+      request: req,
+    });
     return NextResponse.json(
       { error: `Demasiados intentos fallidos. Intenta de nuevo en ${minutos} minuto(s).` },
       { status: 429 }
     );
   }
 
+  let correoIntentado: unknown = null;
+
   try {
     const body = await req.json();
+    correoIntentado = body?.email;
 
     // ===============================
     // Validación básica
@@ -40,6 +58,13 @@ export async function POST(req: Request) {
     });
 
     await registrarExito(ip);
+    await registrarActividad({
+      usuario: { id: user.id, nombre: user.nombre },
+      accion: "login",
+      modulo: "sesion",
+      detalle: `Inició sesión (${user.rol})`,
+      request: req,
+    });
 
     // ===============================
     // RESPUESTA + COOKIE httpOnly
@@ -61,6 +86,13 @@ export async function POST(req: Request) {
     return response;
   } catch (err: any) {
     await registrarFallo(ip);
+    await registrarActividad({
+      accion: "login_fallido",
+      modulo: "sesion",
+      nivel: "aviso",
+      detalle: `Correo o contraseña incorrectos. Correo: ${correoParaRegistro(correoIntentado)}`,
+      request: req,
+    });
     return NextResponse.json(
       { error: err.message || "Credenciales inválidas" },
       { status: 401 }

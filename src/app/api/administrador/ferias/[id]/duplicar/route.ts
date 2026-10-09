@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { FeriaController } from "@/controllers/feriaController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
+import { registrarActividad, registrarError, nombreEntidad, idDe } from "@/lib/registro";
 
 export async function POST(
   req: Request,
@@ -32,13 +33,22 @@ export async function POST(
       );
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "duplicar",
+      modulo: "ferias",
+      entidadId: idDe(nuevaFeria),
+      detalle: `Duplicó la feria "${(await nombreEntidad("ferias", feriaId)) ?? `#${feriaId}`}"`,
+      request: req,
+    });
+
     return NextResponse.json({
       ok: true,
       message: "Feria duplicada correctamente",
       nuevaFeria,
     });
   } catch (error) {
-    console.error("ERROR DUPLICAR:", error);
+    await registrarError("ferias", "Duplicar feria", error, req);
     return NextResponse.json(
       { error: "Error interno al duplicar feria" },
       { status: 500 }

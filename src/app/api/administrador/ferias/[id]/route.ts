@@ -4,6 +4,7 @@ import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
+import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
 
 /* =========================
    GET – Feria por ID
@@ -80,13 +81,22 @@ export async function PUT(
       return NextResponse.json({ error: "Feria no encontrada" }, { status: 404 });
     }
 
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "editar",
+      modulo: "ferias",
+      entidadId: feriaId,
+      detalle: `Editó la feria "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData, "estado"))})`,
+      request: req,
+    });
+
     return NextResponse.json(feria);
   } catch (error) {
     if (error instanceof ArchivoInvalidoError || error instanceof FeriaValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error("PUT FERIA ERROR:", error);
+    await registrarError("ferias", "Editar feria", error, req);
     return NextResponse.json(
       { error: "Error al actualizar feria" },
       { status: 500 }
@@ -98,7 +108,7 @@ export async function PUT(
    DELETE – Eliminar feria
    ========================= */
 export async function DELETE(
-  _: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -110,11 +120,21 @@ export async function DELETE(
     const { id } = await params;
     const feriaId = Number(id);
 
+    const titulo = await nombreEntidad("ferias", feriaId);
     await FeriaController.eliminarFeria(feriaId);
+
+    await registrarActividad({
+      usuario: usuarioActual,
+      accion: "eliminar",
+      modulo: "ferias",
+      entidadId: feriaId,
+      detalle: `Eliminó la feria "${titulo ?? `#${feriaId}`}"`,
+      request: req,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
+    await registrarError("ferias", "Eliminar feria", error, req);
     return NextResponse.json(
       { error: "Error al eliminar feria" },
       { status: 500 }
