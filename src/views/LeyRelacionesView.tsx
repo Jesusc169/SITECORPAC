@@ -11,7 +11,7 @@ interface Props {
   };
 }
 
-export default function LeyRelacionesView({ data }: Props) {
+export default function LeyRelacionesView({ data }: Readonly<Props>) {
   if (!data.ley) {
     return <p style={{ padding: "3rem", textAlign: "center" }}>Contenido no disponible</p>;
   }

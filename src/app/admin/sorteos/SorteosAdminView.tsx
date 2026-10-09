@@ -46,7 +46,7 @@ export default function SorteosAdminView({
   onEditar,
   onEliminar,
   onDuplicar,
-}: SorteosAdminViewProps) {
+}: Readonly<SorteosAdminViewProps>) {
   return (
     <section className={styles.container}>
       {/* ================= HEADER ================= */}
@@ -89,7 +89,7 @@ export default function SorteosAdminView({
                         : "-"}
                     </td>
 
-                    <td>{s.lugar || "SITECORPAC"}</td>
+                    <td>{s.lugar ? s.lugar : "SITECORPAC"}</td>
 
                     <td>
                       <EtiquetaVisible visible={s.estado !== "INACTIVO"} masculino />

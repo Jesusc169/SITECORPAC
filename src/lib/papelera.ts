@@ -3,7 +3,7 @@
  *
  * Al eliminar una noticia, feria, sorteo o miembro del directorio se guarda
  * el registro completo (con fotos, PDFs, fechas, empresas y premios) en la
- * tabla `papelera` y recién entonces se borra de su tabla, todo en una sola
+ * tabla `papelera` y recién entonces se borra de su tabla, ambas cosas en una sola
  * transacción. Durante 30 días se puede restaurar con el mismo id (los
  * enlaces vuelven a funcionar). Los archivos NO se tocan al eliminar: se
  * borran recién al vencer, y solo si ningún otro registro los usa (una feria

@@ -48,7 +48,7 @@ export default function Sidebar() {
     localStorage.clear();
     sessionStorage.clear();
 
-    // Navegación del lado del cliente: evita recargar todo el JS/CSS
+    // Navegación del lado del cliente: evita recargar el JS/CSS completo
     // (eso era lo que causaba el retraso al escribir justo después de salir)
     // y router.replace también evita volver con "atrás".
     router.replace("/login");

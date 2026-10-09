@@ -4,6 +4,7 @@ import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
+import { campoTexto, campoTextoODefecto, campoOpcional } from "@/lib/formulario";
 
 export const runtime = "nodejs";
 
@@ -43,10 +44,10 @@ export async function POST(request: Request) {
     const imagenPrincipalIndexRaw = formData.get("imagenPrincipalIndex");
 
     const nuevaNoticia = await NoticiasController.crearNoticiaCompleta({
-      titulo: formData.get("titulo")?.toString().trim() || "",
-      descripcion: formData.get("descripcion")?.toString().trim() || "",
-      contenido: formData.get("contenido")?.toString() || null,
-      autor: formData.get("autor")?.toString().trim() || "SITECORPAC",
+      titulo: campoTexto(formData, "titulo"),
+      descripcion: campoTexto(formData, "descripcion"),
+      contenido: campoOpcional(formData, "contenido"),
+      autor: campoTextoODefecto(formData, "autor", "SITECORPAC"),
       imagenFiles: formData.getAll("imagenes") as File[],
       imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       pdfFiles: formData.getAll("pdfs") as File[],

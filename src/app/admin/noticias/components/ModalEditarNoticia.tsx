@@ -41,7 +41,7 @@ export default function ModalEditarNoticia({
   onClose,
   onSuccess,
   mostrarToast,
-}: Props) {
+}: Readonly<Props>) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [contenido, setContenido] = useState("");
@@ -58,8 +58,8 @@ export default function ModalEditarNoticia({
 
   useEffect(() => {
     setTitulo(noticia.titulo);
-    setDescripcion(noticia.descripcion || "");
-    setContenido(noticia.contenido || "");
+    setDescripcion(noticia.descripcion ?? "");
+    setContenido(noticia.contenido ?? "");
     setAutor(noticia.autor);
     setActivo(noticia.activo ?? true);
     setPdfsExistentes(noticia.noticia_pdf || []);
@@ -165,8 +165,8 @@ export default function ModalEditarNoticia({
             <InterruptorVisible visible={activo} onChange={setActivo} tipo="noticia" />
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Título</label>
-              <input
+              <label htmlFor="editar-noticia-titulo" className="form-label fw-semibold">Título</label>
+              <input id="editar-noticia-titulo"
                 className="form-control"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
@@ -174,8 +174,8 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Descripción breve</label>
-              <textarea
+              <label htmlFor="editar-noticia-descripcion-breve" className="form-label fw-semibold">Descripción breve</label>
+              <textarea id="editar-noticia-descripcion-breve"
                 className="form-control"
                 rows={2}
                 value={descripcion}
@@ -184,8 +184,8 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Contenido</label>
-              <textarea
+              <label htmlFor="editar-noticia-contenido" className="form-label fw-semibold">Contenido</label>
+              <textarea id="editar-noticia-contenido"
                 className="form-control"
                 rows={6}
                 value={contenido}
@@ -194,8 +194,8 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Autor</label>
-              <input
+              <label htmlFor="editar-noticia-autor" className="form-label fw-semibold">Autor</label>
+              <input id="editar-noticia-autor"
                 className="form-control"
                 style={{ maxWidth: 320 }}
                 value={autor}
@@ -204,15 +204,15 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Fotos (hasta 5)</label>
-              <SelectorImagenes selector={selectorImagenes} />
+              <label htmlFor="editar-noticia-fotos" className="form-label fw-semibold">Fotos (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} idEntrada="editar-noticia-fotos" />
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">
+              <label htmlFor="editar-noticia-documentos" className="form-label fw-semibold">
                 Documentos adjuntos (opcional, máximo 5)
               </label>
-              <input
+              <input id="editar-noticia-documentos"
                 type="file"
                 className="form-control"
                 accept="application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"

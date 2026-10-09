@@ -19,7 +19,7 @@ interface Props {
 const MAX_INDICADORES = 8;
 const INTERVALO_MS = 18000;
 
-export default function NoticiasHome({ noticias = [] }: Props) {
+export default function NoticiasHome({ noticias = [] }: Readonly<Props>) {
   const [indexActual, setIndexActual] = useState(0);
   const [pausado, setPausado] = useState(false);
 
@@ -66,9 +66,8 @@ export default function NoticiasHome({ noticias = [] }: Props) {
       ) : (
         <>
           {/* CARRUSEL */}
-          <div
+          <section
             className={styles.carruselWrapper}
-            role="region"
             aria-roledescription="carrusel"
             aria-label="Noticias destacadas"
             onMouseEnter={() => setPausado(true)}
@@ -143,15 +142,15 @@ export default function NoticiasHome({ noticias = [] }: Props) {
                 </button>
               </>
             )}
-          </div>
+          </section>
 
           {/* INDICADORES */}
           {noticias.length > 1 && (
             noticias.length <= MAX_INDICADORES ? (
               <div className={styles.indicadores}>
-                {noticias.map((_, i) => (
+                {noticias.map((n, i) => (
                   <button
-                    key={i}
+                    key={n.id}
                     type="button"
                     className={`${styles.indicador} ${
                       i === indexActual ? styles.activo : ""

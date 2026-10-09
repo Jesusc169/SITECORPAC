@@ -98,3 +98,10 @@ describe("papelera con datos incompletos", () => {
     expect((await papeleraLib.eliminarDefinitivamente(p.id)).archivosBorrados).toBe(0);
   });
 });
+
+describe("premios que no son una lista", () => {
+  it("por JSON con premios en texto se ignoran", async () => {
+    const s = await (await sorteoPOST(peticion("/x", "POST", { json: { nombre: "S", lugar: "L", premios: "TV" } }))).json();
+    expect(s.sorteo_producto).toEqual([]);
+  });
+});

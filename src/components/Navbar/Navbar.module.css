@@ -25,6 +25,10 @@
 .navLink {
   color: #000000 !important; /* negro institucional */
   font-weight: 500;
+  /* los desplegables son <button>: misma letra que los enlaces del menú
+     (global.css le pone otra tipografía a todos los botones) */
+  font-family: inherit;
+  letter-spacing: normal;
   transition: color 0.2s ease-in-out;
   text-decoration: none;
 }

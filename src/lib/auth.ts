@@ -87,6 +87,6 @@ export function sesionVigente(
   sesion: Pick<SesionUsuario, "sv">,
   usuario: { activo: boolean; sesionVersion: number } | null
 ): boolean {
-  if (!usuario || !usuario.activo) return false;
+  if (!usuario?.activo) return false;
   return (sesion.sv ?? 0) === usuario.sesionVersion;
 }

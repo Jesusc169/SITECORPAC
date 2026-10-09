@@ -9,7 +9,7 @@ interface ModalAgregarProps {
   onSubmit: (formData: FormData) => Promise<void>;
 }
 
-export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarProps) {
+export default function ModalAgregarMiembro({ onClose, onSubmit }: Readonly<ModalAgregarProps>) {
   const [nombre, setNombre] = useState("");
   const [cargo, setCargo] = useState("");
   const [correo, setCorreo] = useState("");
@@ -30,13 +30,13 @@ export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarP
         useWebWorker: true,
       });
 
-      setFoto(compressed as File);
+      setFoto(compressed);
     } catch {
       setFoto(file);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -59,26 +59,26 @@ export default function ModalAgregarMiembro({ onClose, onSubmit }: ModalAgregarP
         <h2>Agregar Miembro</h2>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <label>Nombre</label>
-          <input value={nombre} onChange={e => setNombre(e.target.value)} required />
+          <label htmlFor="agregar-miembro-nombre">Nombre</label>
+          <input id="agregar-miembro-nombre" value={nombre} onChange={e => setNombre(e.target.value)} required />
 
-          <label>Cargo</label>
-          <input value={cargo} onChange={e => setCargo(e.target.value)} required />
+          <label htmlFor="agregar-miembro-cargo">Cargo</label>
+          <input id="agregar-miembro-cargo" value={cargo} onChange={e => setCargo(e.target.value)} required />
 
-          <label>Correo</label>
-          <input type="email" value={correo} onChange={e => setCorreo(e.target.value)} required />
+          <label htmlFor="agregar-miembro-correo">Correo</label>
+          <input id="agregar-miembro-correo" type="email" value={correo} onChange={e => setCorreo(e.target.value)} required />
 
-          <label>Teléfono</label>
-          <input value={telefono} onChange={e => setTelefono(e.target.value)} required />
+          <label htmlFor="agregar-miembro-telefono">Teléfono</label>
+          <input id="agregar-miembro-telefono" value={telefono} onChange={e => setTelefono(e.target.value)} required />
 
-          <label>Periodo Inicio</label>
-          <input type="date" value={periodoInicio} onChange={e => setPeriodoInicio(e.target.value)} required />
+          <label htmlFor="agregar-miembro-periodo-inicio">Periodo Inicio</label>
+          <input id="agregar-miembro-periodo-inicio" type="date" value={periodoInicio} onChange={e => setPeriodoInicio(e.target.value)} required />
 
-          <label>Periodo Fin</label>
-          <input type="date" value={periodoFin} onChange={e => setPeriodoFin(e.target.value)} />
+          <label htmlFor="agregar-miembro-periodo-fin">Periodo Fin</label>
+          <input id="agregar-miembro-periodo-fin" type="date" value={periodoFin} onChange={e => setPeriodoFin(e.target.value)} />
 
-          <label>Foto (opcional)</label>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <label htmlFor="agregar-miembro-foto">Foto (opcional)</label>
+          <input id="agregar-miembro-foto" type="file" accept="image/*" onChange={handleFileChange} />
 
           <div className={styles.buttons}>
             <button type="submit" className={styles.primary} disabled={loading}>

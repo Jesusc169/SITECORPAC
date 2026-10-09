@@ -20,9 +20,9 @@ interface NoticiaView {
 
 export default function NoticiasPageView({
   noticias,
-}: {
+}: Readonly<{
   noticias: NoticiaFromApi[];
-}) {
+}>) {
   // 🔁 Adaptador solo de presentación (no lógica de negocio)
   const noticiasView: NoticiaView[] = noticias.map((n) => ({
     id: n.id,

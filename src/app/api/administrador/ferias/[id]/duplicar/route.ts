@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { FeriaController } from "@/controllers/feriaController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-import { registrarActividad, registrarError, nombreEntidad, idDe } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero, idDe } from "@/lib/registro";
 
 export async function POST(
   req: Request,
@@ -38,7 +38,7 @@ export async function POST(
       accion: "duplicar",
       modulo: "ferias",
       entidadId: idDe(nuevaFeria),
-      detalle: `Duplicó la feria "${(await nombreEntidad("ferias", feriaId)) ?? `#${feriaId}`}"`,
+      detalle: `Duplicó la feria "${nombreONumero(await nombreEntidad("ferias", feriaId), feriaId)}"`,
       request: req,
     });
 

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const pagina = Number(params.get("pagina") || "1");
+    const pagina = Number(params.get("pagina") ?? "1");
     const datos = await SistemaController.listarRegistro(filtros, pagina);
     return NextResponse.json(datos, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

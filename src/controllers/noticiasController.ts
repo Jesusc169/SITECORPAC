@@ -13,7 +13,8 @@ import {
   MAX_IMAGEN_BYTES,
   MAX_DOCUMENTO_BYTES,
 } from "@/lib/archivosNoticia";
-import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { actualizarGaleria } from "@/lib/galeria";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 
@@ -87,6 +88,24 @@ const obtenerNoticiaPorIdCacheada = unstable_cache(
   { revalidate: 60, tags: ["noticias"] }
 );
 
+const MAX_DOCUMENTOS = 5;
+
+/** Documentos adjuntos que sí traen contenido, ya validados (tipo y tamaño). */
+function documentosValidos(archivos: File[]): File[] {
+  const validos = archivos.filter((f) => f && f.size > 0);
+  for (const f of validos) {
+    if (!esDocumentoPermitido(f)) {
+      throw new NoticiaValidationError(
+        `"${f.name}" no es un tipo de archivo permitido (PDF, Word o imagen JPG/PNG)`
+      );
+    }
+    if (f.size > MAX_DOCUMENTO_BYTES) {
+      throw new NoticiaValidationError(`"${f.name}" debe ser menor a 15MB`);
+    }
+  }
+  return validos;
+}
+
 export class NoticiasController {
   // 🟢 Obtener todas las noticias (lectura pública, cacheada)
   static async obtenerNoticias() {
@@ -115,9 +134,10 @@ export class NoticiasController {
       throw new NoticiaValidationError("El título es obligatorio");
     }
 
-    if (input.pdfFiles.length > 5) {
-      throw new NoticiaValidationError("Máximo 5 documentos por noticia");
+    if (input.pdfFiles.length > MAX_DOCUMENTOS) {
+      throw new NoticiaValidationError(`Máximo ${MAX_DOCUMENTOS} documentos por noticia`);
     }
+    const documentos = documentosValidos(input.pdfFiles);
 
     const imagenFilesValidos = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenFilesValidos.length > MAX_IMAGENES_GALERIA) {
@@ -145,21 +165,9 @@ export class NoticiasController {
     const imagenPath = imagenesData[principalIndex]?.url ?? null;
 
     const pdfsData: { url: string; nombre: string; orden: number }[] = [];
-    for (let i = 0; i < input.pdfFiles.length; i++) {
-      const pdfFile = input.pdfFiles[i];
-      if (!pdfFile || pdfFile.size === 0) continue;
-
-      if (!esDocumentoPermitido(pdfFile)) {
-        throw new NoticiaValidationError(
-          `"${pdfFile.name}" no es un tipo de archivo permitido (PDF, Word o imagen JPG/PNG)`
-        );
-      }
-      if (pdfFile.size > MAX_DOCUMENTO_BYTES) {
-        throw new NoticiaValidationError(`"${pdfFile.name}" debe ser menor a 15MB`);
-      }
-
-      const url = await guardarDocumentoNoticia(pdfFile, i);
-      pdfsData.push({ url, nombre: pdfFile.name, orden: i + 1 });
+    for (let i = 0; i < documentos.length; i++) {
+      const url = await guardarDocumentoNoticia(documentos[i], i);
+      pdfsData.push({ url, nombre: documentos[i].name, orden: i + 1 });
     }
 
     const now = new Date();
@@ -188,77 +196,38 @@ export class NoticiasController {
       throw new NoticiaValidationError("El título es obligatorio");
     }
 
-    const imagenesNuevasValidas = input.imagenesNuevas.filter((f) => f && f.size > 0);
-    const existentes = noticiaActual.noticia_imagen.map((img) => ({ id: img.id, orden: img.orden }));
-    const idsEliminar = input.imagenesEliminar.filter((eid) => existentes.some((e) => e.id === eid));
-
-    const activasActuales = existentes.length - idsEliminar.length;
-    if (activasActuales + imagenesNuevasValidas.length > MAX_IMAGENES_GALERIA) {
-      throw new NoticiaValidationError(`Máximo ${MAX_IMAGENES_GALERIA} fotos por noticia`);
+    // Primero se valida y recién después se borra o guarda: un PDF inválido ya no
+    // deja la noticia modificada a medias.
+    const documentosNuevos = documentosValidos(input.pdfFilesNuevos);
+    const pdfsAEliminar = noticiaActual.noticia_pdf.filter((p) => input.pdfsEliminar.includes(p.id));
+    const pdfsQueQuedan = noticiaActual.noticia_pdf.filter((p) => !input.pdfsEliminar.includes(p.id));
+    if (pdfsQueQuedan.length + documentosNuevos.length > MAX_DOCUMENTOS) {
+      throw new NoticiaValidationError(`Máximo ${MAX_DOCUMENTOS} documentos por noticia`);
     }
 
-    for (const file of imagenesNuevasValidas) {
-      if (!esImagenValida(file)) {
-        throw new NoticiaValidationError("Solo se permiten imágenes");
+    const imagenPath = await actualizarGaleria(
+      {
+        existentes: noticiaActual.noticia_imagen,
+        imagenesNuevas: input.imagenesNuevas,
+        imagenesEliminar: input.imagenesEliminar,
+        imagenPrincipalId: input.imagenPrincipalId,
+        imagenPrincipalNuevaIndex: input.imagenPrincipalNuevaIndex,
+      },
+      {
+        etiqueta: "noticia",
+        error: (m) => new NoticiaValidationError(m),
+        validarArchivo: (file) => {
+          if (!esImagenValida(file)) throw new NoticiaValidationError("Solo se permiten imágenes");
+          if (file.size > MAX_IMAGEN_BYTES) throw new NoticiaValidationError("Cada imagen debe ser menor a 10MB");
+        },
+        borrarArchivo: borrarImagenNoticia,
+        guardarArchivo: guardarImagenNoticia,
+        eliminarImagenes: NoticiaModel.eliminarImagenes,
+        reordenarImagen: NoticiaModel.reordenarImagen,
+        crearImagen: (url, orden) => NoticiaModel.crearImagen({ noticia_id: id, url, orden, principal: false }),
+        marcarPrincipal: (idImagen) => NoticiaModel.marcarImagenPrincipal(id, idImagen),
       }
-      if (file.size > MAX_IMAGEN_BYTES) {
-        throw new NoticiaValidationError("Cada imagen debe ser menor a 10MB");
-      }
-    }
-
-    const plan = resolverGaleria({
-      existentes,
-      idsEliminar,
-      cantidadNuevas: imagenesNuevasValidas.length,
-      principalExistenteId: input.imagenPrincipalId,
-      principalNuevaIndex: input.imagenPrincipalNuevaIndex,
-    });
-
-    for (const eid of idsEliminar) {
-      const img = noticiaActual.noticia_imagen.find((i) => i.id === eid);
-      if (img) await borrarImagenNoticia(img.url);
-    }
-    if (idsEliminar.length > 0) {
-      await NoticiaModel.eliminarImagenes(idsEliminar);
-    }
-
-    for (const sup of plan.supervivientes) {
-      const original = existentes.find((e) => e.id === sup.id);
-      if (original && original.orden !== sup.orden) {
-        await NoticiaModel.reordenarImagen(sup.id, sup.orden);
-      }
-    }
-
-    const nuevasCreadas: { id: number; url: string }[] = [];
-    for (let i = 0; i < imagenesNuevasValidas.length; i++) {
-      const file = imagenesNuevasValidas[i];
-      const url = await guardarImagenNoticia(file, i);
-      const creada = await NoticiaModel.crearImagen({
-        noticia_id: id,
-        url,
-        orden: plan.nuevas[i].orden,
-        principal: false,
-      });
-      nuevasCreadas.push({ id: creada.id, url });
-    }
-
-    // resolverGaleria garantiza que la principal existe: una que sobrevive o
-    // una nueva recién creada.
-    const principal = plan.principal;
-    let imagenPath: string | null = null;
-    if (principal) {
-      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
-      imagenPath = (await NoticiaModel.marcarImagenPrincipal(id, idPrincipal)).url;
-    }
-
-    const pdfsAEliminar = noticiaActual.noticia_pdf.filter((p) =>
-      input.pdfsEliminar.includes(p.id)
     );
-    const pdfsRestantes = noticiaActual.noticia_pdf.length - pdfsAEliminar.length;
-
-    if (pdfsRestantes + input.pdfFilesNuevos.length > 5) {
-      throw new NoticiaValidationError("Máximo 5 documentos por noticia");
-    }
 
     for (const pdf of pdfsAEliminar) {
       await borrarDocumentoNoticia(pdf.url);
@@ -267,40 +236,18 @@ export class NoticiasController {
       await NoticiaModel.eliminarPdfs(pdfsAEliminar.map((p) => p.id));
     }
 
-    let ordenSiguiente =
-      Math.max(
-        0,
-        ...noticiaActual.noticia_pdf
-          .filter((p) => !input.pdfsEliminar.includes(p.id))
-          .map((p) => p.orden ?? 0)
-      ) + 1;
-
-    for (const pdfFile of input.pdfFilesNuevos) {
-      if (!pdfFile || pdfFile.size === 0) continue;
-
-      if (!esDocumentoPermitido(pdfFile)) {
-        throw new NoticiaValidationError(
-          `"${pdfFile.name}" no es un tipo de archivo permitido (PDF, Word o imagen JPG/PNG)`
-        );
-      }
-      if (pdfFile.size > MAX_DOCUMENTO_BYTES) {
-        throw new NoticiaValidationError(`"${pdfFile.name}" debe ser menor a 15MB`);
-      }
-
-      const url = await guardarDocumentoNoticia(pdfFile, ordenSiguiente);
-      await NoticiaModel.crearPdf({
-        noticia_id: id,
-        url,
-        nombre: pdfFile.name,
-        orden: ordenSiguiente,
-      });
+    // Los nuevos van al final, después del mayor orden de los que quedan
+    let ordenSiguiente = Math.max(0, ...pdfsQueQuedan.map((p) => p.orden ?? 0)) + 1;
+    for (const doc of documentosNuevos) {
+      const url = await guardarDocumentoNoticia(doc, ordenSiguiente);
+      await NoticiaModel.crearPdf({ noticia_id: id, url, nombre: doc.name, orden: ordenSiguiente });
       ordenSiguiente++;
     }
 
     const actualizada = await NoticiaModel.actualizar(id, {
       titulo: input.titulo,
       descripcion: input.descripcion,
-      contenido: input.contenido || null,
+      contenido: input.contenido ? input.contenido : null,
       autor: input.autor,
       imagen: imagenPath,
       activo: input.activo,

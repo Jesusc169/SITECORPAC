@@ -40,8 +40,8 @@ export default function Beneficios() {
       </header>
 
       <div className={styles.grid}>
-        {beneficios.map((beneficio, index) => (
-          <article key={index} className={styles.card}>
+        {beneficios.map((beneficio) => (
+          <article key={beneficio.titulo} className={styles.card}>
             <div className={styles.icono}>
               <i className={beneficio.icono} />
             </div>

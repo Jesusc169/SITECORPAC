@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { obtenerUsuarioActual } from "@/lib/auth";
-import { registrarActividad, registrarError } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreONumero } from "@/lib/registro";
 import { RegistroModel } from "@/models/registroModel";
 import {
   diferencias,
@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const fila = await leerFila(params);
-    if (!fila || !fila.antes) {
+    if (!fila?.antes) {
       return NextResponse.json({ error: "Ese movimiento no tiene historial de cambios" }, { status: 404 });
     }
 
@@ -92,13 +92,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       timeStyle: "short",
     }).format(fila.fecha);
 
+    const quien = fila.usuario ? " hecho por " + fila.usuario : "";
     await registrarActividad({
       usuario: usuarioActual,
       accion: "editar",
       modulo,
       entidadId: id,
       nivel: "aviso",
-      detalle: `Restauró la versión anterior de "${String(actual.titulo ?? actual.nombre ?? `#${id}`)}" (deshizo el cambio del ${fechaCambio}${fila.usuario ? ` hecho por ${fila.usuario}` : ""})`,
+      detalle: `Restauró la versión anterior de "${nombreONumero((actual.titulo ?? actual.nombre) as string | null, id)}" (deshizo el cambio del ${fechaCambio}${quien})`,
       antes: actual,
       despues,
       request,

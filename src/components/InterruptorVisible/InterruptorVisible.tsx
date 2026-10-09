@@ -14,7 +14,7 @@ interface Props {
 // Interruptor "Visible en el sitio web" compartido por los formularios de
 // noticias, ferias y sorteos. Apagado = el registro se guarda pero no aparece
 // en el sitio público (se puede volver a encender cuando se quiera).
-export default function InterruptorVisible({ visible, onChange, tipo, masculino = false }: Props) {
+export default function InterruptorVisible({ visible, onChange, tipo, masculino = false }: Readonly<Props>) {
   const id = useId();
   const ayudaId = `${id}-ayuda`;
   const este = masculino ? "este" : "esta";

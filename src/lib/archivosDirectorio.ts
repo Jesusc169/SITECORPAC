@@ -10,7 +10,8 @@ export async function guardarFotoDirectorio(file: File): Promise<string> {
 
   const original = Buffer.from(await file.arrayBuffer());
   const buffer = await optimizarImagen(original);
-  const extension = nombreArchivoSeguro(file.name).split(".").pop() || "jpg";
+  // sin extensión ("foto" o "foto.") se guarda como .jpg
+  const extension = /\.([a-z0-9]+)$/i.exec(nombreArchivoSeguro(file.name))?.[1] ?? "jpg";
   const fileName = `directorio-${Date.now()}.${extension}`;
 
   await fs.mkdir(UPLOAD_DIR, { recursive: true });

@@ -21,7 +21,7 @@ type ConstitucionViewProps = {
 /* =========================
    VISTA
 ========================= */
-export default function ConstitucionView({ data }: ConstitucionViewProps) {
+export default function ConstitucionView({ data }: Readonly<ConstitucionViewProps>) {
   const { contenidos } = data;
 
   return (

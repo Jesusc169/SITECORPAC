@@ -12,10 +12,11 @@ interface Props {
 // Cuadrícula de fotos adicionales para una página de detalle (ej. noticia
 // completa). Al hacer click en cualquiera se abre el visor a pantalla
 // completa con navegación entre todas.
-export default function GaleriaFotos({ imagenes, titulo }: Props) {
+export default function GaleriaFotos({ imagenes, titulo }: Readonly<Props>) {
   const [abierta, setAbierta] = useState<number | null>(null);
 
   if (imagenes.length === 0) return null;
+  const deTitulo = titulo ? " de " + titulo : "";
 
   return (
     <div className={styles.seccion}>
@@ -23,11 +24,11 @@ export default function GaleriaFotos({ imagenes, titulo }: Props) {
       <div className={styles.grid}>
         {imagenes.map((url, i) => (
           <button
-            key={i}
+            key={url}
             type="button"
             className={styles.tile}
             onClick={() => setAbierta(i)}
-            aria-label={`Ver foto ${i + 1} de ${imagenes.length}${titulo ? ` de ${titulo}` : ""}`}
+            aria-label={`Ver foto ${i + 1} de ${imagenes.length}${deTitulo}`}
           >
             {/* El nombre lo da el aria-label del botón; alt vacío evita que
                 el lector de pantalla lo anuncie dos veces. */}

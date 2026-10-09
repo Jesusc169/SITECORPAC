@@ -2,7 +2,19 @@ import { NextResponse } from "next/server";
 import { UsuarioController, UsuarioValidationError } from "@/controllers/usuarioController";
 import { obtenerUsuarioActual, firmarTokenSesion, opcionesCookieSesion } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-import { registrarActividad, registrarError, nombreEntidad } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero } from "@/lib/registro";
+
+/** " (rol secretaria; permisos: noticias; cambió la contraseña)" o "" */
+function describirCambiosCuenta(body: { rol?: string; permisos?: unknown; password?: string } | null): string {
+  const cambios: string[] = [];
+  if (body?.rol) cambios.push("rol " + body.rol);
+  if (Array.isArray(body?.permisos)) {
+    const lista = body.permisos.length ? body.permisos.join(", ") : "ninguno";
+    cambios.push("permisos: " + lista);
+  }
+  if (body?.password) cambios.push("cambió la contraseña");
+  return cambios.length ? " (" + cambios.join("; ") + ")" : "";
+}
 
 export const runtime = "nodejs";
 
@@ -34,17 +46,13 @@ export async function PUT(
       usuarioActual.rol === "administrador"
     );
 
-    const cambios = [
-      body?.rol ? `rol ${body.rol}` : null,
-      Array.isArray(body?.permisos) ? `permisos: ${body.permisos.join(", ") || "ninguno"}` : null,
-      body?.password ? "cambió la contraseña" : null,
-    ].filter(Boolean);
+    const cambios = describirCambiosCuenta(body);
     await registrarActividad({
       usuario: usuarioActual,
       accion: "editar",
       modulo: "usuarios",
       entidadId: id,
-      detalle: `Editó la cuenta de ${(await nombreEntidad("usuarios", id)) ?? `#${id}`}${cambios.length ? ` (${cambios.join("; ")})` : ""}`,
+      detalle: `Editó la cuenta de ${nombreONumero(await nombreEntidad("usuarios", id), id)}${cambios}`,
       request,
     });
 
@@ -100,7 +108,7 @@ export async function DELETE(
       accion: "eliminar",
       modulo: "usuarios",
       entidadId: id,
-      detalle: `Eliminó la cuenta de ${cuenta ?? `#${id}`}`,
+      detalle: `Eliminó la cuenta de ${nombreONumero(cuenta, id)}`,
       request,
       nivel: "aviso",
     });
@@ -142,7 +150,7 @@ export async function PATCH(
     const body = await request.json().catch(() => ({}));
     const accion = body?.accion;
     const esAdmin = usuarioActual.rol === "administrador";
-    const cuenta = (await nombreEntidad("usuarios", id)) ?? `#${id}`;
+    const cuenta = nombreONumero(await nombreEntidad("usuarios", id), id);
 
     if (accion === "desactivar" || accion === "activar") {
       const activo = accion === "activar";

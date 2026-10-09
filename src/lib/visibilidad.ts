@@ -6,7 +6,7 @@
  * existir el interruptor.
  */
 export function leerVisible(formData: FormData, campo = "activo"): boolean {
+  // Solo el texto "false" oculta; si no llega (o llega un archivo) queda visible
   const valor = formData.get(campo);
-  if (valor === null) return true;
-  return valor.toString() !== "false";
+  return typeof valor === "string" ? valor !== "false" : true;
 }

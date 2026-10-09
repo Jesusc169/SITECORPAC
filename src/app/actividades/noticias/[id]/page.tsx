@@ -51,9 +51,9 @@ export async function generateMetadata({
 
 export default async function NoticiaPage({
   params,
-}: {
+}: Readonly<{
   params: Promise<{ id: string }>;
-}) {
+}>) {
   const { id } = await params;
   const noticiaId = Number(id);
 
@@ -96,7 +96,8 @@ export default async function NoticiaPage({
         </p>
 
         <div className={styles.noticiaContenido}>
-          <p>{noticia.contenido || noticia.descripcion}</p>
+          {/* sin contenido (o vacío) se muestra la descripción */}
+          <p>{noticia.contenido ? noticia.contenido : noticia.descripcion}</p>
         </div>
 
         <GaleriaFotos

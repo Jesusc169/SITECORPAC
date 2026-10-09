@@ -46,9 +46,9 @@ export const UsuarioController = {
   ) => {
     // Un cuerpo vacío (null) es un error del formulario (400), no del servidor
     input = input ?? {};
-    const nombre = (input.nombre || "").trim();
-    const email = (input.email || "").trim().toLowerCase();
-    const password = input.password || "";
+    const nombre = (input.nombre ?? "").trim();
+    const email = (input.email ?? "").trim().toLowerCase();
+    const password = input.password ?? "";
     const rol = normalizarRol(input.rol, actorEsAdministrador);
     const permisos = normalizarPermisos(input.permisos);
 
@@ -76,10 +76,11 @@ export const UsuarioController = {
     actorEsAdministrador: boolean
   ) => {
     input = input ?? {};
-    const nombre = (input.nombre || "").trim();
+    const nombre = (input.nombre ?? "").trim();
     const rol = normalizarRol(input.rol, actorEsAdministrador);
     const permisos = normalizarPermisos(input.permisos);
-    const nuevaPassword = input.password || undefined;
+    // "" (campo vacío en el formulario) = no cambiar la contraseña
+    const nuevaPassword = input.password ? input.password : undefined;
 
     if (!nombre) {
       throw new UsuarioValidationError("El nombre es obligatorio");

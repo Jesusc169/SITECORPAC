@@ -280,3 +280,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* "Premios" agrupa varios campos: <fieldset>/<legend> con el aspecto de antes */
+.grupo {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.grupo legend {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding: 0;
+}

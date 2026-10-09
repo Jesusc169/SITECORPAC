@@ -58,7 +58,7 @@ export function useSelectorImagenes(imagenesIniciales: ImagenExistente[] = []) {
     // Las fotos que pesan más de lo que el servidor acepta ni siquiera se
     // agregan a la lista: si se dejaran pasar, recién al guardar el
     // formulario completo (título, fechas, empresas...) el servidor las
-    // rechazaría y la secretaria perdería todo lo demás que ya había
+    // rechazaría y la secretaria perdería lo demás que ya había
     // llenado. Mejor avisar aquí, apenas elige el archivo.
     const sobrepesadas = arr.filter((f) => f.size > MAX_IMAGEN_BYTES);
     const dentroDelLimite = arr.filter((f) => f.size <= MAX_IMAGEN_BYTES);

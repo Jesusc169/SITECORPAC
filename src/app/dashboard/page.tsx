@@ -66,8 +66,8 @@ export default async function DashboardPage() {
           <div className={styles.section}>
             <h2>📅 Últimas actualizaciones</h2>
             <ul className={styles.activityList}>
-              {ultimasNoticias.map((n, i) => (
-                <li key={i}>📰 {n.titulo}</li>
+              {ultimasNoticias.map((n) => (
+                <li key={n.id}>📰 {n.titulo}</li>
               ))}
             </ul>
           </div>

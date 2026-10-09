@@ -62,10 +62,9 @@ export default function PrivacidadPage() {
       <h2 id="datos">3. Qué datos tratamos, para qué y por cuánto tiempo</h2>
       {/* tabIndex: en celular la tabla se desplaza de lado; así también se
           puede desplazar con las flechas del teclado. */}
-      <div
+      <section
         className={styles.tablaScroll}
         tabIndex={0}
-        role="region"
         aria-label="Tabla de datos que se tratan (se puede desplazar)"
       >
         <table>
@@ -181,7 +180,7 @@ export default function PrivacidadPage() {
             </tr>
           </tbody>
         </table>
-      </div>
+      </section>
       <p>
         Además, la base de datos del sitio tiene copias de seguridad diarias que
         se conservan 30 días. Por eso, un dato borrado puede seguir en esas

@@ -92,7 +92,7 @@ export const NoticiaModel = {
     return prisma.noticia.findMany({
       take,
       orderBy: { fecha: "desc" },
-      select: { titulo: true },
+      select: { id: true, titulo: true },
     });
   },
 };

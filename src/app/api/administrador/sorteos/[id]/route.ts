@@ -3,8 +3,9 @@ import { SorteoController, SorteoValidationError } from "@/controllers/sorteoCon
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
+import { campoTexto, campoLista } from "@/lib/formulario";
 
 export const runtime = "nodejs";
 
@@ -69,22 +70,16 @@ export async function PUT(
 
     const formData = await request.formData();
 
-    const nombre = formData.get("nombre")?.toString().trim() || "";
-    const descripcion = formData.get("descripcion")?.toString().trim() || "";
-    const lugar = formData.get("lugar")?.toString().trim() || "";
-    const fecha_hora = formData.get("fecha_hora")?.toString().trim() || "";
+    const nombre = campoTexto(formData, "nombre");
+    const descripcion = campoTexto(formData, "descripcion");
+    const lugar = campoTexto(formData, "lugar");
+    const fecha_hora = campoTexto(formData, "fecha_hora");
 
     let anio = Number(formData.get("anio"));
     const estado =
       formData.get("estado")?.toString() === "INACTIVO" ? "INACTIVO" : "ACTIVO";
 
-    const premiosRaw = formData.get("premios")?.toString() || "[]";
-    let premios: any[] = [];
-    try {
-      premios = JSON.parse(premiosRaw);
-    } catch {
-      premios = [];
-    }
+    const premios = campoLista<{ nombre: string; descripcion: string; cantidad: number }>(formData, "premios");
 
     if (!nombre || !descripcion || !lugar || !fecha_hora) {
       return NextResponse.json(
@@ -97,13 +92,7 @@ export async function PUT(
       anio = new Date(fecha_hora).getFullYear();
     }
 
-    const imagenesEliminarRaw = formData.get("imagenesEliminar")?.toString() || "[]";
-    let imagenesEliminar: number[] = [];
-    try {
-      imagenesEliminar = JSON.parse(imagenesEliminarRaw);
-    } catch {
-      imagenesEliminar = [];
-    }
+    const imagenesEliminar = campoLista<number>(formData, "imagenesEliminar");
 
     const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
     const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
@@ -182,7 +171,7 @@ export async function DELETE(
       accion: "eliminar",
       modulo: "sorteos",
       entidadId: sorteoId,
-      detalle: `Eliminó el sorteo "${nombreSorteo ?? `#${sorteoId}`}" (queda 30 días en la papelera)`,
+      detalle: `Eliminó el sorteo "${nombreONumero(nombreSorteo, sorteoId)}" (queda 30 días en la papelera)`,
       request,
     });
 

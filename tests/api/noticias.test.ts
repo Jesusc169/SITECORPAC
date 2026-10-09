@@ -252,3 +252,18 @@ describe("casos de borde de noticias", () => {
     expect(n.contenido).toBe("Texto largo");
   });
 });
+
+describe("editar con un PDF inválido no deja la noticia a medias", () => {
+  it("las fotos y documentos quedan como estaban", async () => {
+    const n = await crearConFotos(2, { pdfs: pdf("a.pdf") });
+    const res = await PUT(peticion("/x", "PUT", { form: {
+      titulo: "T", imagenesEliminar: JSON.stringify([n.noticia_imagen[0].id]), pdfsEliminar: JSON.stringify([n.noticia_pdf[0].id]),
+      pdfs: archivo("virus.exe", "application/octet-stream"),
+    } }), params(n.id));
+    expect(res.status).toBe(400);
+    const d = await prisma.noticia.findUnique({ where: { id: n.id }, include: { noticia_imagen: true, noticia_pdf: true } });
+    expect(d?.noticia_imagen).toHaveLength(2);
+    expect(d?.noticia_pdf).toHaveLength(1);
+    expect(d?.titulo).toBe("Noticia");
+  });
+});

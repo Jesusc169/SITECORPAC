@@ -1,6 +1,7 @@
 import styles from "@/app/actividades/sorteos/sorteos.module.css";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
+import { rutaPublica } from "@/lib/rutas";
 
 interface SorteoProducto {
   id?: number;
@@ -42,7 +43,7 @@ export default function SorteosView({
   onChangeAnio,
   aniosDisponibles,
   anioSeleccionado,
-}: Props) {
+}: Readonly<Props>) {
   return (
     <section className={styles.container}>
       {/* CABECERA */}
@@ -55,7 +56,7 @@ export default function SorteosView({
       </header>
 
       {/* FILTRO */}
-      <div className={styles.anios} role="group" aria-label="Filtrar sorteos por año">
+      <fieldset className={styles.anios} aria-label="Filtrar sorteos por año">
         {aniosDisponibles.map((anio) => (
           <button
             key={`anio-${anio}`}
@@ -76,7 +77,7 @@ export default function SorteosView({
         >
           Ver todos
         </button>
-      </div>
+      </fieldset>
 
       {/* VACÍO */}
       {sorteos.length === 0 && (
@@ -105,13 +106,7 @@ export default function SorteosView({
               : "Lugar no especificado";
 
           // 🔥 IMAGEN SEGURA (FIX DEFINITIVO)
-          const imagenSrc =
-            sorteo.imagen && sorteo.imagen.trim() !== ""
-              ? sorteo.imagen.startsWith("http") ||
-                sorteo.imagen.startsWith("/")
-                ? sorteo.imagen
-                : `/${sorteo.imagen}`
-              : null;
+          const imagenSrc = sorteo.imagen?.trim() ? rutaPublica(sorteo.imagen) : null;
 
           return (
             <article key={`sorteo-${sorteo.id}`} className={styles.card}>

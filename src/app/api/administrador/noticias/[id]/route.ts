@@ -3,9 +3,9 @@ import { NoticiasController, NoticiaValidationError } from "@/controllers/notici
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
-import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
-import { campoTexto, campoTextoODefecto, campoOpcional } from "@/lib/formulario";
+import { campoTexto, campoTextoODefecto, campoOpcional, campoLista } from "@/lib/formulario";
 
 export const runtime = "nodejs";
 
@@ -30,22 +30,8 @@ export async function PUT(
     }
 
     const formData = await request.formData();
-    const pdfsEliminarRaw = formData.get("pdfsEliminar")?.toString() || "[]";
-    const imagenesEliminarRaw = formData.get("imagenesEliminar")?.toString() || "[]";
-
-    let pdfsEliminar: number[] = [];
-    try {
-      pdfsEliminar = JSON.parse(pdfsEliminarRaw);
-    } catch {
-      pdfsEliminar = [];
-    }
-
-    let imagenesEliminar: number[] = [];
-    try {
-      imagenesEliminar = JSON.parse(imagenesEliminarRaw);
-    } catch {
-      imagenesEliminar = [];
-    }
+    const pdfsEliminar = campoLista<number>(formData, "pdfsEliminar");
+    const imagenesEliminar = campoLista<number>(formData, "imagenesEliminar");
 
     const imagenPrincipalIdRaw = formData.get("imagenPrincipalId");
     const imagenPrincipalNuevaIndexRaw = formData.get("imagenPrincipalNuevaIndex");
@@ -128,7 +114,7 @@ export async function DELETE(
       accion: "eliminar",
       modulo: "noticias",
       entidadId: id,
-      detalle: `Eliminó la noticia "${titulo ?? `#${id}`}" (queda 30 días en la papelera)`,
+      detalle: `Eliminó la noticia "${nombreONumero(titulo, id)}" (queda 30 días en la papelera)`,
       request,
     });
 

@@ -28,7 +28,7 @@ const PAGINAS_LEGALES = [
 // sencillo, índice con enlaces a cada sección y el texto completo. El índice
 // también sirve a quien navega con teclado o lector de pantalla para saltar
 // directo a la parte que le interesa.
-export default function PaginaLegal({ titulo, resumen, secciones, children }: Props) {
+export default function PaginaLegal({ titulo, resumen, secciones, children }: Readonly<Props>) {
   return (
     <>
       <Cabecera />

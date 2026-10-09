@@ -17,9 +17,8 @@ export default function Toast({ toast, onClose }: Props) {
   if (!toast) return null;
 
   return createPortal(
-    <div
+    <output
       className={`${styles.toast} ${toast.tipo === "exito" ? styles.exito : styles.error}`}
-      role="status"
       aria-live="polite"
     >
       <span className={styles.icono}>{toast.tipo === "exito" ? "✓" : "✕"}</span>
@@ -27,7 +26,7 @@ export default function Toast({ toast, onClose }: Props) {
       <button type="button" className={styles.cerrar} onClick={onClose} aria-label="Cerrar aviso">
         ×
       </button>
-    </div>,
+    </output>,
     document.body
   );
 }

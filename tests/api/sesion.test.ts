@@ -43,11 +43,11 @@ describe("POST /api/auth/login", () => {
     expect(r?.detalle).not.toContain("MiClaveSecreta");
   });
 
-  it("cuerpo que no es JSON → 401 y registro sin correo", async () => {
+  it("cuerpo que no es JSON → 400 (credenciales faltantes), sin contar como intento", async () => {
     const req = new Request("http://localhost/api/auth/login", { method: "POST", body: "no-json", headers: { "x-real-ip": "10.0.0.1" } });
     const res = await login(req);
-    expect(res.status).toBe(401);
-    expect((await ultimoRegistro())?.detalle).toContain("(no es un correo válido)");
+    expect(res.status).toBe(400);
+    expect(await prisma.login_intento.count()).toBe(0);
   });
 
   it("error sin mensaje → 'Credenciales inválidas'", async () => {

@@ -6,9 +6,11 @@ import { MAX_FOTOS, MAX_IMAGEN_MB, type SelectorImagenesState } from "@/hooks/us
 
 interface Props {
   selector: SelectorImagenesState;
+  /** id del campo de archivo, para asociarle una etiqueta externa */
+  idEntrada?: string;
 }
 
-export default function SelectorImagenes({ selector }: Props) {
+export default function SelectorImagenes({ selector, idEntrada }: Readonly<Props>) {
   const {
     activas,
     nuevas,
@@ -71,12 +73,14 @@ export default function SelectorImagenes({ selector }: Props) {
           );
         })}
 
-        {nuevas.map((_, i) => {
+        {nuevas.map((archivo, i) => {
           const esPrincipal = principal?.tipo === "nueva" && principal.index === i;
           const url = previews[i];
           return (
             <div
-              key={`nueva-${i}`}
+              // clave del propio archivo (no su posición): al quitar una foto
+              // del medio, las demás conservan su vista previa
+              key={`${archivo.name}-${archivo.size}-${archivo.lastModified}`}
               className={`${styles.thumb} ${esPrincipal ? styles.thumbPrincipal : ""}`}
             >
               {url && <img src={url} alt="Foto nueva" className={styles.thumbImg} />}
@@ -109,6 +113,7 @@ export default function SelectorImagenes({ selector }: Props) {
             <span className={styles.addTileIcon}>+</span>
             <span>Agregar foto</span>
             <input
+              id={idEntrada}
               type="file"
               accept="image/*"
               multiple

@@ -19,7 +19,7 @@ type EstatutoViewProps = {
 /* =========================
    VISTA
 ========================= */
-export default function EstatutoView({ data }: EstatutoViewProps) {
+export default function EstatutoView({ data }: Readonly<EstatutoViewProps>) {
   const { estatuto } = data;
 
   if (!estatuto) return null;

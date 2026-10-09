@@ -34,6 +34,20 @@ const FORM_VACIO: FormState = {
   permisos: [],
 };
 
+function CeldaPrivilegios({ rol, permisos }: Readonly<{ rol: string; permisos: string[] | null }>) {
+  if (rol === "administrador") return <span className={styles.textoMuted}>Acceso total</span>;
+  if (!permisos?.length) return <span className={styles.textoMuted}>Sin privilegios</span>;
+  return (
+    <div className={styles.chips}>
+      {permisos.map((p) => (
+        <span key={p} className={styles.chip}>
+          {PRIVILEGIOS.find((priv) => priv.clave === p)?.label ?? p}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -235,19 +249,7 @@ export default function UsuariosPage() {
                       </span>
                     </td>
                     <td>
-                      {u.rol === "administrador" ? (
-                        <span className={styles.textoMuted}>Acceso total</span>
-                      ) : u.permisos && u.permisos.length > 0 ? (
-                        <div className={styles.chips}>
-                          {u.permisos.map((p) => (
-                            <span key={p} className={styles.chip}>
-                              {PRIVILEGIOS.find((priv) => priv.clave === p)?.label || p}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className={styles.textoMuted}>Sin privilegios</span>
-                      )}
+                      <CeldaPrivilegios rol={u.rol} permisos={u.permisos} />
                     </td>
                     <td>
                       <span className={`${styles.badgeRol} ${u.activo ? styles.badgeActiva : styles.badgeInactiva}`}>
@@ -296,15 +298,15 @@ export default function UsuariosPage() {
 
               {error && <div className={styles.errorBanner}>{error}</div>}
 
-              <label className={styles.label}>Nombre</label>
-              <input
+              <label htmlFor="usuario-nombre" className={styles.label}>Nombre</label>
+              <input id="usuario-nombre"
                 className={styles.input}
                 value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               />
 
-              <label className={styles.label}>Correo</label>
-              <input
+              <label htmlFor="usuario-correo" className={styles.label}>Correo</label>
+              <input id="usuario-correo"
                 className={styles.input}
                 type="email"
                 value={form.email}
@@ -312,10 +314,10 @@ export default function UsuariosPage() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
 
-              <label className={styles.label}>
+              <label htmlFor="usuario-contrasena" className={styles.label}>
                 {form.id ? "Nueva contraseña (opcional)" : "Contraseña"}
               </label>
-              <input
+              <input id="usuario-contrasena"
                 className={styles.input}
                 type="password"
                 value={form.password}
@@ -323,8 +325,8 @@ export default function UsuariosPage() {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
 
-              <label className={styles.label}>Rol</label>
-              <select
+              <label htmlFor="usuario-rol" className={styles.label}>Rol</label>
+              <select id="usuario-rol"
                 className={styles.input}
                 value={form.rol}
                 onChange={(e) =>
@@ -340,8 +342,8 @@ export default function UsuariosPage() {
                   Un administrador tiene acceso a todas las secciones automáticamente.
                 </p>
               ) : (
-                <>
-                  <label className={styles.label}>Privilegios</label>
+                <fieldset className={styles.grupo}>
+                  <legend className={styles.label}>Privilegios</legend>
                   <div className={styles.checkboxGroup}>
                     {PRIVILEGIOS.map((priv) => (
                       <label key={priv.clave} className={styles.checkboxItem}>
@@ -354,7 +356,7 @@ export default function UsuariosPage() {
                       </label>
                     ))}
                   </div>
-                </>
+                </fieldset>
               )}
 
               <div className={styles.modalFooter}>

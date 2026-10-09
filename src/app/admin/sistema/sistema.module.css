@@ -94,6 +94,7 @@
 }
 
 .alerta {
+  display: block; /* también cuando es <output> */
   border-radius: 10px;
   padding: 0.75rem 1rem;
   font-weight: 600;

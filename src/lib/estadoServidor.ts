@@ -12,8 +12,14 @@ import os from "os";
 import tls from "tls";
 
 // Las rutas se arman en tiempo de ejecución: los comentarios turbopackIgnore
-// evitan que el build intente rastrear todo el proyecto por esas lecturas.
+// evitan que el build intente rastrear el proyecto entero por esas lecturas.
 const RAIZ = process.cwd();
+
+/** Variable de entorno, o el valor por defecto si no está o está vacía. */
+function envODefecto(nombre: string, porDefecto: string): string {
+  const valor = process.env[nombre];
+  return valor?.trim() ? valor : porDefecto;
+}
 
 export interface Version {
   commit: string | null;
@@ -53,7 +59,7 @@ export async function leerVersion(): Promise<Version> {
 async function sistemaOperativo(): Promise<string> {
   try {
     const txt = await fs.readFile("/etc/os-release", "utf8");
-    const m = txt.match(/^PRETTY_NAME="?([^"\n]+)"?/m);
+    const m = /^PRETTY_NAME="?([^"\n]+)"?/m.exec(txt);
     if (m) return m[1];
   } catch {
     // no es Linux (por ejemplo, desarrollo en Windows)
@@ -157,7 +163,7 @@ export interface EstadoRespaldos {
 
 /** Respaldos diarios de la base de datos (los genera /root/backup_sitecorpac.sh). */
 export async function estadoRespaldos(): Promise<EstadoRespaldos> {
-  const carpeta = process.env.BACKUPS_DIR || "/home/sitecorpac/backups";
+  const carpeta = envODefecto("BACKUPS_DIR", "/home/sitecorpac/backups");
   try {
     const nombres = (await fs.readdir(/*turbopackIgnore: true*/ carpeta)).filter((n) => n.endsWith(".sql.gz"));
     const datos = await Promise.all(
@@ -192,7 +198,7 @@ export function estadoCertificado(): Promise<EstadoCertificado> {
   let dominio = "sitecorpac.com";
   try {
     const base = process.env.NEXT_PUBLIC_BASE_URL;
-    if (base && base.startsWith("https://")) dominio = new URL(base).hostname;
+    if (base?.startsWith("https://")) dominio = new URL(base).hostname;
   } catch {
     // URL mal escrita: se usa el dominio por defecto
   }
@@ -204,7 +210,7 @@ export function estadoCertificado(): Promise<EstadoCertificado> {
       () => {
         const cert = socket.getPeerCertificate();
         socket.end();
-        if (!cert || !cert.valid_to) {
+        if (!cert?.valid_to) {
           fin({ venceEl: null, diasRestantes: null, emisor: null, error: "Sin certificado" });
           return;
         }
@@ -237,7 +243,7 @@ export interface EstadoAlertas {
 
 /** Lo que dejó escrito /root/alertas_sitecorpac.sh en su última pasada. */
 export async function estadoAlertas(): Promise<EstadoAlertas> {
-  const ruta = process.env.ALERTAS_ESTADO || "/var/lib/sitecorpac-alertas/estado.json";
+  const ruta = envODefecto("ALERTAS_ESTADO", "/var/lib/sitecorpac-alertas/estado.json");
   try {
     const j = JSON.parse(await fs.readFile(/*turbopackIgnore: true*/ ruta, "utf8"));
     return {

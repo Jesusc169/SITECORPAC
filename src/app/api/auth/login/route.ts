@@ -34,16 +34,16 @@ export async function POST(req: Request) {
     );
   }
 
-  let correoIntentado: unknown = null;
+  // Un cuerpo que no es JSON se trata como credenciales faltantes (400)
+  const body = await req.json().catch(() => null);
+  const correoIntentado: unknown = body?.email;
 
   try {
-    const body = await req.json();
-    correoIntentado = body?.email;
 
     // ===============================
     // Validación básica
     // ===============================
-    if (!body.email || !body.password) {
+    if (!body?.email || !body?.password) {
       return NextResponse.json(
         { error: "Faltan credenciales" },
         { status: 400 }

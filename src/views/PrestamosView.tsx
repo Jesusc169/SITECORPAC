@@ -33,7 +33,7 @@ type PrestamosViewProps = {
 /* =========================
    VISTA
    ========================= */
-export default function PrestamosView({ data }: PrestamosViewProps) {
+export default function PrestamosView({ data }: Readonly<PrestamosViewProps>) {
   const { cooperativas, requisitos, faqs } = data;
 
   return (

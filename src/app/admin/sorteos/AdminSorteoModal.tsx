@@ -11,6 +11,8 @@ import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
 const LUGAR_POR_DEFECTO = "Sede principal SITECORPAC";
 
 interface Premio {
+  /** Clave estable de la fila en pantalla (el servidor la ignora) */
+  clave: string;
   nombre: string;
   descripcion: string;
   cantidad: number;
@@ -28,7 +30,7 @@ export default function AdminSorteoModal({
   onClose,
   onSave,
   initialData,
-}: Props) {
+}: Readonly<Props>) {
   const emptyForm = {
     id: null as number | null,
     titulo: "",
@@ -64,6 +66,7 @@ export default function AdminSorteoModal({
         premios:
           (initialData.premios ?? initialData.sorteo_producto)?.map(
             (p: any) => ({
+              clave: crypto.randomUUID(),
               nombre: p.nombre ?? "",
               descripcion: p.descripcion ?? "",
               cantidad: p.cantidad ?? 1,
@@ -101,7 +104,7 @@ export default function AdminSorteoModal({
   const addPremio = () =>
     setForm((prev) => ({
       ...prev,
-      premios: [...prev.premios, { nombre: "", descripcion: "", cantidad: 1 }],
+      premios: [...prev.premios, { clave: crypto.randomUUID(), nombre: "", descripcion: "", cantidad: 1 }],
     }));
 
   const updatePremio = (i: number, field: string, value: any) => {
@@ -183,8 +186,8 @@ export default function AdminSorteoModal({
 
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
-              <label>Título</label>
-              <input
+              <label htmlFor="sorteo-titulo">Título</label>
+              <input id="sorteo-titulo"
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
@@ -192,8 +195,8 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Fecha</label>
-              <input
+              <label htmlFor="sorteo-fecha">Fecha</label>
+              <input id="sorteo-fecha"
                 type="date"
                 name="fecha"
                 value={form.fecha}
@@ -202,8 +205,8 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Hora</label>
-              <input
+              <label htmlFor="sorteo-hora">Hora</label>
+              <input id="sorteo-hora"
                 type="time"
                 name="hora"
                 value={form.hora}
@@ -224,8 +227,8 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label>Descripción</label>
-              <textarea
+              <label htmlFor="sorteo-descripcion">Descripción</label>
+              <textarea id="sorteo-descripcion"
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
@@ -233,17 +236,19 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label>Fotos del sorteo (hasta 5)</label>
-              <SelectorImagenes selector={selectorImagenes} />
+              <label htmlFor="sorteo-fotos">Fotos del sorteo (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} idEntrada="sorteo-fotos" />
             </div>
 
-            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label>Premios</label>
+            {/* Grupo de varios campos: fieldset + legend (sin borde, como antes) */}
+            <fieldset className={`${styles.formGroup} ${styles.fullWidth} ${styles.grupo}`}>
+              <legend>Premios</legend>
 
               {form.premios.map((p, i) => (
-                <div key={i} className={styles.premioBox}>
+                <div key={p.clave} className={styles.premioBox}>
                   <input
                     placeholder="Nombre"
+                    aria-label={`Premio ${i + 1}: nombre`}
                     value={p.nombre}
                     onChange={(e) =>
                       updatePremio(i, "nombre", e.target.value)
@@ -251,6 +256,7 @@ export default function AdminSorteoModal({
                   />
                   <input
                     placeholder="Descripción"
+                    aria-label={`Premio ${i + 1}: descripción`}
                     value={p.descripcion}
                     onChange={(e) =>
                       updatePremio(i, "descripcion", e.target.value)
@@ -258,6 +264,7 @@ export default function AdminSorteoModal({
                   />
                   <input
                     type="number"
+                    aria-label={`Premio ${i + 1}: cantidad`}
                     value={p.cantidad}
                     onChange={(e) =>
                       updatePremio(i, "cantidad", e.target.value)
@@ -279,7 +286,7 @@ export default function AdminSorteoModal({
               >
                 + Agregar premio
               </button>
-            </div>
+            </fieldset>
           </div>
         </div>
 

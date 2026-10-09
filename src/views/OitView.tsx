@@ -18,7 +18,7 @@ type OitViewProps = {
 /* =========================
    VISTA
 ========================= */
-export default function OitView({ data }: OitViewProps) {
+export default function OitView({ data }: Readonly<OitViewProps>) {
   const { contenidos } = data;
 
   return (

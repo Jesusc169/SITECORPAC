@@ -14,20 +14,49 @@ interface Props {
 export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: Props) {
   const clamp = (i: number) => Math.min(Math.max(0, i), Math.max(0, imagenes.length - 1));
   const [indice, setIndice] = useState(clamp(indiceInicial));
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const cerrarRef = useRef<HTMLButtonElement>(null);
 
+  // <dialog> nativo en modo modal: el navegador deja el resto de la página
+  // inerte y cierra con Escape (evento "close"). Al abrir, el foco pasa al
+  // botón Cerrar; al cerrar, vuelve al elemento que abrió el visor.
   useEffect(() => {
+    const dialogo = dialogRef.current;
+    if (!dialogo) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    // Accesibilidad de diálogo modal: al abrir, el foco pasa al botón
-    // Cerrar; al cerrar, vuelve al elemento que abrió el visor (si no, quien
-    // usa teclado queda "perdido" al inicio de la página).
     const previo = document.activeElement as HTMLElement | null;
+    if (!dialogo.open) dialogo.showModal();
     cerrarRef.current?.focus();
 
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setIndice((i) => (i + 1) % imagenes.length);
+      if (e.key === "ArrowLeft") setIndice((i) => (i - 1 + imagenes.length) % imagenes.length);
+      // Tab no sale del visor (ni hacia la barra del navegador)
+      if (e.key === "Tab") {
+        const enfocables = dialogo.querySelectorAll<HTMLElement>("button");
+        const primero = enfocables[0];
+        const ultimo = enfocables[enfocables.length - 1];
+        if (e.shiftKey && document.activeElement === primero) {
+          e.preventDefault();
+          ultimo.focus();
+        } else if (!e.shiftKey && document.activeElement === ultimo) {
+          e.preventDefault();
+          primero.focus();
+        }
+      }
+    };
+    // Clic en el fondo oscuro (el propio diálogo), no en la foto ni en los botones
+    const alHacerClic = (e: MouseEvent) => e.target === dialogo && onClose();
+    const alCerrar = () => onClose();
+    dialogo.addEventListener("keydown", alTeclear);
+    dialogo.addEventListener("click", alHacerClic);
+    dialogo.addEventListener("close", alCerrar);
+
     return () => {
+      dialogo.removeEventListener("keydown", alTeclear);
+      dialogo.removeEventListener("click", alHacerClic);
+      dialogo.removeEventListener("close", alCerrar);
       document.body.style.overflow = original;
       previo?.focus();
     };
@@ -36,44 +65,13 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
 
   if (imagenes.length === 0) return null;
 
-  // El foco está siempre dentro del visor (entra al abrir y Tab no sale), así
-  // que el teclado se atiende aquí mismo en vez de en window.
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") onClose();
-    if (e.key === "ArrowRight") setIndice((i) => (i + 1) % imagenes.length);
-    if (e.key === "ArrowLeft") setIndice((i) => (i - 1 + imagenes.length) % imagenes.length);
-
-    // Mantiene el foco dentro del visor mientras está abierto.
-    if (e.key === "Tab" && dialogRef.current) {
-      const enfocables = dialogRef.current.querySelectorAll<HTMLElement>("button");
-      const primero = enfocables[0];
-      const ultimo = enfocables[enfocables.length - 1];
-      if (e.shiftKey && document.activeElement === primero) {
-        e.preventDefault();
-        ultimo.focus();
-      } else if (!e.shiftKey && document.activeElement === ultimo) {
-        e.preventDefault();
-        primero.focus();
-      }
-    }
-  };
-
   // Portal a document.body: si el lightbox se quedara anidado dentro de la
   // tarjeta que lo abre (feria/sorteo), un simple `transform` en su :hover
   // (ver .feria:hover, .sorteo:hover) convierte a esa tarjeta en el
   // contenedor de este position:fixed, y el visor queda encerrado en la
   // tarjeta en vez de cubrir toda la pantalla.
   return createPortal(
-    <div
-      ref={dialogRef}
-      className={styles.overlay}
-      // Cierra solo si el clic fue en el fondo oscuro, no en la foto ni en los botones
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      onKeyDown={onKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-label={titulo || "Galería de fotos"}
-    >
+    <dialog ref={dialogRef} className={styles.overlay} aria-label={titulo?.trim() ? titulo : "Galería de fotos"}>
       <span className={styles.contador} aria-live="polite">
         Foto {indice + 1} de {imagenes.length}
       </span>
@@ -130,7 +128,7 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
             // Antes era un <div> con onClick: se podía usar con el mouse
             // pero no con el teclado.
             <button
-              key={i}
+              key={url}
               type="button"
               className={`${styles.miniatura} ${i === indice ? styles.miniaturaActiva : ""}`}
               onClick={() => setIndice(i)}
@@ -142,7 +140,7 @@ export default function Lightbox({ imagenes, indiceInicial, titulo, onClose }: P
           ))}
         </div>
       )}
-    </div>,
+    </dialog>,
     document.body
   );
 }

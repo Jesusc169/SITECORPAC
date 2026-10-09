@@ -1,7 +1,7 @@
 /**
  * Datos legales del sindicato (según su ficha RUC). Fuente única para las
  * páginas legales y el footer: si cambia el domicilio o el correo de
- * contacto, se corrige aquí y se actualiza en todo el sitio.
+ * contacto, se corrige aquí y se actualiza en el sitio entero.
  */
 export const INSTITUCION = {
   razonSocial:

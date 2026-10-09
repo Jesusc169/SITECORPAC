@@ -139,18 +139,24 @@ function hace(valor: string | null | undefined): string {
   return `hace ${Math.round(h / 24)} días`;
 }
 
+const nombreArchivo = (ruta: unknown) => String(ruta).split("/").pop() as string;
+const ES_FECHA = /^\d{4}-\d{2}-\d{2}T/;
+const ES_ARCHIVO = /^\/.*\.(jpe?g|png|webp|gif|pdf|docx?)$/i;
+
+/** Texto de un campo de texto del historial (fecha, archivo o tal cual). */
+function valorTexto(campo: string, v: string): string {
+  if (ES_FECHA.test(v)) return campo === "fecha_hora" ? fecha(v) : formatearFechaHoraPeru(v, { dateStyle: "medium" });
+  if (ES_ARCHIVO.test(v)) return nombreArchivo(v);
+  if (campo === "estado" && (v === "ACTIVO" || v === "INACTIVO")) return v === "ACTIVO" ? "Sí" : "No";
+  return v;
+}
+
 /** Valor de un campo del historial, legible. */
 function valorCampo(campo: string, v: unknown): string {
   if (v === null || v === undefined || v === "") return "(vacío)";
   if (typeof v === "boolean") return v ? "Sí" : "No";
-  if (campo === "estado" && (v === "ACTIVO" || v === "INACTIVO")) return v === "ACTIVO" ? "Sí" : "No";
-  if (Array.isArray(v)) return v.length ? v.map((x) => String(x).split("/").pop()).join("\n") : "(ninguno)";
-  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v)) {
-    return campo === "fecha_hora" ? fecha(v) : formatearFechaHoraPeru(v, { dateStyle: "medium" });
-  }
-  if (typeof v === "string" && v.startsWith("/") && /\.(jpe?g|png|webp|gif|pdf|docx?)$/i.test(v)) {
-    return v.split("/").pop() as string;
-  }
+  if (Array.isArray(v)) return v.length ? v.map(nombreArchivo).join("\n") : "(ninguno)";
+  if (typeof v === "string") return valorTexto(campo, v);
   return String(v);
 }
 
@@ -159,16 +165,19 @@ function porcentaje(usado: number, total: number): number {
 }
 
 /* ---------- piezas ---------- */
-function Barra({ valor }: { valor: number }) {
-  const tono = valor >= 90 ? styles.barraError : valor >= 80 ? styles.barraAviso : styles.barraOk;
+function Barra({ valor }: Readonly<{ valor: number }>) {
+  let tono = styles.barraOk;
+  if (valor >= 90) tono = styles.barraError;
+  else if (valor >= 80) tono = styles.barraAviso;
   return (
-    <div className={styles.barra} role="img" aria-label={`${valor}% usado`}>
+    // decorativa: el porcentaje ya está escrito en el texto de arriba
+    <div className={styles.barra} aria-hidden="true">
       <div className={`${styles.barraRelleno} ${tono}`} style={{ width: `${Math.min(100, valor)}%` }} />
     </div>
   );
 }
 
-function Tarjeta({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+function Tarjeta({ titulo, children }: Readonly<{ titulo: string; children: React.ReactNode }>) {
   return (
     <section className={styles.tarjeta}>
       <h3>{titulo}</h3>
@@ -177,7 +186,7 @@ function Tarjeta({ titulo, children }: { titulo: string; children: React.ReactNo
   );
 }
 
-function Dato({ k, v }: { k: string; v: React.ReactNode }) {
+function Dato({ k, v }: Readonly<{ k: string; v: React.ReactNode }>) {
   return (
     <div className={styles.dato}>
       <dt>{k}</dt>
@@ -186,16 +195,37 @@ function Dato({ k, v }: { k: string; v: React.ReactNode }) {
   );
 }
 
-function Nivel({ nivel }: { nivel: string }) {
-  const cls = nivel === "error" ? styles.nivelError : nivel === "aviso" ? styles.nivelAviso : styles.nivelInfo;
-  const txt = nivel === "error" ? "Error" : nivel === "aviso" ? "Aviso" : "Info";
+const NIVELES: Record<string, { cls: string; txt: string }> = {
+  error: { cls: styles.nivelError, txt: "Error" },
+  aviso: { cls: styles.nivelAviso, txt: "Aviso" },
+  info: { cls: styles.nivelInfo, txt: "Info" },
+};
+
+/** Fila de tabla con un solo mensaje ("Cargando…", "No hay…") */
+function FilaMensaje({ columnas, children }: Readonly<{ columnas: number; children: React.ReactNode }>) {
+  return (
+    <tr>
+      <td colSpan={columnas} className={panel.vacio}>
+        {children}
+      </td>
+    </tr>
+  );
+}
+
+function Nivel({ nivel }: Readonly<{ nivel: string }>) {
+  const { cls, txt } = NIVELES[nivel] ?? NIVELES.info;
   return <span className={`${styles.nivel} ${cls}`}>{txt}</span>;
 }
 
 /* =========================================================
    RESUMEN
 ========================================================= */
-function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string, string>) => void }) {
+function textoUltimoRespaldo(r: Estado["respaldos"]): string {
+  if (r.ultimo) return `${fecha(r.ultimo.fecha)} (${hace(r.ultimo.fecha)})`;
+  return r.disponible ? "Ninguno" : "No disponible";
+}
+
+function Resumen({ e, irARegistro }: Readonly<{ e: Estado; irARegistro: (f: Record<string, string>) => void }>) {
   const m = e.maquina;
   const memUsada = m.memoriaTotal - m.memoriaLibre;
   const discoUsado = m.discoTotal != null && m.discoLibre != null ? m.discoTotal - m.discoLibre : null;
@@ -206,8 +236,8 @@ function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string
         {e.alertas.length === 0 ? (
           <div className={`${styles.alerta} ${styles.alertaOk}`}>✔ Todo en orden. No hay alertas.</div>
         ) : (
-          e.alertas.map((a, i) => (
-            <div key={i} className={`${styles.alerta} ${a.gravedad === "error" ? styles.alertaError : styles.alertaAviso}`}>
+          e.alertas.map((a) => (
+            <div key={a.texto} className={`${styles.alerta} ${a.gravedad === "error" ? styles.alertaError : styles.alertaAviso}`}>
               {a.gravedad === "error" ? "✖" : "⚠"} {a.texto}
             </div>
           ))
@@ -274,13 +304,7 @@ function Resumen({ e, irARegistro }: { e: Estado; irARegistro: (f: Record<string
           <dl>
             <Dato
               k="Último respaldo"
-              v={
-                e.respaldos.ultimo
-                  ? `${fecha(e.respaldos.ultimo.fecha)} (${hace(e.respaldos.ultimo.fecha)})`
-                  : e.respaldos.disponible
-                    ? "Ninguno"
-                    : "No disponible"
-              }
+              v={textoUltimoRespaldo(e.respaldos)}
             />
             <Dato k="Respaldos guardados" v={e.respaldos.disponible ? `${e.respaldos.cantidad} · ${bytes(e.respaldos.bytesTotal)}` : "—"} />
             <Dato k="Archivos subidos" v={`${e.archivos.archivos} · ${bytes(e.archivos.bytes)}`} />
@@ -356,11 +380,11 @@ function Registro({
   usuarios,
   modulos,
   filtrosIniciales,
-}: {
+}: Readonly<{
   usuarios: Usuarios;
   modulos: string[];
   filtrosIniciales: Filtros;
-}) {
+}>) {
   const [filtros, setFiltros] = useState<Filtros>(filtrosIniciales);
   const [aplicados, setAplicados] = useState<Filtros>(filtrosIniciales);
   const [pagina, setPagina] = useState(1);
@@ -417,15 +441,15 @@ function Registro({
         }}
       >
         <label>
-          Desde
+          <span>Desde</span>
           <input type="date" value={filtros.desde} onChange={(e) => cambiar("desde", e.target.value)} />
         </label>
         <label>
-          Hasta
+          <span>Hasta</span>
           <input type="date" value={filtros.hasta} onChange={(e) => cambiar("hasta", e.target.value)} />
         </label>
         <label>
-          Módulo
+          <span>Módulo</span>
           <select value={filtros.modulo} onChange={(e) => cambiar("modulo", e.target.value)}>
             <option value="">Todos</option>
             {modulos.map((m) => (
@@ -436,7 +460,7 @@ function Registro({
           </select>
         </label>
         <label>
-          Nivel
+          <span>Nivel</span>
           <select value={filtros.nivel} onChange={(e) => cambiar("nivel", e.target.value)}>
             <option value="">Todos</option>
             <option value="info">Info</option>
@@ -445,7 +469,7 @@ function Registro({
           </select>
         </label>
         <label>
-          Usuario
+          <span>Usuario</span>
           <select value={filtros.usuario} onChange={(e) => cambiar("usuario", e.target.value)}>
             <option value="">Todos</option>
             {usuarios.map((u) => (
@@ -457,7 +481,7 @@ function Registro({
           </select>
         </label>
         <label className={styles.filtroTexto}>
-          Buscar
+          <span>Buscar</span>
           <input
             type="search"
             placeholder="Título, nombre, IP…"
@@ -519,20 +543,9 @@ function Registro({
             </tr>
           </thead>
           <tbody>
-            {cargando && !datos ? (
-              <tr>
-                <td colSpan={6} className={panel.vacio}>
-                  Cargando…
-                </td>
-              </tr>
-            ) : datos && datos.filas.length === 0 ? (
-              <tr>
-                <td colSpan={6} className={panel.vacio}>
-                  No hay movimientos con esos filtros.
-                </td>
-              </tr>
-            ) : (
-              datos?.filas.map((f) => (
+            {cargando && !datos && <FilaMensaje columnas={6}>Cargando…</FilaMensaje>}
+            {datos?.filas.length === 0 && <FilaMensaje columnas={6}>No hay movimientos con esos filtros.</FilaMensaje>}
+            {datos?.filas.map((f) => (
                 <tr key={f.id} className={f.nivel === "error" ? styles.filaError : undefined}>
                   <td className={styles.celdaFecha}>{fecha(f.fecha)}</td>
                   <td>{f.usuario ?? <span className={styles.muted}>—</span>}</td>
@@ -553,8 +566,7 @@ function Registro({
                   </td>
                   <td className={styles.celdaIp}>{f.ip ?? "—"}</td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
@@ -608,12 +620,12 @@ function ModalCambios({
   alCerrar,
   alRestaurar,
   verHistorial,
-}: {
+}: Readonly<{
   id: number;
   alCerrar: () => void;
   alRestaurar: () => void;
   verHistorial: (modulo: string, entidad: number) => void;
-}) {
+}>) {
   const [d, setD] = useState<DetalleCambios | null>(null);
   const [error, setError] = useState("");
   const [restaurando, setRestaurando] = useState(false);
@@ -786,9 +798,9 @@ function PapeleraTab() {
         después se borra solo. Al restaurar vuelve con sus fotos, documentos y el mismo enlace.
       </p>
       {mensaje && (
-        <div className={`${styles.alerta} ${styles.alertaOk}`} role="status">
+        <output className={`${styles.alerta} ${styles.alertaOk}`}>
           {mensaje}
-        </div>
+        </output>
       )}
       {error && <div className={`${styles.alerta} ${styles.alertaError}`}>{error}</div>}
 
@@ -804,20 +816,9 @@ function PapeleraTab() {
             </tr>
           </thead>
           <tbody>
-            {items === null ? (
-              <tr>
-                <td colSpan={5} className={panel.vacio}>
-                  Cargando…
-                </td>
-              </tr>
-            ) : items.length === 0 ? (
-              <tr>
-                <td colSpan={5} className={panel.vacio}>
-                  La papelera está vacía.
-                </td>
-              </tr>
-            ) : (
-              items.map((it) => (
+            {items === null && <FilaMensaje columnas={5}>Cargando…</FilaMensaje>}
+            {items?.length === 0 && <FilaMensaje columnas={5}>La papelera está vacía.</FilaMensaje>}
+            {items?.map((it) => (
                 <tr key={it.id}>
                   <td>
                     <strong>{it.titulo}</strong>
@@ -848,8 +849,7 @@ function PapeleraTab() {
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
@@ -860,7 +860,7 @@ function PapeleraTab() {
 /* =========================================================
    SEGURIDAD
 ========================================================= */
-function SeguridadTab({ s, alCambiar }: { s: Seguridad; alCambiar: () => void }) {
+function SeguridadTab({ s, alCambiar }: Readonly<{ s: Seguridad; alCambiar: () => void }>) {
   const [trabajando, setTrabajando] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState("");
 
@@ -903,7 +903,7 @@ function SeguridadTab({ s, alCambiar }: { s: Seguridad; alCambiar: () => void })
         </Tarjeta>
       </div>
 
-      {mensaje && <div className={`${styles.alerta} ${styles.alertaOk}`} role="status">{mensaje}</div>}
+      {mensaje && <output className={`${styles.alerta} ${styles.alertaOk}`}>{mensaje}</output>}
 
       <h3 className={styles.subtitulo2}>IPs con intentos fallidos</h3>
       <div className={panel.contenedorTabla}>
@@ -949,7 +949,12 @@ function SeguridadTab({ s, alCambiar }: { s: Seguridad; alCambiar: () => void })
 /* =========================================================
    USUARIOS
 ========================================================= */
-function UsuariosTab({ u, irARegistro }: { u: Usuarios; irARegistro: (f: Record<string, string>) => void }) {
+function textoPermisos(rol: string, permisos: string[]): string {
+  if (rol === "administrador") return "Acceso total";
+  return permisos.length ? permisos.join(", ") : "Ninguno";
+}
+
+function UsuariosTab({ u, irARegistro }: Readonly<{ u: Usuarios; irARegistro: (f: Record<string, string>) => void }>) {
   return (
     <>
       <p className={styles.nota}>
@@ -975,7 +980,7 @@ function UsuariosTab({ u, irARegistro }: { u: Usuarios; irARegistro: (f: Record<
                   <div className={styles.muted}>{x.email}</div>
                 </td>
                 <td>{x.rol === "administrador" ? "Administrador" : "Secretaria"}</td>
-                <td>{x.rol === "administrador" ? "Acceso total" : x.permisos.length ? x.permisos.join(", ") : "Ninguno"}</td>
+                <td>{textoPermisos(x.rol, x.permisos)}</td>
                 <td>
                   {x.ultimoLogin ? fecha(x.ultimoLogin) : "—"}
                   <div className={styles.muted}>{hace(x.ultimoLogin)}</div>
@@ -1006,12 +1011,12 @@ export default function SistemaView({
   seguridad,
   usuarios,
   modulos,
-}: {
+}: Readonly<{
   estado: Estado;
   seguridad: Seguridad;
   usuarios: Usuarios;
   modulos: string[];
-}) {
+}>) {
   const router = useRouter();
   const [pestana, setPestana] = useState<Pestana>("resumen");
   const [filtrosRegistro, setFiltrosRegistro] = useState<Filtros>(FILTROS_VACIOS);

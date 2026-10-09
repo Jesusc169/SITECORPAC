@@ -35,7 +35,7 @@ export interface Alerta {
  * Alertas de la portada de /admin/sistema. Separada para poder probar los
  * umbrales sin servidor ni base de datos.
  */
-export function calcularAlertas(d: {
+export interface DatosAlertas {
   discoTotal: number | null;
   discoLibre: number | null;
   memoriaTotal: number;
@@ -49,59 +49,87 @@ export function calcularAlertas(d: {
   alertasInstaladas?: boolean;
   alertasUltimaRevision?: string | null;
   ahora?: number;
-}): Alerta[] {
-  const ahora = d.ahora ?? Date.now();
-  const alertas: Alerta[] = [];
+}
 
-  if (d.discoTotal && d.discoLibre != null) {
-    const uso = 1 - d.discoLibre / d.discoTotal;
-    if (uso >= 0.9) alertas.push({ gravedad: "error", texto: `Disco casi lleno (${Math.round(uso * 100)}% usado).` });
-    else if (uso >= 0.8) alertas.push({ gravedad: "aviso", texto: `El disco ya va en ${Math.round(uso * 100)}% de uso.` });
+type Revision = (d: DatosAlertas, ahora: number) => Alerta | null;
+
+const revisarDisco: Revision = (d) => {
+  if (!d.discoTotal || d.discoLibre == null) return null;
+  const uso = 1 - d.discoLibre / d.discoTotal;
+  const pct = Math.round(uso * 100);
+  if (uso >= 0.9) return { gravedad: "error", texto: `Disco casi lleno (${pct}% usado).` };
+  if (uso >= 0.8) return { gravedad: "aviso", texto: `El disco ya va en ${pct}% de uso.` };
+  return null;
+};
+
+const revisarCertificado: Revision = (d) => {
+  const dias = d.diasCertificado;
+  if (dias == null) {
+    return { gravedad: "aviso", texto: `No se pudo revisar el certificado HTTPS (${d.errorCertificado ?? "sin datos"}).` };
   }
-
-  if (d.diasCertificado == null) {
-    alertas.push({ gravedad: "aviso", texto: `No se pudo revisar el certificado HTTPS (${d.errorCertificado ?? "sin datos"}).` });
-  } else if (d.diasCertificado < 7) {
-    alertas.push({ gravedad: "error", texto: `El certificado HTTPS vence en ${d.diasCertificado} días y no se ha renovado.` });
-  } else if (d.diasCertificado < 20) {
-    alertas.push({ gravedad: "aviso", texto: `El certificado HTTPS vence en ${d.diasCertificado} días (normalmente se renueva solo a los 30).` });
+  if (dias < 7) return { gravedad: "error", texto: `El certificado HTTPS vence en ${dias} días y no se ha renovado.` };
+  if (dias < 20) {
+    return { gravedad: "aviso", texto: `El certificado HTTPS vence en ${dias} días (normalmente se renueva solo a los 30).` };
   }
+  return null;
+};
 
+const revisarRespaldo: Revision = (d, ahora) => {
   if (!d.respaldosDisponibles) {
-    alertas.push({ gravedad: "aviso", texto: "No se puede leer la carpeta de respaldos desde la aplicación." });
-  } else if (!d.ultimoRespaldo) {
-    alertas.push({ gravedad: "error", texto: "No hay ningún respaldo de la base de datos." });
-  } else if (ahora - new Date(d.ultimoRespaldo).getTime() > 36 * HORA) {
-    alertas.push({ gravedad: "error", texto: "El último respaldo de la base de datos tiene más de 36 horas." });
+    return { gravedad: "aviso", texto: "No se puede leer la carpeta de respaldos desde la aplicación." };
   }
-
-  if (d.erroresUltimas24h > 0) {
-    alertas.push({
-      gravedad: "aviso",
-      texto: `${d.erroresUltimas24h} error(es) del servidor en las últimas 24 horas. Revísalos en «Registro de actividad».`,
-    });
+  if (!d.ultimoRespaldo) return { gravedad: "error", texto: "No hay ningún respaldo de la base de datos." };
+  if (ahora - new Date(d.ultimoRespaldo).getTime() > 36 * HORA) {
+    return { gravedad: "error", texto: "El último respaldo de la base de datos tiene más de 36 horas." };
   }
+  return null;
+};
 
-  if (d.ipsBloqueadas > 0) {
-    alertas.push({ gravedad: "aviso", texto: `${d.ipsBloqueadas} IP(s) bloqueada(s) ahora por intentos fallidos de inicio de sesión.` });
-  }
+const revisarErrores: Revision = (d) =>
+  d.erroresUltimas24h > 0
+    ? {
+        gravedad: "aviso",
+        texto: `${d.erroresUltimas24h} error(es) del servidor en las últimas 24 horas. Revísalos en «Registro de actividad».`,
+      }
+    : null;
 
-  // Las alertas por correo corren cada 10 min: si la última pasada tiene más
-  // de 30 min, el cron dejó de funcionar y nadie se enteraría de un problema.
+const revisarBloqueos: Revision = (d) =>
+  d.ipsBloqueadas > 0
+    ? { gravedad: "aviso", texto: `${d.ipsBloqueadas} IP(s) bloqueada(s) ahora por intentos fallidos de inicio de sesión.` }
+    : null;
+
+// Las alertas por correo corren cada 10 min: si la última pasada tiene más
+// de 30 min, el cron dejó de funcionar y nadie se enteraría de un problema.
+const revisarAlertasCorreo: Revision = (d, ahora) => {
   if (d.alertasInstaladas === false) {
-    alertas.push({ gravedad: "aviso", texto: "Las alertas por correo no están instaladas en el servidor." });
-  } else if (
-    d.alertasUltimaRevision &&
-    ahora - new Date(d.alertasUltimaRevision).getTime() > 30 * 60 * 1000
-  ) {
-    alertas.push({ gravedad: "error", texto: "Las alertas por correo dejaron de ejecutarse (más de 30 minutos sin revisar)." });
+    return { gravedad: "aviso", texto: "Las alertas por correo no están instaladas en el servidor." };
   }
-
-  if (d.memoriaTotal > 0 && d.memoriaLibre / d.memoriaTotal < 0.1) {
-    alertas.push({ gravedad: "aviso", texto: "Queda menos del 10% de memoria libre en el servidor." });
+  const ultima = d.alertasUltimaRevision;
+  if (ultima && ahora - new Date(ultima).getTime() > 30 * 60 * 1000) {
+    return { gravedad: "error", texto: "Las alertas por correo dejaron de ejecutarse (más de 30 minutos sin revisar)." };
   }
+  return null;
+};
 
-  return alertas;
+const revisarMemoria: Revision = (d) =>
+  d.memoriaTotal > 0 && d.memoriaLibre / d.memoriaTotal < 0.1
+    ? { gravedad: "aviso", texto: "Queda menos del 10% de memoria libre en el servidor." }
+    : null;
+
+const REVISIONES: Revision[] = [
+  revisarDisco,
+  revisarCertificado,
+  revisarRespaldo,
+  revisarErrores,
+  revisarBloqueos,
+  revisarAlertasCorreo,
+  revisarMemoria,
+];
+
+/** Lista las alertas activas, en el orden de REVISIONES. */
+export function calcularAlertas(d: DatosAlertas): Alerta[] {
+  const ahora = d.ahora ?? Date.now();
+  return REVISIONES.map((revisar) => revisar(d, ahora)).filter((a): a is Alerta => a !== null);
 }
 
 /** "2026-10-01" → Date (inicio o fin de ese día en hora de Perú). */
@@ -117,7 +145,7 @@ export function leerFiltros(params: URLSearchParams): FiltrosRegistro {
   const modulo = params.get("modulo");
   const nivel = params.get("nivel");
   const usuario = params.get("usuario");
-  const texto = params.get("q")?.trim().slice(0, 100) || null;
+  const texto = params.get("q")?.trim().slice(0, 100) ?? null;
   const entidad = params.get("entidad");
   const entidadId = entidad && /^\d{1,9}$/.test(entidad) ? Number(entidad) : null;
 
@@ -139,8 +167,8 @@ export function leerFiltros(params: URLSearchParams): FiltrosRegistro {
   return {
     desde: diaPeru(params.get("desde"), false),
     hasta: diaPeru(params.get("hasta"), true),
-    modulo: modulo || null,
-    nivel: nivel || null,
+    modulo: modulo ?? null,
+    nivel: nivel ?? null,
     usuario: usuarioFiltro,
     texto,
     entidadId,

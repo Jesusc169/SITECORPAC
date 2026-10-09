@@ -1,7 +1,8 @@
 // Etiqueta de estado para las tablas del panel: "Visible" (verde) u
 // "Oculta"/"Oculto" (ámbar). El texto acompaña al color para no depender
 // solo del color (accesibilidad).
-export default function EtiquetaVisible({ visible, masculino = false }: { visible: boolean; masculino?: boolean }) {
+export default function EtiquetaVisible({ visible, masculino = false }: Readonly<{ visible: boolean; masculino?: boolean }>) {
+  const oculto = masculino ? "○ Oculto" : "○ Oculta";
   return (
     <span
       style={{
@@ -15,7 +16,7 @@ export default function EtiquetaVisible({ visible, masculino = false }: { visibl
         color: visible ? "#15803d" : "#8a5a00",
       }}
     >
-      {visible ? "● Visible" : masculino ? "○ Oculto" : "○ Oculta"}
+      {visible ? "● Visible" : oculto}
     </span>
   );
 }

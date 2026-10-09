@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { SorteoController } from "@/controllers/sorteoController";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-import { registrarActividad, registrarError, nombreEntidad, idDe } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero, idDe } from "@/lib/registro";
 
 export async function POST(
   req: Request,
@@ -35,7 +35,7 @@ export async function POST(
       accion: "duplicar",
       modulo: "sorteos",
       entidadId: idDe(nuevo),
-      detalle: `Duplicó el sorteo "${(await nombreEntidad("sorteos", sorteoId)) ?? `#${sorteoId}`}"`,
+      detalle: `Duplicó el sorteo "${nombreONumero(await nombreEntidad("sorteos", sorteoId), sorteoId)}"`,
       request: req,
     });
 

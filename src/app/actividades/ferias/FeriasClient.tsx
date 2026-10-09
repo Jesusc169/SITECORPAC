@@ -7,6 +7,15 @@ import FeriasView, {
 } from "@/views/FeriasView";
 import { fetchFerias } from "@/services/eventoFerias.service";
 
+/** Empresas de todas las ferias, sin repetir (para los logos de la página). */
+function empresasUnicas(ferias: EventoFeria[]): Empresa[] {
+  const porId = new Map<number, Empresa>();
+  for (const feria of ferias) {
+    for (const rel of feria.evento_feria_empresa) porId.set(rel.empresa.id, rel.empresa);
+  }
+  return Array.from(porId.values());
+}
+
 export default function FeriasClient() {
   const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
   const [anio, setAnio] = useState<number | null>(null);
@@ -68,17 +77,7 @@ export default function FeriasClient() {
         if (!mounted) return;
 
         setFerias(res);
-
-        // Extraer empresas únicas
-        const empresasMap = new Map<number, Empresa>();
-
-        res.forEach((feria) => {
-          feria.evento_feria_empresa.forEach((rel) => {
-            empresasMap.set(rel.empresa.id, rel.empresa);
-          });
-        });
-
-        setEmpresas(Array.from(empresasMap.values()));
+        setEmpresas(empresasUnicas(res));
       })
       .catch((error) => {
         console.error("Error cargando ferias:", error);

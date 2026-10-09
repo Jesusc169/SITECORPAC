@@ -2,7 +2,8 @@ import { unstable_cache } from "next/cache";
 import { invalidarCache } from "@/lib/invalidarCache";
 import { FeriaModel } from "@/models/feriaModel";
 import { guardarImagenFeria, borrarImagenFeria } from "@/lib/archivosFeria";
-import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { actualizarGaleria } from "@/lib/galeria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
@@ -23,7 +24,8 @@ function normalizarFechas(fechas: FechaInput[]) {
     hora_inicio: f.hora_inicio,
     hora_fin: f.hora_fin,
     ubicacion: f.ubicacion,
-    zona: f.zona || null,
+    // zona vacía se guarda como null
+    zona: f.zona ? f.zona : null,
   }));
 }
 
@@ -40,7 +42,7 @@ export const FeriaController = {
   obtenerFeriasAdmin: () => FeriaModel.obtenerTodas(),
 
   obtenerFeriasPublicas: async (opciones: { anioParam: string | null; pageParam: string | null }) => {
-    const page = Number(opciones.pageParam || 1);
+    const page = opciones.pageParam ? Number(opciones.pageParam) : 1;
     const limit = 50;
     const skip = (page - 1) * limit;
 
@@ -135,62 +137,29 @@ export const FeriaController = {
       throw new FeriaValidationError("Datos incompletos");
     }
 
-    const imagenesNuevasValidas = input.imagenesNuevas.filter((f) => f && f.size > 0);
-    const existentes = feriaActual.evento_feria_imagen.map((img) => ({ id: img.id, orden: img.orden }));
-    const idsEliminar = input.imagenesEliminar.filter((eid) => existentes.some((e) => e.id === eid));
-
-    const activasActuales = existentes.length - idsEliminar.length;
-    if (activasActuales + imagenesNuevasValidas.length > MAX_IMAGENES_GALERIA) {
-      throw new FeriaValidationError(`Máximo ${MAX_IMAGENES_GALERIA} fotos por feria`);
-    }
-    for (const file of imagenesNuevasValidas) {
-      if (file.size > MAX_IMAGEN_BYTES) {
-        throw new FeriaValidationError("Cada imagen debe ser menor a 10MB");
+    const imagen_portada = await actualizarGaleria(
+      {
+        existentes: feriaActual.evento_feria_imagen,
+        imagenesNuevas: input.imagenesNuevas,
+        imagenesEliminar: input.imagenesEliminar,
+        imagenPrincipalId: input.imagenPrincipalId,
+        imagenPrincipalNuevaIndex: input.imagenPrincipalNuevaIndex,
+      },
+      {
+        etiqueta: "feria",
+        error: (m) => new FeriaValidationError(m),
+        // el tipo de archivo lo valida guardarImagenFeria
+        validarArchivo: (file) => {
+          if (file.size > MAX_IMAGEN_BYTES) throw new FeriaValidationError("Cada imagen debe ser menor a 10MB");
+        },
+        borrarArchivo: borrarImagenFeria,
+        guardarArchivo: guardarImagenFeria,
+        eliminarImagenes: FeriaModel.eliminarImagenes,
+        reordenarImagen: FeriaModel.reordenarImagen,
+        crearImagen: (url, orden) => FeriaModel.crearImagen({ feria_id: id, url, orden, principal: false }),
+        marcarPrincipal: (idImagen) => FeriaModel.marcarImagenPrincipal(id, idImagen),
       }
-    }
-
-    const plan = resolverGaleria({
-      existentes,
-      idsEliminar,
-      cantidadNuevas: imagenesNuevasValidas.length,
-      principalExistenteId: input.imagenPrincipalId,
-      principalNuevaIndex: input.imagenPrincipalNuevaIndex,
-    });
-
-    for (const eid of idsEliminar) {
-      const img = feriaActual.evento_feria_imagen.find((i) => i.id === eid);
-      if (img) await borrarImagenFeria(img.url);
-    }
-    if (idsEliminar.length > 0) {
-      await FeriaModel.eliminarImagenes(idsEliminar);
-    }
-
-    for (const sup of plan.supervivientes) {
-      const original = existentes.find((e) => e.id === sup.id);
-      if (original && original.orden !== sup.orden) {
-        await FeriaModel.reordenarImagen(sup.id, sup.orden);
-      }
-    }
-
-    const nuevasCreadas: { id: number; url: string }[] = [];
-    for (let i = 0; i < imagenesNuevasValidas.length; i++) {
-      const url = await guardarImagenFeria(imagenesNuevasValidas[i], i);
-      const creada = await FeriaModel.crearImagen({
-        feria_id: id,
-        url,
-        orden: plan.nuevas[i].orden,
-        principal: false,
-      });
-      nuevasCreadas.push({ id: creada.id, url });
-    }
-
-    const principal = plan.principal;
-    let imagen_portada: string | null = null;
-    // resolverGaleria garantiza que la principal existe (sobreviviente o nueva)
-    if (principal) {
-      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
-      imagen_portada = (await FeriaModel.marcarImagenPrincipal(id, idPrincipal)).url;
-    }
+    );
 
     await FeriaModel.actualizar(id, {
       titulo: input.titulo,

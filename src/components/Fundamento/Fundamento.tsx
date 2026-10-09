@@ -29,16 +29,16 @@ export default function Fundamento() {
       </div>
 
       <div className={styles.cardsContainer}>
-        {fundamentos.map((fundamento, index) => (
-          <div key={index} className={styles.card}>
+        {fundamentos.map((fundamento) => (
+          <div key={fundamento.titulo} className={styles.card}>
             <h3 className={styles.cardTitulo}>{fundamento.titulo}</h3>
             <p className={styles.cardDescripcion}>
               {fundamento.descripcion}
             </p>
 
             <ul className={styles.lista}>
-              {fundamento.items.map((item, i) => (
-                <li key={i}>{item}</li>
+              {fundamento.items.map((item) => (
+                <li key={item}>{item}</li>
               ))}
             </ul>
           </div>

@@ -143,3 +143,10 @@ describe("calcularAlertas: memoria", () => {
     expect(calcularAlertas({ ...sano, memoriaTotal: 0, memoriaLibre: 0 })).toEqual([]);
   });
 });
+
+describe("calcularAlertas: disco sin datos", () => {
+  it("sin espacio libre o sin total no avisa", () => {
+    expect(calcularAlertas({ ...sano, discoLibre: null })).toEqual([]);
+    expect(calcularAlertas({ ...sano, discoTotal: null })).toEqual([]);
+  });
+});

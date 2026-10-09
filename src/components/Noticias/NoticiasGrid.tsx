@@ -29,7 +29,7 @@ function formatearFecha(fecha: string | null) {
   });
 }
 
-export default function NoticiasGrid({ noticias }: { noticias: Noticia[] }) {
+export default function NoticiasGrid({ noticias }: Readonly<{ noticias: Noticia[] }>) {
   return (
     <div className={styles.grid}>
       {noticias.map((n) => (

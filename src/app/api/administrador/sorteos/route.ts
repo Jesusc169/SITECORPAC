@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { SorteoController, SorteoValidationError } from "@/controllers/sorteoController";
+import { SorteoController, SorteoValidationError, type DatosSorteo, type Premio } from "@/controllers/sorteoController";
+import { campoTexto, campoLista } from "@/lib/formulario";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -27,8 +28,47 @@ export async function GET() {
 }
 
 /* =========================================
-POST - CREAR
+POST - CREAR (multipart con fotos, o JSON con una URL de imagen)
 ========================================= */
+const anioActual = () => new Date().getFullYear();
+const estadoDe = (v: unknown): "ACTIVO" | "INACTIVO" => (v === "INACTIVO" ? "INACTIVO" : "ACTIVO");
+
+async function leerFormulario(req: Request): Promise<DatosSorteo> {
+  const fd = await req.formData();
+  const anio = campoTexto(fd, "anio");
+  const fecha = campoTexto(fd, "fecha_hora");
+  const indice = campoTexto(fd, "imagenPrincipalIndex");
+  return {
+    // "titulo" se acepta por compatibilidad con un formulario antiguo
+    nombre: campoTexto(fd, "nombre") || campoTexto(fd, "titulo"),
+    descripcion: campoTexto(fd, "descripcion"),
+    lugar: campoTexto(fd, "lugar"),
+    anio: anio ? Number(anio) : anioActual(),
+    estado: estadoDe(campoTexto(fd, "estado")),
+    fecha_hora: fecha ? new Date(fecha) : new Date(),
+    premios: campoLista<Premio>(fd, "premios"),
+    imagenFiles: fd.getAll("imagenes") as File[],
+    imagenPrincipalIndex: indice ? Number(indice) : 0,
+    imagenUrl: null,
+  };
+}
+
+async function leerJson(req: Request): Promise<DatosSorteo> {
+  const json = await req.json();
+  return {
+    nombre: json.nombre ?? json.titulo ?? "",
+    descripcion: json.descripcion ?? "",
+    lugar: json.lugar ?? "",
+    anio: json.anio ? Number(json.anio) : anioActual(),
+    estado: estadoDe(json.estado),
+    fecha_hora: json.fecha_hora ? new Date(json.fecha_hora) : new Date(),
+    premios: json.premios ?? [],
+    imagenFiles: [],
+    imagenPrincipalIndex: 0,
+    imagenUrl: json.imagen ?? null,
+  };
+}
+
 export async function POST(req: Request) {
   try {
     const usuarioActual = await obtenerUsuarioActual();
@@ -36,80 +76,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const contentType = req.headers.get("content-type") || "";
-
-    let nombre = "";
-    let descripcion = "";
-    let lugar = "";
-    let anio = new Date().getFullYear();
-    let estado = "ACTIVO";
-    let fecha_hora = new Date();
-    let premios: any[] = [];
-    let imagenFiles: File[] = [];
-    let imagenPrincipalIndex = 0;
-    let imagenUrl: string | null = null;
-
-    /* =====================================
-       SI ES MULTIPART (VIENEN FOTOS)
-    ===================================== */
-    if (contentType.includes("multipart/form-data")) {
-      const formData = await req.formData();
-
-      nombre = (formData.get("nombre") ?? formData.get("titulo") ?? "").toString();
-      descripcion = (formData.get("descripcion") ?? "").toString();
-      lugar = (formData.get("lugar") ?? "").toString();
-
-      const anioValue = formData.get("anio");
-      anio = anioValue ? Number(anioValue) : new Date().getFullYear();
-
-      estado = (formData.get("estado") ?? "ACTIVO").toString();
-
-      const fechaValue = formData.get("fecha_hora");
-      fecha_hora = fechaValue ? new Date(fechaValue as string) : new Date();
-
-      const premiosRaw = formData.get("premios");
-      premios = premiosRaw ? JSON.parse(premiosRaw as string) : [];
-
-      imagenFiles = formData.getAll("imagenes") as File[];
-      const imagenPrincipalIndexRaw = formData.get("imagenPrincipalIndex");
-      imagenPrincipalIndex = imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0;
-    }
-
-    /* =====================================
-       SI ES JSON
-    ===================================== */
-    else {
-      const json = await req.json();
-
-      nombre = json.nombre ?? json.titulo ?? "";
-      descripcion = json.descripcion ?? "";
-      lugar = json.lugar ?? "";
-      anio = json.anio ? Number(json.anio) : new Date().getFullYear();
-      estado = json.estado ?? "ACTIVO";
-      fecha_hora = json.fecha_hora ? new Date(json.fecha_hora) : new Date();
-      premios = json.premios ?? [];
-      imagenUrl = json.imagen ?? null;
-    }
-
-    const nuevo = await SorteoController.crearSorteo({
-      nombre,
-      descripcion,
-      lugar,
-      anio,
-      estado: estado === "INACTIVO" ? "INACTIVO" : "ACTIVO",
-      fecha_hora,
-      premios,
-      imagenFiles,
-      imagenPrincipalIndex,
-      imagenUrl,
-    });
+    const esMultipart = (req.headers.get("content-type") ?? "").includes("multipart/form-data");
+    const datos = esMultipart ? await leerFormulario(req) : await leerJson(req);
+    const nuevo = await SorteoController.crearSorteo(datos);
 
     await registrarActividad({
       usuario: usuarioActual,
       accion: "crear",
       modulo: "sorteos",
       entidadId: idDe(nuevo),
-      detalle: `Creó el sorteo "${nombre}" (${textoVisible(estado !== "INACTIVO")})`,
+      detalle: `Creó el sorteo "${datos.nombre}" (${textoVisible(datos.estado !== "INACTIVO")})`,
       request: req,
     });
 

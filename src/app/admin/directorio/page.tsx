@@ -8,6 +8,7 @@ import styles from "@/app/admin/directorio/AdministradorDirectorio.module.css";
 import ModalAgregarMiembro from "./components/modals/ModalAgregarMiembro";
 import ModalEditarMiembro from "./components/modals/ModalEditarMiembro";
 import panel from "@/styles/PanelAdmin.module.css";
+import { rutaPublica } from "@/lib/rutas";
 
 interface Miembro {
   id: number;
@@ -27,11 +28,7 @@ interface Miembro {
 function getFotoUrl(url?: string | null, refreshKey?: number) {
   if (!url) return "";
 
-  let finalUrl = url.startsWith("http")
-    ? url
-    : url.startsWith("/")
-      ? url
-      : `/${url}`;
+  let finalUrl = rutaPublica(url);
 
   // evitar cache navegador
   if (refreshKey !== undefined) {

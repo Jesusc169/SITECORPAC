@@ -3,7 +3,7 @@ import { DirectorioController } from "@/controllers/directorioController";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
-import { registrarActividad, registrarError, nombreEntidad } from "@/lib/registro";
+import { registrarActividad, registrarError, nombreEntidad, nombreONumero } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
 
 /* =========================
@@ -67,7 +67,7 @@ export async function PUT(request: Request) {
       entidadId: id,
       antes,
       despues: await instantanea("directorio", id),
-      detalle: `Editó a ${(await nombreEntidad("directorio", id)) ?? `#${id}`} en el directorio${foto && foto.size > 0 ? " (nueva foto)" : ""}`,
+      detalle: `Editó a ${nombreONumero(await nombreEntidad("directorio", id), id)} en el directorio${foto && foto.size > 0 ? " (nueva foto)" : ""}`,
       request,
     });
 
@@ -118,7 +118,7 @@ export async function DELETE(request: Request) {
       accion: "eliminar",
       modulo: "directorio",
       entidadId: id,
-      detalle: `Quitó a ${miembro ?? `#${id}`} del directorio (queda 30 días en la papelera)`,
+      detalle: `Quitó a ${nombreONumero(miembro, id)} del directorio (queda 30 días en la papelera)`,
       request,
     });
 

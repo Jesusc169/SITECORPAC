@@ -70,11 +70,9 @@ export default function DirectorioClient() {
     <main className={styles.main}>
       <h1>Directorio de Representantes</h1>
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : miembros.length === 0 ? (
-        <p>No hay registros por mostrar.</p>
-      ) : (
+      {loading && <p>Cargando...</p>}
+      {!loading && miembros.length === 0 && <p>No hay registros por mostrar.</p>}
+      {!loading && miembros.length > 0 && (
         <ul className={styles.listaMiembros}>
           {miembros.map((m, index) => (
             <li key={m.id} className={styles.miembroCard}>

@@ -13,7 +13,7 @@ interface Props {
 // Botón compacto para tarjetas (ferias, sorteos): abre el álbum completo de
 // fotos de ese ítem en un visor a pantalla completa. Solo tiene sentido
 // mostrarlo cuando hay más de una foto.
-export default function GaleriaBoton({ imagenes, titulo, className }: Props) {
+export default function GaleriaBoton({ imagenes, titulo, className }: Readonly<Props>) {
   const [abierta, setAbierta] = useState<number | null>(null);
 
   if (imagenes.length <= 1) return null;

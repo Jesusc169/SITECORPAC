@@ -16,6 +16,8 @@ interface Empresa {
 
 export interface FechaFeria {
   id?: number;
+  /** Clave estable de la fila en pantalla (no se guarda en la base) */
+  clave: string;
   fecha: string;
   hora_inicio: string;
   hora_fin: string;
@@ -44,7 +46,7 @@ export default function AdminFeriaModal({
   onSave,
   feriaData = null,
   empresasDisponibles = [],
-}: Props) {
+}: Readonly<Props>) {
   /* =========================
      ESTADOS
      ========================= */
@@ -97,6 +99,7 @@ export default function AdminFeriaModal({
       Array.isArray(feriaData.evento_feria_fecha)
         ? feriaData.evento_feria_fecha.map((f: any) => ({
             id: f.id,
+            clave: crypto.randomUUID(),
             fecha: String(f.fecha).substring(0, 10),
             hora_inicio: f.hora_inicio,
             hora_fin: f.hora_fin,
@@ -146,7 +149,7 @@ export default function AdminFeriaModal({
   const addFecha = () =>
     setFechas((prev) => [
       ...prev,
-      { fecha: "", hora_inicio: "", hora_fin: "", ubicacion: "", zona: "" },
+      { clave: crypto.randomUUID(), fecha: "", hora_inicio: "", hora_fin: "", ubicacion: "", zona: "" },
     ]);
 
   const updateFecha = (
@@ -208,17 +211,17 @@ export default function AdminFeriaModal({
         <div className={styles.modalBody}>
           <InterruptorVisible visible={estado} onChange={setEstado} tipo="feria" />
 
-          <label>Título</label>
-          <input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
+          <label htmlFor="feria-titulo">Título</label>
+          <input id="feria-titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
 
-          <label>Descripción</label>
-          <textarea
+          <label htmlFor="feria-descripcion">Descripción</label>
+          <textarea id="feria-descripcion"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
           />
 
-          <label>Año</label>
-          <input
+          <label htmlFor="feria-ano">Año</label>
+          <input id="feria-ano"
             type="number"
             min={2000}
             max={2100}
@@ -226,13 +229,14 @@ export default function AdminFeriaModal({
             onChange={(e) => setAnio(Number(e.target.value))}
           />
 
-          <label>Fotos de la feria (hasta 5)</label>
-          <SelectorImagenes selector={selectorImagenes} />
+          <label htmlFor="feria-fotos">Fotos de la feria (hasta 5)</label>
+          <SelectorImagenes selector={selectorImagenes} idEntrada="feria-fotos" />
 
           {/* EMPRESAS */}
-          <label>Empresas participantes</label>
+          <label htmlFor="feria-empresas">Empresas participantes</label>
           <div className={styles.comboBox} ref={comboRef}>
             <input
+              id="feria-empresas"
               placeholder="Buscar empresa..."
               value={empresaQuery}
               onChange={(e) => {
@@ -284,7 +288,7 @@ export default function AdminFeriaModal({
             </div>
 
             {fechas.map((f, i) => (
-              <div key={i} className={styles.fechaRow}>
+              <div key={f.clave} className={styles.fechaRow}>
                 <input
                   type="date"
                   value={f.fecha}

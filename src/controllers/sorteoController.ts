@@ -2,7 +2,8 @@ import { unstable_cache } from "next/cache";
 import { invalidarCache } from "@/lib/invalidarCache";
 import { SorteoModel } from "@/models/sorteoModel";
 import { guardarImagenSorteo, borrarImagenSorteo } from "@/lib/archivosSorteo";
-import { resolverGaleria, MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
+import { actualizarGaleria } from "@/lib/galeria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
@@ -22,13 +23,13 @@ function normalizarLugar(lugar: string): string {
 
 type Estado = "ACTIVO" | "INACTIVO";
 
-interface Premio {
+export interface Premio {
   nombre: string;
   descripcion: string;
   cantidad: number;
 }
 
-interface DatosSorteo {
+export interface DatosSorteo {
   nombre: string;
   descripcion: string;
   lugar: string;
@@ -41,10 +42,12 @@ interface DatosSorteo {
   imagenUrl: string | null;
 }
 
-function normalizarPremios(premios: any[]): Premio[] {
-  return (premios || []).map((p) => ({
-    nombre: p.nombre || "",
-    descripcion: p.descripcion || "",
+function normalizarPremios(premios: unknown): Premio[] {
+  const lista: Partial<Premio>[] = Array.isArray(premios) ? premios : [];
+  return lista.map((p) => ({
+    nombre: p.nombre ?? "",
+    descripcion: p.descripcion ?? "",
+    // 0, vacío o texto → 1
     cantidad: Number(p.cantidad) || 1,
   }));
 }
@@ -137,62 +140,29 @@ export const SorteoController = {
     const sorteoActual = await SorteoModel.obtenerPorId(id);
     if (!sorteoActual) return null;
 
-    const imagenesNuevasValidas = input.imagenesNuevas.filter((f) => f && f.size > 0);
-    const existentes = sorteoActual.sorteo_imagen.map((img) => ({ id: img.id, orden: img.orden }));
-    const idsEliminar = input.imagenesEliminar.filter((eid) => existentes.some((e) => e.id === eid));
-
-    const activasActuales = existentes.length - idsEliminar.length;
-    if (activasActuales + imagenesNuevasValidas.length > MAX_IMAGENES_GALERIA) {
-      throw new SorteoValidationError(`Máximo ${MAX_IMAGENES_GALERIA} fotos por sorteo`);
-    }
-    for (const file of imagenesNuevasValidas) {
-      if (file.size > MAX_IMAGEN_BYTES) {
-        throw new SorteoValidationError("Cada imagen debe ser menor a 10MB");
+    const imagen = await actualizarGaleria(
+      {
+        existentes: sorteoActual.sorteo_imagen,
+        imagenesNuevas: input.imagenesNuevas,
+        imagenesEliminar: input.imagenesEliminar,
+        imagenPrincipalId: input.imagenPrincipalId,
+        imagenPrincipalNuevaIndex: input.imagenPrincipalNuevaIndex,
+      },
+      {
+        etiqueta: "sorteo",
+        error: (m) => new SorteoValidationError(m),
+        // el tipo de archivo lo valida guardarImagenSorteo
+        validarArchivo: (file) => {
+          if (file.size > MAX_IMAGEN_BYTES) throw new SorteoValidationError("Cada imagen debe ser menor a 10MB");
+        },
+        borrarArchivo: borrarImagenSorteo,
+        guardarArchivo: guardarImagenSorteo,
+        eliminarImagenes: SorteoModel.eliminarImagenes,
+        reordenarImagen: SorteoModel.reordenarImagen,
+        crearImagen: (url, orden) => SorteoModel.crearImagen({ sorteo_id: id, url, orden, principal: false }),
+        marcarPrincipal: (idImagen) => SorteoModel.marcarImagenPrincipal(id, idImagen),
       }
-    }
-
-    const plan = resolverGaleria({
-      existentes,
-      idsEliminar,
-      cantidadNuevas: imagenesNuevasValidas.length,
-      principalExistenteId: input.imagenPrincipalId,
-      principalNuevaIndex: input.imagenPrincipalNuevaIndex,
-    });
-
-    for (const eid of idsEliminar) {
-      const img = sorteoActual.sorteo_imagen.find((i) => i.id === eid);
-      if (img) await borrarImagenSorteo(img.url);
-    }
-    if (idsEliminar.length > 0) {
-      await SorteoModel.eliminarImagenes(idsEliminar);
-    }
-
-    for (const sup of plan.supervivientes) {
-      const original = existentes.find((e) => e.id === sup.id);
-      if (original && original.orden !== sup.orden) {
-        await SorteoModel.reordenarImagen(sup.id, sup.orden);
-      }
-    }
-
-    const nuevasCreadas: { id: number; url: string }[] = [];
-    for (let i = 0; i < imagenesNuevasValidas.length; i++) {
-      const url = await guardarImagenSorteo(imagenesNuevasValidas[i], i);
-      const creada = await SorteoModel.crearImagen({
-        sorteo_id: id,
-        url,
-        orden: plan.nuevas[i].orden,
-        principal: false,
-      });
-      nuevasCreadas.push({ id: creada.id, url });
-    }
-
-    const principal = plan.principal;
-    let imagen: string | null = null;
-    // resolverGaleria garantiza que la principal existe (sobreviviente o nueva)
-    if (principal) {
-      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
-      imagen = (await SorteoModel.marcarImagenPrincipal(id, idPrincipal)).url;
-    }
+    );
 
     const sorteo = await SorteoModel.actualizar(id, {
       nombre: input.nombre,

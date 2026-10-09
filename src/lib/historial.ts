@@ -5,7 +5,7 @@
  * días que el registro) y permiten ver qué cambió y volver los textos a
  * como estaban.
  *
- * Se puede restaurar todo lo que es texto, fechas y el interruptor de
+ * Se pueden restaurar los textos, las fechas y el interruptor de
  * visibilidad. Fotos, PDFs, fechas de feria, empresas y premios solo se
  * muestran (no se restauran): sus archivos pueden ya no existir.
  */
@@ -32,6 +32,18 @@ export const CAMPOS_RESTAURABLES: Record<ModuloHistorial, string[]> = {
 };
 
 const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
+
+/** "2026-03-30 09:00–17:00 · Sede (Lima)" */
+function describirFechaFeria(x: { fecha: Date; hora_inicio: string; hora_fin: string; ubicacion: string; zona: string | null }) {
+  const zona = x.zona ? " (" + x.zona + ")" : "";
+  return `${x.fecha.toISOString().slice(0, 10)} ${x.hora_inicio}–${x.hora_fin} · ${x.ubicacion}${zona}`;
+}
+
+/** "TV ×2" (la cantidad solo si es más de 1) */
+function describirPremio(p: { nombre: string; cantidad: number | null }) {
+  const cantidad = p.cantidad && p.cantidad > 1 ? " ×" + p.cantidad : "";
+  return p.nombre + cantidad;
+}
 
 export async function instantanea(
   modulo: ModuloRegistro,
@@ -76,10 +88,7 @@ export async function instantanea(
           estado: f.estado ?? true,
           imagen_portada: f.imagen_portada,
           imagenes: f.evento_feria_imagen.map((i) => i.url),
-          fechas: f.evento_feria_fecha.map(
-            (x) =>
-              `${x.fecha.toISOString().slice(0, 10)} ${x.hora_inicio}–${x.hora_fin} · ${x.ubicacion}${x.zona ? ` (${x.zona})` : ""}`
-          ),
+          fechas: f.evento_feria_fecha.map(describirFechaFeria),
           empresas: f.evento_feria_empresa
             .map((e) => e.empresa.nombre)
             .sort((a, b) => a.localeCompare(b, "es")),
@@ -103,9 +112,7 @@ export async function instantanea(
           estado: s.estado ?? "ACTIVO",
           imagen: s.imagen,
           imagenes: s.sorteo_imagen.map((i) => i.url),
-          premios: s.sorteo_producto.map(
-            (p) => `${p.nombre}${p.cantidad && p.cantidad > 1 ? ` ×${p.cantidad}` : ""}`
-          ),
+          premios: s.sorteo_producto.map(describirPremio),
         };
       }
       case "directorio": {
@@ -152,7 +159,8 @@ export function diferencias(
 }
 
 function texto(v: unknown): string {
-  return typeof v === "string" ? v : v == null ? "" : String(v);
+  if (typeof v === "string") return v;
+  return v == null ? "" : String(v);
 }
 
 function fechaONull(v: unknown): Date | null {

@@ -19,7 +19,7 @@ type LeySeguridadViewProps = {
 /* =========================
    VISTA
 ========================= */
-export default function LeySeguridadView({ data }: LeySeguridadViewProps) {
+export default function LeySeguridadView({ data }: Readonly<LeySeguridadViewProps>) {
   const { contenidos } = data;
 
   return (

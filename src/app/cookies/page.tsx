@@ -34,10 +34,9 @@ export default function CookiesPage() {
       <h2 id="cuales">2. Qué cookies usa este sitio</h2>
       {/* tabIndex: en celular la tabla se desplaza de lado; así también se
           puede desplazar con las flechas del teclado. */}
-      <div
+      <section
         className={styles.tablaScroll}
         tabIndex={0}
-        role="region"
         aria-label="Tabla de cookies (se puede desplazar)"
       >
         <table>
@@ -70,7 +69,7 @@ export default function CookiesPage() {
             </tr>
           </tbody>
         </table>
-      </div>
+      </section>
 
       <h2 id="no-usamos">3. Qué no usamos</h2>
       <ul>

@@ -172,6 +172,11 @@ export function idDe(obj: unknown): number | null {
   return null;
 }
 
+/** Para los textos del registro: el nombre, o "#id" si ya no se pudo leer. */
+export function nombreONumero(nombre: string | null | undefined, id: number): string {
+  return nombre ?? "#" + id;
+}
+
 /** Texto del interruptor "Visible en el sitio web" para el detalle. */
 export function textoVisible(activo: boolean | null | undefined): string {
   return activo === false ? "no visible en el sitio" : "visible en el sitio";

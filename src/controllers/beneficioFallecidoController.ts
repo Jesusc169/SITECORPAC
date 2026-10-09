@@ -22,7 +22,7 @@ export async function obtenerBeneficioFallecido() {
   return {
     titulo: data.titulo,
     descripcion: data.descripcion,
-    imagenHero: data.imagen_hero || '',
+    imagenHero: data.imagen_hero ?? '',
     requisitos: data.beneficio_fallecido_requisitos,
     faqs: data.beneficio_fallecido_faq,
   }

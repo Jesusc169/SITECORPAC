@@ -6,15 +6,15 @@ interface Props {
   data: NuestraHistoriaData;
 }
 
-export default function NuestraHistoriaView({ data }: Props) {
+export default function NuestraHistoriaView({ data }: Readonly<Props>) {
   return (
     <section className={styles.container}>
       <h2 className={styles.titulo}>{data.titulo}</h2>
       <p className={styles.introduccion}>{data.introduccion}</p>
 
       <div className={styles.timeline}>
-        {data.eventos.map((evento, index) => (
-          <div key={index} className={styles.evento}>
+        {data.eventos.map((evento) => (
+          <div key={evento.año} className={styles.evento}>
             <span className={styles.año}>{evento.año}</span>
             <p>{evento.descripcion}</p>
           </div>

@@ -117,7 +117,7 @@ export default function FeriasView({
   aniosDisponibles,
   anioSeleccionado,
   onChangeAnio,
-}: FeriasViewProps) {
+}: Readonly<FeriasViewProps>) {
   const feriasOrdenadas = ordenarFerias(feriasList);
 
   const feriasAgrupadas = agruparPorAnio(feriasOrdenadas);
@@ -137,7 +137,7 @@ export default function FeriasView({
             {[...empresasList, ...empresasList].map((empresa, index) => (
               <div key={`${empresa.id}-${index}`} className={styles.logoItem}>
                 <img
-                  src={empresa.logo_url || "/images/empresas/default.png"}
+                  src={empresa.logo_url ? empresa.logo_url : "/images/empresas/default.png"}
                   alt={empresa.nombre}
                   title={empresa.nombre}
                   loading="lazy"
@@ -150,7 +150,7 @@ export default function FeriasView({
 
       {/* FILTRO AÑO */}
       {aniosDisponibles && onChangeAnio && (
-        <div className={styles.filtros} role="group" aria-label="Filtrar ferias por año">
+        <fieldset className={styles.filtros} aria-label="Filtrar ferias por año">
           {aniosDisponibles.map((anio) => (
             <button
               key={anio}
@@ -168,7 +168,7 @@ export default function FeriasView({
               Ver todas
             </button>
           )}
-        </div>
+        </fieldset>
       )}
 
       {/* ESTADOS */}
@@ -191,7 +191,7 @@ export default function FeriasView({
               <section key={feria.id} className={styles.feria}>
                 <div className={styles.feriaImgWrap}>
                   <img
-                    src={feria.imagen_portada || "/images/ferias/default.jpg"}
+                    src={feria.imagen_portada ? feria.imagen_portada : "/images/ferias/default.jpg"}
                     alt={feria.titulo}
                     loading="lazy"
                   />

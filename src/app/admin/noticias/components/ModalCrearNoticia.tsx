@@ -11,7 +11,7 @@ interface Props {
   mostrarToast: (tipo: "exito" | "error", texto: string) => void;
 }
 
-export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: Props) {
+export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: Readonly<Props>) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [contenido, setContenido] = useState("");
@@ -112,8 +112,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             <InterruptorVisible visible={activo} onChange={setActivo} tipo="noticia" />
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Título</label>
-              <input
+              <label htmlFor="crear-noticia-titulo" className="form-label fw-semibold">Título</label>
+              <input id="crear-noticia-titulo"
                 className="form-control"
                 placeholder="Título de la noticia"
                 value={titulo}
@@ -122,8 +122,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Descripción breve</label>
-              <textarea
+              <label htmlFor="crear-noticia-descripcion-breve" className="form-label fw-semibold">Descripción breve</label>
+              <textarea id="crear-noticia-descripcion-breve"
                 className="form-control"
                 rows={2}
                 placeholder="Resumen corto para la portada"
@@ -133,8 +133,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Contenido</label>
-              <textarea
+              <label htmlFor="crear-noticia-contenido" className="form-label fw-semibold">Contenido</label>
+              <textarea id="crear-noticia-contenido"
                 className="form-control"
                 rows={6}
                 placeholder="Contenido completo de la noticia"
@@ -144,8 +144,8 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Autor</label>
-              <input
+              <label htmlFor="crear-noticia-autor" className="form-label fw-semibold">Autor</label>
+              <input id="crear-noticia-autor"
                 className="form-control"
                 style={{ maxWidth: 320 }}
                 value={autor}
@@ -154,15 +154,15 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">Fotos (hasta 5)</label>
-              <SelectorImagenes selector={selectorImagenes} />
+              <label htmlFor="crear-noticia-fotos" className="form-label fw-semibold">Fotos (hasta 5)</label>
+              <SelectorImagenes selector={selectorImagenes} idEntrada="crear-noticia-fotos" />
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-semibold">
+              <label htmlFor="crear-noticia-documentos" className="form-label fw-semibold">
                 Documentos adjuntos (opcional, máximo 5)
               </label>
-              <input
+              <input id="crear-noticia-documentos"
                 type="file"
                 className="form-control"
                 accept="application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"

@@ -27,7 +27,7 @@ export default function BeneficioFallecidoView({
   imagenRequisitos,
   requisitos,
   faqs
-}: BeneficioFallecidoProps) {
+}: Readonly<BeneficioFallecidoProps>) {
   return (
     <section className={styles.container}>
       {/* =====================

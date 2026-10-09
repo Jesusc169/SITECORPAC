@@ -197,3 +197,15 @@
 .filaInactiva td {
   color: #94a3b8;
 }
+
+/* "Privilegios" agrupa casillas: <fieldset>/<legend> sin el borde del navegador */
+.grupo {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.grupo legend {
+  padding: 0;
+}

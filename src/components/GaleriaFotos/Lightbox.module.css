@@ -1,6 +1,16 @@
+/* Es un <dialog> nativo: se le quitan los estilos del navegador (tamaño
+   ajustado al contenido, borde, margen, fondo del ::backdrop) para que cubra
+   la pantalla igual que antes. */
 .overlay {
   position: fixed;
   inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: inherit;
   background: rgba(15, 15, 15, 0.92);
   z-index: 1050;
   display: flex;
@@ -108,6 +118,14 @@
 
 /* Sobre el fondo casi negro del visor, el anillo de foco azul global no se
    distinguiría: aquí va blanco. */
+.overlay:not([open]) {
+  display: none;
+}
+
+.overlay::backdrop {
+  background: transparent;
+}
+
 .overlay :focus-visible {
   outline-color: #ffffff;
 }

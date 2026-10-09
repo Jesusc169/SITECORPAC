@@ -10,10 +10,10 @@ import styles from "./error.module.css";
 export default function ErrorGlobal({
   error,
   reset,
-}: {
+}: Readonly<{
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}>) {
   useEffect(() => {
     console.error(error);
   }, [error]);

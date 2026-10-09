@@ -19,3 +19,16 @@ export function campoOpcional(fd: FormData, campo: string): string | null {
   const valor = fd.get(campo)?.toString() ?? "";
   return valor === "" ? null : valor;
 }
+
+/**
+ * Lista enviada como JSON en un campo (ids a quitar, premios, empresas...).
+ * Si no llega, está mal escrita o no es una lista, devuelve [].
+ */
+export function campoLista<T = unknown>(fd: FormData, campo: string): T[] {
+  try {
+    const valor: unknown = JSON.parse(campoTextoODefecto(fd, campo, "[]"));
+    return Array.isArray(valor) ? (valor as T[]) : [];
+  } catch {
+    return [];
+  }
+}
