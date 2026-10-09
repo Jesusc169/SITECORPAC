@@ -87,8 +87,10 @@ $DESACT
 
 Si esa persona ya no trabaja en el sindicato, considera eliminar la cuenta."
   fi
-  echo "$MAX_ID" > "$DIR/ultimo_id"
 fi
+# Siempre se guarda hasta dónde se revisó (también en la primera pasada,
+# para no volver a "empezar de cero" en cada ejecución).
+[ -n "$MAX_ID" ] && echo "$MAX_ID" > "$DIR/ultimo_id"
 
 # ---------- 2. posible ataque a las contraseñas ----------
 FALLIDOS=$(sql "SELECT COUNT(*) FROM registro_actividad WHERE accion IN ('login_fallido','login_bloqueado')
