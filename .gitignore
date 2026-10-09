@@ -82,3 +82,8 @@ public/images/temp/
 
 # Documentación privada (SRS, manuales, informe técnico): solo local, no se versiona
 /docs/
+
+# informe de cobertura de tests (npm run test:coverage)
+/coverage
+# cache local del escaner de SonarQube
+.scannerwork/
