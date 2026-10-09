@@ -25,3 +25,10 @@ describe("fechas en hora de Perú", () => {
     expect(texto).toContain("19:00");
   });
 });
+
+describe("partesPeru con una fecha inválida", () => {
+  it("devuelve campos vacíos", async () => {
+    const { partesPeru } = await import("./fechas");
+    expect(partesPeru("no es fecha")).toEqual({ fecha: "", hora: "" });
+  });
+});

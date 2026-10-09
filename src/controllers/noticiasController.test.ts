@@ -8,7 +8,7 @@ vi.mock("@/models/noticiaModel", () => ({
     eliminarImagenes: vi.fn(),
     reordenarImagen: vi.fn(),
     crearImagen: vi.fn(),
-    marcarImagenPrincipal: vi.fn(),
+    marcarImagenPrincipal: vi.fn().mockResolvedValue({ url: "/uploads/x.jpg" }),
     eliminarPdfs: vi.fn(),
     crearPdf: vi.fn(),
     actualizar: vi.fn(),

@@ -119,3 +119,27 @@ describe("calcularAlertas: alertas por correo", () => {
     ).toEqual([]);
   });
 });
+
+describe("calcularAlertas: casos sin datos", () => {
+  it("certificado sin datos ni mensaje de error", () => {
+    const a = calcularAlertas({ ...sano, diasCertificado: null, errorCertificado: null });
+    expect(a[0].texto).toContain("sin datos");
+  });
+
+  it("carpeta de respaldos legible pero vacía → error", () => {
+    const a = calcularAlertas({ ...sano, ultimoRespaldo: null });
+    expect(a[0]).toMatchObject({ gravedad: "error", texto: "No hay ningún respaldo de la base de datos." });
+  });
+});
+
+describe("calcularAlertas: memoria", () => {
+  // Antes se cubría solo si la PC de pruebas tenía poca RAM libre: ahora es fijo
+  it("avisa si queda menos del 10% de memoria libre", () => {
+    const a = calcularAlertas({ ...sano, memoriaLibre: 0.5 * GB });
+    expect(a).toEqual([{ gravedad: "aviso", texto: "Queda menos del 10% de memoria libre en el servidor." }]);
+  });
+
+  it("sin dato de memoria total no avisa", () => {
+    expect(calcularAlertas({ ...sano, memoriaTotal: 0, memoriaLibre: 0 })).toEqual([]);
+  });
+});

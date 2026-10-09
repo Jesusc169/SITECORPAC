@@ -57,7 +57,3 @@ export function resolverGaleria(input: ResolverGaleriaInput): ResolverGaleriaRes
 
   return { supervivientes, nuevas, principal };
 }
-
-export function espacioDisponibleGaleria(activasActuales: number, maxTotal = MAX_IMAGENES_GALERIA): number {
-  return Math.max(0, maxTotal - activasActuales);
-}

@@ -49,7 +49,8 @@ export async function POST(req: Request) {
     const nombre = formData.get("nombre") as string;
     const cargo = formData.get("cargo") as string;
     const correo = formData.get("correo") as string;
-    const telefono = formData.get("telefono") as string;
+    // Opcional: sin teléfono se guarda vacío (antes llegaba null y daba 500)
+    const telefono = formData.get("telefono")?.toString() ?? "";
     const periodoInicio = formData.get("periodoInicio") as string;
     const periodoFin = formData.get("periodoFin") as string | null;
     const foto = formData.get("foto") as File | null;

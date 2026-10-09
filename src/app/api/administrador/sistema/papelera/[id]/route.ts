@@ -15,7 +15,6 @@ const QUE: Record<string, string> = {
   noticias: "la noticia",
   ferias: "la feria",
   sorteos: "el sorteo",
-  directorio: "del directorio a",
 };
 
 /* =====================================================
@@ -40,7 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       detalle:
         fila.modulo === "directorio"
           ? `Restauró desde la papelera a ${fila.titulo} en el directorio`
-          : `Restauró desde la papelera ${QUE[fila.modulo] ?? ""} "${fila.titulo}"`,
+          : `Restauró desde la papelera ${QUE[fila.modulo]} "${fila.titulo}"`,
       request,
     });
     return NextResponse.json({ ok: true, modulo: fila.modulo, entidadId: fila.entidadId });

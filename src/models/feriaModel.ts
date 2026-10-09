@@ -92,34 +92,11 @@ export const FeriaModel = {
     }
   },
 
-  crearEmpresas: async (feriaId: number, empresaIds: number[]) => {
-    if (empresaIds.length === 0) return;
-    await prisma.evento_feria_empresa.createMany({
-      data: empresaIds.map((empresa_id) => ({ feria_id: feriaId, empresa_id })),
-    });
-  },
-
-  crearFechas: async (
-    feriaId: number,
-    fechas: { fecha: Date; hora_inicio: string; hora_fin: string; ubicacion: string; zona: string | null }[]
-  ) => {
-    if (fechas.length === 0) return;
-    await prisma.evento_feria_fecha.createMany({
-      data: fechas.map((f) => ({ feria_id: feriaId, ...f })),
-    });
-  },
-
-  eliminarRelaciones: async (feriaId: number) => {
-    await prisma.evento_feria_empresa.deleteMany({ where: { feria_id: feriaId } });
-    await prisma.evento_feria_fecha.deleteMany({ where: { feria_id: feriaId } });
-  },
-
   crearImagen: async (data: { feria_id: number; url: string; orden: number; principal: boolean }) => {
     return prisma.evento_feria_imagen.create({ data });
   },
 
   eliminarImagenes: async (ids: number[]) => {
-    if (ids.length === 0) return;
     await prisma.evento_feria_imagen.deleteMany({ where: { id: { in: ids } } });
   },
 
@@ -132,11 +109,7 @@ export const FeriaModel = {
       where: { feria_id },
       data: { principal: false },
     });
-    await prisma.evento_feria_imagen.update({ where: { id }, data: { principal: true } });
-  },
-
-  eliminar: async (id: number) => {
-    return prisma.evento_feria.delete({ where: { id } });
+    return prisma.evento_feria_imagen.update({ where: { id }, data: { principal: true } });
   },
 
   contarActivas: async () => {

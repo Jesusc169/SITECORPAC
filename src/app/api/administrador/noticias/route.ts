@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       accion: "crear",
       modulo: "noticias",
       entidadId: idDe(nuevaNoticia),
-      detalle: `Creó la noticia "${formData.get("titulo")?.toString().trim() ?? ""}" (${textoVisible(leerVisible(formData))})`,
+      detalle: `Creó la noticia "${nuevaNoticia.titulo}" (${textoVisible(nuevaNoticia.activo)})`,
       request,
     });
 

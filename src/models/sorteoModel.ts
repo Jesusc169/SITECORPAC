@@ -85,10 +85,6 @@ export const SorteoModel = {
     });
   },
 
-  eliminar: async (id: number) => {
-    return prisma.sorteo.delete({ where: { id } });
-  },
-
   contarActivos: async () => {
     return prisma.sorteo.count({ where: { estado: "ACTIVO" } });
   },
@@ -98,7 +94,6 @@ export const SorteoModel = {
   },
 
   eliminarImagenes: async (ids: number[]) => {
-    if (ids.length === 0) return;
     await prisma.sorteo_imagen.deleteMany({ where: { id: { in: ids } } });
   },
 
@@ -111,6 +106,6 @@ export const SorteoModel = {
       where: { sorteo_id },
       data: { principal: false },
     });
-    await prisma.sorteo_imagen.update({ where: { id }, data: { principal: true } });
+    return prisma.sorteo_imagen.update({ where: { id }, data: { principal: true } });
   },
 };

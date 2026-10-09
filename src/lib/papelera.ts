@@ -207,7 +207,8 @@ async function recrear(tx: Prisma.TransactionClient, modulo: ModuloPapelera, d: 
           evento_feria_empresa: {
             create: lista(d.evento_feria_empresa)
               .filter((e) => existentes.has(e.empresa_id as number))
-              .map((e) => ({ id: e.id as number, empresa: { connect: { id: e.empresa_id as number } } })),
+              // forma directa (id + empresa_id): con `empresa: { connect }` Prisma no acepta el id
+              .map((e) => ({ id: e.id as number, empresa_id: e.empresa_id as number })),
           },
         },
       });
@@ -345,14 +346,16 @@ export async function eliminarDefinitivamente(papeleraId: number): Promise<{ fil
   return { fila: { modulo: fila.modulo, titulo: fila.titulo, entidadId: fila.entidadId }, archivosBorrados };
 }
 
-/** Vacía lo que ya cumplió los 30 días. */
-export async function depurarPapelera(): Promise<number> {
+/** Vacía lo que ya cumplió los 30 días. Si una entrada falla, sigue con las demás. */
+export async function depurarPapelera(
+  borrar: (id: number) => Promise<unknown> = eliminarDefinitivamente
+): Promise<number> {
   const vencidos = await prisma.papelera.findMany({
     where: { expiraEn: { lt: new Date() } },
     select: { id: true },
   });
   for (const v of vencidos) {
-    await eliminarDefinitivamente(v.id).catch((e) =>
+    await borrar(v.id).catch((e) =>
       console.error("No se pudo depurar la papelera:", e)
     );
   }

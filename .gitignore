@@ -87,3 +87,9 @@ public/images/temp/
 /coverage
 # cache local del escaner de SonarQube
 .scannerwork/
+# conexion a la base de pruebas (tiene contrasena local)
+.env.test
+
+# resultados de Playwright
+/test-results/
+/playwright-report/

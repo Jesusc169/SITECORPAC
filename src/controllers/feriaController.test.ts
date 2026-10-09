@@ -8,7 +8,7 @@ vi.mock("@/models/feriaModel", () => ({
     eliminarImagenes: vi.fn(),
     reordenarImagen: vi.fn(),
     crearImagen: vi.fn(),
-    marcarImagenPrincipal: vi.fn(),
+    marcarImagenPrincipal: vi.fn().mockResolvedValue({ url: "/uploads/x.jpg" }),
     actualizar: vi.fn(),
     reemplazarEmpresas: vi.fn(),
     reemplazarFechas: vi.fn(),

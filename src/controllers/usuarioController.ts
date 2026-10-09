@@ -44,6 +44,8 @@ export const UsuarioController = {
     },
     actorEsAdministrador: boolean
   ) => {
+    // Un cuerpo vacío (null) es un error del formulario (400), no del servidor
+    input = input ?? {};
     const nombre = (input.nombre || "").trim();
     const email = (input.email || "").trim().toLowerCase();
     const password = input.password || "";
@@ -73,6 +75,7 @@ export const UsuarioController = {
     input: { nombre?: string; rol?: string; permisos?: unknown; password?: string },
     actorEsAdministrador: boolean
   ) => {
+    input = input ?? {};
     const nombre = (input.nombre || "").trim();
     const rol = normalizarRol(input.rol, actorEsAdministrador);
     const permisos = normalizarPermisos(input.permisos);

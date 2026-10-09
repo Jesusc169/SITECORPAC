@@ -9,7 +9,7 @@ vi.mock("@/models/sorteoModel", () => ({
     eliminarImagenes: vi.fn(),
     reordenarImagen: vi.fn(),
     crearImagen: vi.fn(),
-    marcarImagenPrincipal: vi.fn(),
+    marcarImagenPrincipal: vi.fn().mockResolvedValue({ url: "/uploads/x.jpg" }),
     actualizar: vi.fn(),
     eliminar: vi.fn(),
   },

@@ -184,6 +184,9 @@ export class NoticiasController {
   static async actualizarNoticiaCompleta(id: number, input: DatosNoticiaActualizacion) {
     const noticiaActual = await NoticiaModel.obtenerPorId(id);
     if (!noticiaActual) return null;
+    if (!input.titulo.trim()) {
+      throw new NoticiaValidationError("El título es obligatorio");
+    }
 
     const imagenesNuevasValidas = input.imagenesNuevas.filter((f) => f && f.size > 0);
     const existentes = noticiaActual.noticia_imagen.map((img) => ({ id: img.id, orden: img.orden }));
@@ -239,17 +242,13 @@ export class NoticiasController {
       nuevasCreadas.push({ id: creada.id, url });
     }
 
+    // resolverGaleria garantiza que la principal existe: una que sobrevive o
+    // una nueva recién creada.
     const principal = plan.principal;
     let imagenPath: string | null = null;
-    if (principal?.tipo === "existente") {
-      await NoticiaModel.marcarImagenPrincipal(id, principal.id);
-      imagenPath = noticiaActual.noticia_imagen.find((i) => i.id === principal.id)?.url ?? null;
-    } else if (principal?.tipo === "nueva") {
-      const fila = nuevasCreadas[principal.indice];
-      if (fila) {
-        await NoticiaModel.marcarImagenPrincipal(id, fila.id);
-        imagenPath = fila.url;
-      }
+    if (principal) {
+      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
+      imagenPath = (await NoticiaModel.marcarImagenPrincipal(id, idPrincipal)).url;
     }
 
     const pdfsAEliminar = noticiaActual.noticia_pdf.filter((p) =>

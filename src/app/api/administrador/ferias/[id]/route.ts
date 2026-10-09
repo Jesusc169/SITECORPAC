@@ -6,6 +6,7 @@ import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
+import { campoTexto } from "@/lib/formulario";
 
 /* =========================
    GET – Feria por ID
@@ -65,8 +66,8 @@ export async function PUT(
 
     const antes = await instantanea("ferias", feriaId);
     const feria = await FeriaController.actualizarFeria(feriaId, {
-      titulo: formData.get("titulo") as string,
-      descripcion: formData.get("descripcion") as string,
+      titulo: campoTexto(formData, "titulo"),
+      descripcion: campoTexto(formData, "descripcion"),
       imagenesNuevas: formData.getAll("imagenes") as File[],
       imagenesEliminar,
       imagenPrincipalId: imagenPrincipalIdRaw ? Number(imagenPrincipalIdRaw) : null,
@@ -90,7 +91,7 @@ export async function PUT(
       entidadId: feriaId,
       antes,
       despues: await instantanea("ferias", feriaId),
-      detalle: `Editó la feria "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData, "estado"))})`,
+      detalle: `Editó la feria "${feria.titulo}" (${textoVisible(feria.estado)})`,
       request: req,
     });
 

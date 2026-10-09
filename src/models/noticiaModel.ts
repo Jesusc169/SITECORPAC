@@ -55,10 +55,6 @@ export const NoticiaModel = {
     });
   },
 
-  eliminar: async (id: number) => {
-    return prisma.noticia.delete({ where: { id } });
-  },
-
   crearPdf: async (data: { noticia_id: number; url: string; nombre: string; orden: number }) => {
     return prisma.noticia_pdf.create({ data });
   },
@@ -72,7 +68,6 @@ export const NoticiaModel = {
   },
 
   eliminarImagenes: async (ids: number[]) => {
-    if (ids.length === 0) return;
     await prisma.noticia_imagen.deleteMany({ where: { id: { in: ids } } });
   },
 
@@ -85,7 +80,7 @@ export const NoticiaModel = {
       where: { noticia_id },
       data: { principal: false },
     });
-    await prisma.noticia_imagen.update({ where: { id }, data: { principal: true } });
+    return prisma.noticia_imagen.update({ where: { id }, data: { principal: true } });
   },
 
   // Tablero del panel: "Noticias publicadas" = las visibles en el sitio.

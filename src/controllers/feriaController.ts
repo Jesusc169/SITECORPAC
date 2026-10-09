@@ -131,6 +131,9 @@ export const FeriaController = {
 
     const feriaActual = await FeriaModel.obtenerPorId(id);
     if (!feriaActual) return null;
+    if (!input.titulo.trim() || !input.descripcion.trim()) {
+      throw new FeriaValidationError("Datos incompletos");
+    }
 
     const imagenesNuevasValidas = input.imagenesNuevas.filter((f) => f && f.size > 0);
     const existentes = feriaActual.evento_feria_imagen.map((img) => ({ id: img.id, orden: img.orden }));
@@ -183,16 +186,10 @@ export const FeriaController = {
 
     const principal = plan.principal;
     let imagen_portada: string | null = null;
-    if (principal?.tipo === "existente") {
-      await FeriaModel.marcarImagenPrincipal(id, principal.id);
-      imagen_portada =
-        feriaActual.evento_feria_imagen.find((i) => i.id === principal.id)?.url ?? null;
-    } else if (principal?.tipo === "nueva") {
-      const fila = nuevasCreadas[principal.indice];
-      if (fila) {
-        await FeriaModel.marcarImagenPrincipal(id, fila.id);
-        imagen_portada = fila.url;
-      }
+    // resolverGaleria garantiza que la principal existe (sobreviviente o nueva)
+    if (principal) {
+      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
+      imagen_portada = (await FeriaModel.marcarImagenPrincipal(id, idPrincipal)).url;
     }
 
     await FeriaModel.actualizar(id, {
@@ -217,7 +214,7 @@ export const FeriaController = {
 
     const nuevaFeria = await FeriaModel.crear({
       titulo: original.titulo + " (Copia)",
-      descripcion: original.descripcion ?? "",
+      descripcion: original.descripcion,
       anio: new Date().getFullYear(),
       imagen_portada: original.imagen_portada ?? null,
       fechas: original.evento_feria_fecha.map((f) => ({

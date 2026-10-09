@@ -9,6 +9,25 @@ on:
 jobs:
   verificaciones:
     runs-on: ubuntu-latest
+
+    # Base MySQL SOLO para los tests (se crea vacía en cada ejecución)
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sitecorpac_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      TEST_DATABASE_URL: mysql://root:root@127.0.0.1:3306/sitecorpac_test
+
     steps:
       - name: Descargar el codigo
         uses: actions/checkout@v4
@@ -22,11 +41,36 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Generar el cliente de Prisma
+        run: npx prisma generate
+
       - name: Revisar tipos (tsc)
         run: npx tsc --noEmit
 
-      - name: Pruebas automatizadas
-        run: npm run test
+      # Unitarios + integracion contra MySQL. Falla si la cobertura de la
+      # logica (API, controladores, modelos, lib, services) baja del 100%.
+      - name: Pruebas y cobertura (minimo 100%)
+        run: npm run test:coverage
+
+      # Pantallas de punta a punta con Chrome (ya viene en el runner)
+      - name: Pruebas E2E (Playwright)
+        run: npm run test:e2e
+
+      - name: Guardar informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+      - name: Guardar evidencias si fallan las E2E
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-fallas
+          path: test-results/
+          if-no-files-found: ignore
 
       - name: Escaneo de dependencias (npm audit)
         # No bloquea el pipeline: hoy hay un hallazgo conocido y aceptado

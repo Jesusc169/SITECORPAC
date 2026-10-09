@@ -5,6 +5,7 @@ import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
+import { campoTexto, campoTextoODefecto, campoOpcional } from "@/lib/formulario";
 
 export const runtime = "nodejs";
 
@@ -51,10 +52,10 @@ export async function PUT(
 
     const antes = await instantanea("noticias", id);
     const noticiaActualizada = await NoticiasController.actualizarNoticiaCompleta(id, {
-      titulo: formData.get("titulo") as string,
-      descripcion: formData.get("descripcion") as string,
-      contenido: formData.get("contenido") as string,
-      autor: formData.get("autor") as string,
+      titulo: campoTexto(formData, "titulo"),
+      descripcion: campoTexto(formData, "descripcion"),
+      contenido: campoOpcional(formData, "contenido"),
+      autor: campoTextoODefecto(formData, "autor", "SITECORPAC"),
       activo: leerVisible(formData),
       imagenesNuevas: formData.getAll("imagenes") as File[],
       imagenesEliminar,
@@ -77,7 +78,7 @@ export async function PUT(
       entidadId: id,
       antes,
       despues: await instantanea("noticias", id),
-      detalle: `Editó la noticia "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData))})`,
+      detalle: `Editó la noticia "${noticiaActualizada.titulo}" (${textoVisible(noticiaActualizada.activo)})`,
       request,
     });
 

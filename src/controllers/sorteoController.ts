@@ -12,7 +12,7 @@ export class SorteoValidationError extends Error {}
 /** La columna sorteo.lugar es VARCHAR(150) y el lugar es obligatorio. */
 const MAX_LUGAR = 150;
 function normalizarLugar(lugar: string): string {
-  const limpio = (lugar ?? "").trim();
+  const limpio = lugar.trim();
   if (!limpio) throw new SorteoValidationError("Indica el lugar del sorteo");
   if (limpio.length > MAX_LUGAR) {
     throw new SorteoValidationError(`El lugar no puede superar ${MAX_LUGAR} caracteres`);
@@ -188,15 +188,10 @@ export const SorteoController = {
 
     const principal = plan.principal;
     let imagen: string | null = null;
-    if (principal?.tipo === "existente") {
-      await SorteoModel.marcarImagenPrincipal(id, principal.id);
-      imagen = sorteoActual.sorteo_imagen.find((i) => i.id === principal.id)?.url ?? null;
-    } else if (principal?.tipo === "nueva") {
-      const fila = nuevasCreadas[principal.indice];
-      if (fila) {
-        await SorteoModel.marcarImagenPrincipal(id, fila.id);
-        imagen = fila.url;
-      }
+    // resolverGaleria garantiza que la principal existe (sobreviviente o nueva)
+    if (principal) {
+      const idPrincipal = principal.tipo === "existente" ? principal.id : nuevasCreadas[principal.indice].id;
+      imagen = (await SorteoModel.marcarImagenPrincipal(id, idPrincipal)).url;
     }
 
     const sorteo = await SorteoModel.actualizar(id, {

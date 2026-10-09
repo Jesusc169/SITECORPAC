@@ -43,9 +43,4 @@ export const DirectorioModel = {
     });
   },
 
-  eliminar: async (id: number): Promise<directorio> => {
-    return prisma.directorio.delete({
-      where: { id },
-    });
-  },
 };

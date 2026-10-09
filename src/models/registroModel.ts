@@ -122,13 +122,12 @@ export const RegistroModel = {
   },
 
   /** Tamaño en bytes de la base de datos actual (datos + índices). */
-  tamanoBaseDatos: async (): Promise<number | null> => {
+  tamanoBaseDatos: async (): Promise<number> => {
     const filas = await prisma.$queryRaw<{ bytes: bigint | number | null }[]>`
       SELECT SUM(data_length + index_length) AS bytes
       FROM information_schema.TABLES
       WHERE table_schema = DATABASE()`;
-    const b = filas[0]?.bytes;
-    return b == null ? null : Number(b);
+    return Number(filas[0].bytes);
   },
 
   ping: async (): Promise<number> => {

@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       accion: "crear",
       modulo: "ferias",
       entidadId: idDe(feria),
-      detalle: `Creó la feria "${formData.get("titulo")?.toString() ?? ""}" (${textoVisible(leerVisible(formData, "estado"))})`,
+      detalle: `Creó la feria "${feria.titulo}" (${textoVisible(feria.estado)})`,
       request: req,
     });
 
