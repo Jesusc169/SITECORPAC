@@ -1,92 +1,17 @@
 /* =====================================================
-   VARIABLES CORPORATIVAS
-===================================================== */
-:root {
-  --primary: var(--sitecorpac-blue);
-  --primary-dark: var(--sitecorpac-blue-dark);
-  --danger: var(--sitecorpac-red);
-  --success: #166534;
-
-  --bg-main: #f5f7fa;
-  --bg-card: #ffffff;
-  --bg-muted: #f8fafc;
-
-  --border: #e5e7eb;
-  --border-soft: #cbd5e1;
-
-  --text-main: var(--sitecorpac-navy);
-  --text-muted: #64748b;
-}
-
-/* =====================================================
-   PANEL ADMINISTRACIÓN
-===================================================== */
-.container {
-  max-width: 1280px;
-  margin: auto;
-  padding: 36px;
-  background: var(--bg-main);
-  min-height: 100vh;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 28px;
-}
-
-.header h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.header p {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-/* =====================================================
-   CARD
+   SORTEOS (panel) – ventana de crear/editar sorteo.
+   La ventana, los botones y la tabla toman el aspecto
+   común de styles/PanelAdmin.module.css (rediseño A+C).
 ===================================================== */
 
-/* =====================================================
-   TABLA
-===================================================== */
-
-/* =====================================================
-   BADGES
-===================================================== */
-
-/* =====================================================
-   MODAL OVERLAY
-===================================================== */
 .modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 20px;
+  composes: ventanaFondo from "../../../styles/PanelAdmin.module.css";
 }
 
-/* =====================================================
-   MODAL CONTENEDOR
-===================================================== */
 .modalContent {
-  background: #fff;
-  width: 100%;
-  max-width: 640px;
+  composes: ventana from "../../../styles/PanelAdmin.module.css";
+  max-width: 680px;
   height: 90vh;
-  border-radius: 18px;
-  box-shadow: 0 25px 60px rgba(2, 6, 23, 0.35);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   animation: modalFade 0.2s ease-out;
 }
 
@@ -101,45 +26,32 @@
   }
 }
 
-/* =====================================================
-   MODAL HEADER
-===================================================== */
 .modalHeader {
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border);
-  background: #fff;
+  composes: ventanaCabecera from "../../../styles/PanelAdmin.module.css";
 }
 
-.modalHeader h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-/* =====================================================
-   MODAL BODY (SCROLL)
-===================================================== */
 .modalBody {
-  padding: 22px 24px;
-  overflow-y: auto;
-  flex: 1;
+  composes: ventanaCuerpo from "../../../styles/PanelAdmin.module.css";
 }
 
-.modalBody::-webkit-scrollbar {
-  width: 7px;
-}
-.modalBody::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+.modalFooter {
+  composes: ventanaPie from "../../../styles/PanelAdmin.module.css";
 }
 
-/* =====================================================
-   FORM GRID
-===================================================== */
+.primaryBtn {
+  composes: botonPrincipal from "../../../styles/PanelAdmin.module.css";
+}
+
+.secondaryBtn {
+  composes: botonSecundario from "../../../styles/PanelAdmin.module.css";
+}
+
+/* ---------- Formulario ---------- */
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px 18px;
+  gap: 18px;
+  margin-top: 4px;
 }
 
 .formGroup {
@@ -151,122 +63,73 @@
   grid-column: span 2;
 }
 
-.hint {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.previewImg {
-  display: block;
-  width: 100%;
-  max-width: 320px;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  border-radius: 10px;
-  background-color: #e5e7eb;
-  margin-top: 10px;
-}
-
-.previewAviso {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #fef3c7;
-  color: #92400e;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  max-width: 320px;
-}
-
-.formGroup label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted);
+.formGroup label,
+.grupo legend {
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
   margin-bottom: 6px;
+  padding: 0;
 }
 
 .formGroup input,
 .formGroup textarea {
-  padding: 11px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #cfdbe5;
   border-radius: 10px;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-muted);
-  font-size: 0.9rem;
+  padding: 10px 12px;
+  font: 400 0.97rem var(--font-texto), Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
 }
 
 .formGroup textarea {
-  resize: none;
-  min-height: 90px;
+  resize: vertical;
+  min-height: 96px;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  background: #fff;
-  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
 }
 
-/* =====================================================
-   PREMIOS
-===================================================== */
+/* ---------- Premios ---------- */
+.grupo {
+  border: 0;
+  margin: 0;
+  padding: 16px;
+  min-width: 0;
+  background: var(--panel-fondo);
+  border-radius: 12px;
+}
+
+.grupo legend {
+  float: left;
+  width: 100%;
+}
+
 .premioBox {
   display: grid;
-  grid-template-columns: 1fr 1fr 90px 40px;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr 90px 42px;
+  gap: 8px;
   margin-top: 10px;
 }
 
 .deleteBtn {
-  background: #fee2e2;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--danger);
-}
-
-/* =====================================================
-   MODAL FOOTER
-===================================================== */
-.modalFooter {
-  border-top: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
   background: #fff;
-}
-
-/* =====================================================
-   BOTONES
-===================================================== */
-.primaryBtn {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
-  border: none;
-  padding: 11px 20px;
+  border: 1.5px solid #f3c7c7;
   border-radius: 10px;
-  font-weight: 600;
   cursor: pointer;
+  color: var(--rojo);
+  font-weight: 700;
 }
 
-.secondaryBtn {
-  background: #f1f5f9;
-  color: var(--text-main);
-  border: none;
-  padding: 11px 20px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
+.deleteBtn:hover {
+  background: var(--rojo-claro);
 }
 
-.secondaryBtn:hover {
-  background: #e2e8f0;
-}
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
 @media (max-width: 640px) {
   .formGrid {
     grid-template-columns: 1fr;
@@ -279,20 +142,4 @@
   .premioBox {
     grid-template-columns: 1fr;
   }
-}
-
-/* "Premios" agrupa varios campos: <fieldset>/<legend> con el aspecto de antes */
-.grupo {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.grupo legend {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  padding: 0;
 }

@@ -49,7 +49,7 @@ export default function ModalEliminarNoticia({
           <div className="modal-content">
             {/* HEADER */}
             <div className="modal-header">
-              <h5 className="modal-title" id="titulo-eliminar">Eliminar noticia</h5>
+              <h2 className="modal-title" id="titulo-eliminar">Eliminar noticia</h2>
               <button
                 type="button"
                 className="btn-close"

@@ -1,6 +1,7 @@
 "use client";
 
-import styles from "./sorteos.admin.module.css";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
+import Icono from "@/components/Icono/Icono";
 import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
 import panel from "@/styles/PanelAdmin.module.css";
@@ -48,18 +49,15 @@ export default function SorteosAdminView({
   onDuplicar,
 }: Readonly<SorteosAdminViewProps>) {
   return (
-    <section className={styles.container}>
-      {/* ================= HEADER ================= */}
-      <header className={styles.header}>
-        <div>
-          <h1>Administración de Sorteos</h1>
-          <p>Gestione los sorteos del sindicato</p>
-        </div>
-
+    <section>
+      <EncabezadoPanel
+        titulo="Administración de Sorteos"
+        descripcion="Sorteos con su fecha, lugar y premios. Se muestran en Actividades › Sorteos."
+      >
         <button className={panel.botonNuevo} onClick={onNuevo}>
           + Nuevo Sorteo
         </button>
-      </header>
+      </EncabezadoPanel>
 
       {/* ================= TABLA ================= */}
       <div className={panel.contenedorTabla}>
@@ -105,7 +103,7 @@ export default function SorteosAdminView({
                           title="Editar"
                           aria-label={`Editar ${s.nombre}`}
                         >
-                          ✏️
+                          <Icono nombre="lapiz" chico />
                         </button>
 
                         {/* DUPLICAR */}
@@ -115,7 +113,7 @@ export default function SorteosAdminView({
                           title="Duplicar"
                           aria-label={`Duplicar ${s.nombre}`}
                         >
-                          📄
+                          <Icono nombre="copiar" chico />
                         </button>
 
                         {/* ELIMINAR */}
@@ -125,7 +123,7 @@ export default function SorteosAdminView({
                           title="Eliminar"
                           aria-label={`Eliminar ${s.nombre}`}
                         >
-                          🗑️
+                          <Icono nombre="papelera" chico />
                         </button>
                       </div>
                     </td>

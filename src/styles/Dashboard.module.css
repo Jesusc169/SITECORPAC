@@ -1,122 +1,201 @@
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f4f6f8;
-}
+/* =========================================================
+   INICIO DEL PANEL (rediseño A+C)
+   Cifras en tarjetas como los accesos rápidos de la portada
+   pública, accesos a cada sección y las últimas noticias.
+========================================================= */
 
-/* Sidebar fijo */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 260px;
-  height: 100vh;
-  z-index: 10;
-}
-
-/* Contenido principal (al costado del sidebar) */
-.main {
-  flex: 1;
-  margin-left: 260px;
-  padding: 2rem;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-
-/* Contenedor general */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Encabezado del dashboard */
-.header {
-  margin-bottom: 2rem;
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header h1 {
-  font-size: 1.8rem;
-  color: var(--sitecorpac-blue);
-  margin-bottom: 0.5rem;
-}
-
-.header p {
-  color: #666;
-  font-size: 1rem;
-}
-
-/* Tarjetas de estadísticas */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.statCard {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  text-align: center;
-}
-
-.statCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-}
-
-.statCard h3 {
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.statNumber {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--sitecorpac-blue);
-  margin: 0.5rem 0 1rem 0;
-}
-
-/* Enlaces */
-.link {
-  color: var(--sitecorpac-blue);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-
-/* Últimas actualizaciones */
-.section {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section h2 {
-  margin-bottom: 1rem;
-  color: #333;
-  font-size: 1.3rem;
-}
-
-.activityList {
+/* ---------- Cifras ---------- */
+.cifras {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
+  margin: 0 0 26px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-.activityList li {
-  margin-bottom: 0.75rem;
-  border-left: 4px solid var(--sitecorpac-blue);
-  padding-left: 0.75rem;
-  color: #555;
+.cifra {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icono numero"
+    "icono texto"
+    "enlace enlace";
+  column-gap: 16px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+.cifraIcono {
+  grid-area: icono;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--tint);
+  color: var(--teal-claro);
+}
+
+.cifraNumero {
+  grid-area: numero;
+  font: 800 2rem/1 var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+}
+
+.cifraTexto {
+  grid-area: texto;
+  color: var(--ink2);
+  font-size: 0.95rem;
+}
+
+.cifraEnlace {
+  grid-area: enlace;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #edf2f6;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--teal-claro);
+  text-decoration: none;
+}
+
+.cifraEnlace:hover {
+  color: var(--navy);
+}
+
+/* ---------- Dos columnas ---------- */
+.columnas {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.bloque {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
+.bloque h2 {
+  font-size: 1.2rem;
+  margin: 0 0 14px;
+}
+
+/* ---------- Accesos ---------- */
+.accesos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.acceso {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  height: 100%;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.acceso:hover {
+  background: var(--tint);
+  border-color: #c6dbe6;
+  color: var(--ink);
+}
+
+.accesoIcono {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--navy);
+  color: var(--gold);
+}
+
+.accesoTitulo {
+  display: block;
+  font: 700 1rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+}
+
+.accesoTexto {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.88rem;
+  color: var(--ink2);
   line-height: 1.4;
+}
+
+/* ---------- Últimas noticias ---------- */
+.ultimas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ultimas li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf2f6;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.ultimas li svg {
+  margin-top: 2px;
+  color: var(--teal-claro);
+}
+
+.vacio {
+  color: var(--ink2);
+  margin: 0;
+}
+
+.verPublico {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--teal-claro);
+  text-decoration: none;
+}
+
+.verPublico:hover {
+  color: var(--navy);
+}
+
+@media (max-width: 1100px) {
+  .columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .cifras {
+    grid-template-columns: 1fr;
+  }
+
+  .accesos {
+    grid-template-columns: 1fr;
+  }
 }

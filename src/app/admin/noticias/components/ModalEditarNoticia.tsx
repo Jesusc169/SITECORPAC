@@ -153,10 +153,10 @@ export default function ModalEditarNoticia({
 
           {/* HEADER */}
           <div className="modal-header bg-light border-bottom">
-            <h5 className="modal-title fw-bold">
-              ✏️ Editar noticia
-            </h5>
-            <button className="btn-close" onClick={onClose} />
+            <h2 className="modal-title">
+              Editar noticia
+            </h2>
+            <button type="button" className="btn-close" aria-label="Cerrar" onClick={onClose} />
           </div>
 
           {/* BODY */}

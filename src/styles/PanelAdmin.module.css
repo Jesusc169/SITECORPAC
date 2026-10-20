@@ -1,37 +1,129 @@
 /* =========================================================
-   ESTILO COMÚN DEL PANEL ADMINISTRATIVO
-   Tablas, botones de acción y botón "+ Nuevo" iguales en
-   noticias, ferias, sorteos, directorio y usuarios.
-   Encabezado en el azul oscuro de la marca (el del nombre
-   SITECORPAC en la cabecera del sitio).
+   ESTILO COMÚN DEL PANEL ADMINISTRATIVO (rediseño A+C)
+   Mismo lenguaje que el sitio público: Lexend en navy para
+   títulos, botón principal dorado, tarjetas blancas con
+   borde suave y acentos cian/teal. Lo usan todas las
+   pantallas internas (inicio, noticias, directorio, ferias,
+   sorteos, usuarios y sistema).
 ========================================================= */
 
+/* ---------- Marco: menú lateral + contenido ---------- */
+.panel {
+  min-height: 100vh;
+  background: var(--panel-fondo);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--font-texto), Arial, sans-serif;
+}
+
+.contenido {
+  margin-left: var(--panel-menu);
+  padding: 34px 40px 56px;
+  min-width: 0;
+}
+
+.contenidoIn {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+@media (max-width: 991.98px) {
+  .contenido {
+    margin-left: 0;
+    padding: 22px 16px 40px;
+  }
+}
+
+/* ---------- Encabezado de cada pantalla ---------- */
+.cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.kick {
+  display: block;
+  font: 600 0.78rem var(--font-titulos), Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal-claro);
+}
+
+.cabecera h1 {
+  margin: 6px 0 0;
+  font: 700 1.85rem/1.15 var(--font-titulos), Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.descripcion {
+  margin: 8px 0 0;
+  color: var(--ink2);
+  font-size: 1rem;
+  max-width: 70ch;
+}
+
+.cabeceraAcciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+  .cabecera h1 {
+    font-size: 1.5rem;
+  }
+
+  .cabeceraAcciones,
+  .cabeceraAcciones > * {
+    width: 100%;
+  }
+}
+
+/* ---------- Tarjeta blanca genérica ---------- */
+.tarjeta {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
 /* ---------- Botón principal ("+ Nuevo ...") ---------- */
+/* Dorado con texto navy, igual que "Únete al SITE" en el sitio. */
 .botonNuevo {
-  background: var(--sitecorpac-azul-oscuro);
-  color: #ffffff;
-  border: none;
-  padding: 0.65rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--gold);
+  color: var(--navy);
+  border: 0;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font: 700 0.93rem var(--font-titulos), Arial, sans-serif;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s ease;
+  transition: filter 0.15s ease;
 }
 
 .botonNuevo:hover {
-  background: var(--sitecorpac-azul-oscuro-hover);
+  filter: brightness(0.95);
+}
+
+.botonNuevo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ---------- Contenedor con scroll horizontal ---------- */
 .contenedorTabla {
   width: 100%;
   overflow-x: auto;
-  background: #ffffff;
-  border: 1px solid #dbe3ec;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(11, 42, 74, 0.06);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
 }
 
 /* ---------- Tabla ---------- */
@@ -39,34 +131,30 @@
   width: 100%;
   min-width: 720px;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.93rem;
 }
 
 .tabla thead th {
-  background: var(--sitecorpac-azul-oscuro);
-  color: #ffffff;
-  padding: 0.9rem 1rem;
+  background: var(--tint);
+  color: var(--navy);
+  padding: 13px 16px;
   text-align: left;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font: 600 0.74rem var(--font-titulos), Arial, sans-serif;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
+  border-bottom: 1px solid var(--line);
 }
 
 .tabla tbody td {
-  padding: 0.85rem 1rem;
-  color: #1f2937;
-  border-bottom: 1px solid #e5eaf0;
+  padding: 14px 16px;
+  color: var(--ink);
+  border-bottom: 1px solid #edf2f6;
   vertical-align: middle;
 }
 
-.tabla tbody tr:nth-child(even) {
-  background: #f8fafc;
-}
-
 .tabla tbody tr:hover {
-  background: #eef4fa;
+  background: #f8fbfd;
 }
 
 .tabla tbody tr:last-child td {
@@ -76,15 +164,14 @@
 /* Fila "No hay ... registradas" */
 .vacio {
   text-align: center;
-  padding: 1.75rem 1rem !important;
-  color: #526173 !important;
-  font-style: italic;
+  padding: 2rem 1rem !important;
+  color: var(--ink2) !important;
 }
 
 /* ---------- Acciones (Editar / Duplicar / Eliminar) ---------- */
 .acciones {
   display: flex;
-  gap: 0.4rem;
+  gap: 6px;
   align-items: center;
   flex-wrap: nowrap; /* Editar y Eliminar siempre en la misma línea */
 }
@@ -92,59 +179,233 @@
 .boton,
 .botonPeligro,
 .botonIcono {
-  border: 1px solid transparent;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  font: 600 0.84rem var(--font-titulos), Arial, sans-serif;
   cursor: pointer;
-  min-height: 34px;
+  min-height: 36px;
+  white-space: nowrap;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .boton {
-  background: #e8eef5;
-  color: var(--sitecorpac-azul-oscuro);
-  padding: 0.35rem 0.8rem;
+  background: #fff;
+  border-color: var(--line);
+  color: var(--navy);
+  padding: 6px 13px;
 }
 
 .boton:hover {
-  background: #d6e1ec;
+  background: var(--tint);
+  border-color: #c6dbe6;
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .botonPeligro {
-  background: #fdecec;
-  color: #a51c1c;
-  padding: 0.35rem 0.8rem;
+  background: #fff;
+  border-color: #f3c7c7;
+  color: var(--rojo);
+  padding: 6px 13px;
 }
 
 .botonPeligro:hover {
-  background: #fbd5d5;
+  background: var(--rojo-claro);
 }
 
-/* Botones con ícono (✏️ 📄 🗑️): mismo tamaño y fondo que los de texto */
+/* Botones con ícono (✏️ 📄 🗑️): mismo alto que los de texto */
 .botonIcono {
-  background: #e8eef5;
-  padding: 0.35rem 0.6rem;
-  min-width: 36px;
+  background: #fff;
+  border-color: var(--line);
+  padding: 6px 9px;
+  min-width: 38px;
   font-size: 0.95rem;
 }
 
 .botonIcono:hover {
-  background: #d6e1ec;
+  background: var(--tint);
 }
 
 .botonIcono.botonPeligro {
-  background: #fdecec;
+  border-color: #f3c7c7;
 }
 
 .botonIcono.botonPeligro:hover {
-  background: #fbd5d5;
+  background: var(--rojo-claro);
 }
 
 @media (max-width: 576px) {
   .tabla thead th,
   .tabla tbody td {
-    padding: 0.6rem 0.65rem;
-    font-size: 0.8rem;
+    padding: 10px 11px;
+    font-size: 0.84rem;
   }
+}
+
+/* =========================================================
+   VENTANAS Y FORMULARIOS PROPIOS
+   Ferias, sorteos, directorio y usuarios tienen ventanas
+   hechas a mano (no de Bootstrap). Sus módulos CSS las
+   "componen" desde aquí (composes: ... from) para que todas
+   se vean igual que las de noticias (styles/panel.css).
+========================================================= */
+.ventanaFondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 42, 74, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1060;
+}
+
+.ventana {
+  background: #fff;
+  width: 100%;
+  max-height: 90vh;
+  border-radius: 18px;
+  box-shadow: 0 30px 70px rgba(11, 42, 74, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Franja con los colores del logo */
+.ventana::before {
+  content: "";
+  display: block;
+  height: 5px;
+  flex: none;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
+}
+
+.ventanaCabecera {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ventanaCabecera h2,
+.ventanaCabecera h3 {
+  margin: 0;
+  font: 700 1.2rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+}
+
+.ventanaCuerpo {
+  padding: 22px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.ventanaPie {
+  border-top: 1px solid var(--line);
+  background: var(--panel-fondo);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.etiqueta {
+  display: block;
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.entrada {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #cfdbe5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 400 0.97rem var(--font-texto), Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.entrada:focus {
+  outline: none;
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
+}
+
+.entrada:disabled {
+  background: var(--panel-fondo);
+  color: var(--ink2);
+}
+
+.entrada::placeholder {
+  color: #8a9bab;
+}
+
+.ayuda {
+  font-size: 0.86rem;
+  color: var(--ink2);
+  margin-top: 5px;
+}
+
+/* Botones de las ventanas: principal dorado, secundario blanco */
+.botonPrincipal,
+.botonSecundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font: 600 0.93rem var(--font-titulos), Arial, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, filter 0.15s ease;
+}
+
+.botonPrincipal {
+  background: var(--gold);
+  color: var(--navy);
+  border: 1.5px solid var(--gold);
+  font-weight: 700;
+}
+
+.botonPrincipal:hover {
+  filter: brightness(0.95);
+}
+
+.botonPrincipal:disabled,
+.botonSecundario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botonSecundario {
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid #cfdbe5;
+}
+
+.botonSecundario:hover {
+  background: var(--tint);
+}
+
+/* Etiquetas redondas (rol, estado, privilegios) */
+.etiquetaRedonda {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: 600 0.78rem var(--font-titulos), Arial, sans-serif;
+  white-space: nowrap;
 }

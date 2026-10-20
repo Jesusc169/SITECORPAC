@@ -4,36 +4,39 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Sidebar.module.css";
+import Icono, { type NombreIcono } from "@/components/Icono/Icono";
 import { tienePermiso, type ClavePrivilegio } from "@/lib/permisos";
 
-const ITEMS_MENU: { href: string; label: string; permiso: ClavePrivilegio }[] = [
-  { href: "/admin/noticias", label: "Administrar noticias", permiso: "noticias" },
-  { href: "/admin/directorio", label: "Administrar directorio", permiso: "directorio" },
-  { href: "/admin/ferias", label: "Administrar ferias", permiso: "ferias" },
-  { href: "/admin/sorteos", label: "Administrar sorteos", permiso: "sorteos" },
-  { href: "/admin/usuarios", label: "Administrar usuarios", permiso: "usuarios" },
+// Los textos de los enlaces no cambian con el rediseño: las secretarias y el
+// manual los conocen así (y las pruebas E2E los buscan por nombre).
+const ITEMS_MENU: { href: string; label: string; permiso: ClavePrivilegio; icono: NombreIcono }[] = [
+  { href: "/admin/noticias", label: "Administrar noticias", permiso: "noticias", icono: "megafono" },
+  { href: "/admin/directorio", label: "Administrar directorio", permiso: "directorio", icono: "grupo" },
+  { href: "/admin/ferias", label: "Administrar ferias", permiso: "ferias", icono: "tienda" },
+  { href: "/admin/sorteos", label: "Administrar sorteos", permiso: "sorteos", icono: "regalo" },
+  { href: "/admin/usuarios", label: "Administrar usuarios", permiso: "usuarios", icono: "usuario" },
 ];
 
-interface UsuarioActual {
+export interface UsuarioPanel {
+  nombre: string;
   rol: string;
   permisos: unknown;
 }
 
-export default function Sidebar() {
+/**
+ * Menú lateral del panel (rediseño A+C): blanco, con la franja de colores del
+ * logo arriba como la cabecera del sitio público. En pantallas chicas se
+ * vuelve una barra superior con botón de menú.
+ */
+export default function Sidebar({ usuario }: Readonly<{ usuario: UsuarioPanel }>) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
 
-  useEffect(() => {
-    fetch("/api/administrador/me")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setUsuario(data))
-      .catch(() => setUsuario(null));
-  }, []);
+  // Al cambiar de pantalla se cierra el menú del celular.
+  useEffect(() => setOpen(false), [pathname]);
 
-  const isActive = (path: string) =>
-    pathname === path || pathname.startsWith(path + "/");
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
   const handleLogout = async () => {
     try {
@@ -55,107 +58,93 @@ export default function Sidebar() {
     router.refresh();
   };
 
+  const enlace = (href: string, label: string, icono: NombreIcono) => (
+    <Link
+      href={href}
+      className={`${styles.link} ${isActive(href) ? styles.active : ""}`}
+      aria-current={isActive(href) ? "page" : undefined}
+    >
+      <Icono nombre={icono} chico />
+      {label}
+    </Link>
+  );
+
   return (
     <>
-      {/* Toggle (mobile) */}
-      <button
-        className={styles.toggleBtn}
-        onClick={() => setOpen(true)}
-        aria-label="Abrir menú"
-      >
-        ☰
-      </button>
+      {/* Barra superior (celular y tablet) */}
+      <header className={styles.barraMovil}>
+        <span className={styles.strip} />
+        <div className={styles.barraMovilIn}>
+          <Link href="/dashboard" className={styles.brand}>
+            <img src="/logo_site.jpg" alt="" width={38} height={38} />
+            <span className={styles.bname}>SITECORPAC</span>
+          </Link>
+          <button
+            type="button"
+            className={styles.toggleBtn}
+            onClick={() => setOpen(true)}
+            aria-label="Abrir menú"
+            aria-expanded={open}
+          >
+            <i />
+            <i />
+            <i />
+          </button>
+        </div>
+      </header>
 
-      {/* Overlay */}
       {open && (
-        <button
-          type="button"
-          className={styles.overlay}
-          onClick={() => setOpen(false)}
-          aria-label="Cerrar menú"
-        />
+        <button type="button" className={styles.overlay} onClick={() => setOpen(false)} aria-label="Cerrar menú" />
       )}
 
-      {/* Sidebar */}
-      <aside
-        className={`${styles.sidebar} ${open ? styles.open : ""}`}
-      >
-        <div>
-          {/* Header */}
-          <div className={styles.header}>
-            <div className={styles.brand}>
-              <img
-                src="/logo_site.jpg"
-                alt="SITECORPAC"
-                className={styles.brandLogo}
-              />
-              <span className={styles.brandText}>
-                SITECORPAC
-              </span>
-            </div>
-          </div>
+      <aside className={`${styles.sidebar} ${open ? styles.open : ""}`}>
+        <span className={styles.strip} />
 
-          {/* Botón Inicio */}
-          <div className={styles.homeWrapper}>
-            <Link
-              href="/dashboard"
-              className={`${styles.homeBtn} ${
-                isActive("/dashboard") ? styles.activeHome : ""
-              }`}
-              onClick={() => setOpen(false)}
-            >
-              Inicio
-            </Link>
-          </div>
-
-          {/* Navegación */}
-          <nav className={styles.nav}>
-            <ul>
-              {ITEMS_MENU.filter((item) => tienePermiso(usuario, item.permiso)).map(
-                (item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`${styles.link} ${
-                        isActive(item.href) ? styles.active : ""
-                      }`}
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                )
-              )}
-              {/* Solo el rol administrador: no es un privilegio asignable */}
-              {usuario?.rol === "administrador" && (
-                <li>
-                  <Link
-                    href="/admin/sistema"
-                    className={`${styles.link} ${
-                      isActive("/admin/sistema") ? styles.active : ""
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Sistema y registros
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </nav>
+        <div className={styles.header}>
+          <Link href="/dashboard" className={styles.brand}>
+            <img src="/logo_site.jpg" alt="" width={46} height={46} />
+            <span>
+              <span className={styles.bname}>SITECORPAC</span>
+              <span className={styles.bsub}>Panel administrativo</span>
+            </span>
+          </Link>
         </div>
 
-        {/* Footer */}
+        <nav className={styles.nav} aria-label="Panel administrativo">
+          <ul>
+            <li>{enlace("/dashboard", "Inicio", "casa")}</li>
+          </ul>
+          <p className={styles.grupoTitulo}>Contenido</p>
+          <ul>
+            {ITEMS_MENU.filter((item) => tienePermiso(usuario, item.permiso)).map((item) => (
+              <li key={item.href}>{enlace(item.href, item.label, item.icono)}</li>
+            ))}
+            {/* Solo el rol administrador: no es un privilegio asignable */}
+            {usuario.rol === "administrador" && <li>{enlace("/admin/sistema", "Sistema y registros", "escudo")}</li>}
+          </ul>
+        </nav>
+
         <div className={styles.footer}>
-          <button
-            className={styles.logoutBtn}
-            onClick={handleLogout}
-          >
+          <div className={styles.cuenta}>
+            <span className={styles.avatar} aria-hidden="true">
+              {usuario.nombre.trim().charAt(0).toUpperCase() || "?"}
+            </span>
+            <span className={styles.cuentaTexto}>
+              <span className={styles.cuentaNombre}>{usuario.nombre}</span>
+              <span className={styles.cuentaRol}>{usuario.rol}</span>
+            </span>
+          </div>
+
+          <a href="/" target="_blank" rel="noopener noreferrer" className={styles.verSitio}>
+            <Icono nombre="externo" chico />
+            Ver el sitio público
+            <span className="sr-only"> (abre en una pestaña nueva)</span>
+          </a>
+
+          <button type="button" className={styles.logoutBtn} onClick={handleLogout}>
+            <Icono nombre="salir" chico />
             Cerrar sesión
           </button>
-
-          <div className={styles.footerText}>
-            SITECORPAC • Panel administrativo
-          </div>
         </div>
       </aside>
     </>

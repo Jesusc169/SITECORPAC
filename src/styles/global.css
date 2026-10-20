@@ -26,6 +26,14 @@
   --tint: #eef9fc;
   --teal: #136a80;
   --teal-claro: #1b6f86;
+
+  /* Panel administrativo (mismo rediseño, oct-2026) */
+  --panel-menu: 264px;
+  --panel-fondo: #f4f8fb;
+  --rojo: #a51c1c;
+  --rojo-claro: #fdecec;
+  --verde: #166534;
+  --verde-claro: #dcfce7;
 }
 
 /* Reset básico */

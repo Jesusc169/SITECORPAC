@@ -1,204 +1,116 @@
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f4f6f8;
-}
-
-.main {
-  flex: 1;
-  margin-left: 260px;
-  padding: 2rem;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.header h1 {
-  margin: 0;
-  color: var(--sitecorpac-navy);
-}
-
-.subtitulo {
-  color: #64748b;
-  margin: 0.3rem 0 0;
-  font-size: 0.95rem;
-}
-
-.btnPrimary {
-  background-color: var(--sitecorpac-blue);
-  color: #fff;
-  border: none;
-  padding: 0.65rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.btnPrimary:hover {
-  background-color: var(--sitecorpac-blue-dark);
-}
-
-.btnSecondary {
-  background-color: #e5e7eb;
-  color: #111827;
-  border: none;
-  padding: 0.65rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
+/* =========================================================
+   USUARIOS (panel) – etiquetas de la tabla y la ventana de
+   crear/editar cuenta. El marco, la tabla y los botones
+   vienen de styles/PanelAdmin.module.css (rediseño A+C).
+========================================================= */
 
 .errorBanner {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: var(--sitecorpac-red-dark);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  background: var(--rojo-claro);
+  border: 1px solid #f3c7c7;
+  color: var(--rojo);
+  padding: 11px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.93rem;
 }
 
+/* ---------- Etiquetas de la tabla ---------- */
 .badgeRol {
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  composes: etiquetaRedonda from "../../../styles/PanelAdmin.module.css";
   text-transform: capitalize;
 }
 
 .badgeAdmin {
-  background-color: #eff6ff;
-  color: var(--sitecorpac-blue-dark);
+  background: var(--navy);
+  color: #fff;
 }
 
 .badgeSecretaria {
-  background-color: #f0fdf4;
-  color: #15803d;
+  background: var(--tint);
+  color: var(--teal);
+}
+
+.badgeActiva {
+  background: var(--verde-claro);
+  color: var(--verde);
+}
+
+.badgeInactiva {
+  background: #eef2f6;
+  color: var(--ink2);
+}
+
+.filaInactiva td {
+  color: #8a9bab;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 5px;
 }
 
 .chip {
-  background-color: #f1f5f9;
-  color: #334155;
-  padding: 0.2rem 0.55rem;
+  background: var(--panel-fondo);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 2px 9px;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .textoMuted {
-  color: #94a3b8;
-  font-size: 0.85rem;
+  color: var(--ink2);
+  font-size: 0.88rem;
 }
 
-/* ---------- Modal ---------- */
+/* ---------- Ventana ---------- */
 .modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 50;
+  composes: ventanaFondo from "../../../styles/PanelAdmin.module.css";
 }
 
 .modal {
   background: #fff;
-  border-radius: 14px;
-  padding: 1.75rem;
+  border-radius: 18px;
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
+  padding: 0 24px;
+  box-shadow: 0 30px 70px rgba(11, 42, 74, 0.3);
+}
+
+/* Franja con los colores del logo */
+.modal::before {
+  content: "";
+  display: block;
+  height: 5px;
+  margin: 0 -24px;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
 }
 
 .modal h2 {
-  margin: 0 0 1.1rem;
-  color: var(--sitecorpac-navy);
+  margin: 0 -24px 6px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  font: 700 1.2rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+}
+
+.modal .errorBanner {
+  margin-top: 14px;
 }
 
 .label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin: 0.9rem 0 0.35rem;
-  color: #334155;
+  composes: etiqueta from "../../../styles/PanelAdmin.module.css";
+  margin-top: 14px;
 }
 
 .input {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.92rem;
-  box-sizing: border-box;
+  composes: entrada from "../../../styles/PanelAdmin.module.css";
 }
 
-.input:disabled {
-  background-color: #f3f4f6;
-  color: #6b7280;
-}
-
-.checkboxGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.4rem;
-}
-
-.checkboxItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #1f2937;
-  cursor: pointer;
-}
-
-.modalFooter {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .main {
-    margin-left: 0;
-  }
-}
-
-/* Estado de la cuenta */
-.badgeActiva {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badgeInactiva {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.filaInactiva td {
-  color: #94a3b8;
-}
-
-/* "Privilegios" agrupa casillas: <fieldset>/<legend> sin el borde del navegador */
 .grupo {
   border: 0;
   margin: 0;
@@ -208,4 +120,50 @@
 
 .grupo legend {
   padding: 0;
+  float: left;
+  width: 100%;
+}
+
+.checkboxGroup {
+  clear: both;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--panel-fondo);
+  border-radius: 12px;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.checkboxItem input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal-claro);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 22px -24px 0;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--panel-fondo);
+  position: sticky;
+  bottom: 0;
+}
+
+.btnPrimary {
+  composes: botonPrincipal from "../../../styles/PanelAdmin.module.css";
+}
+
+.btnSecondary {
+  composes: botonSecundario from "../../../styles/PanelAdmin.module.css";
 }

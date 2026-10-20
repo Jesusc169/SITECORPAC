@@ -1,238 +1,98 @@
 /* =========================================================
-   🏦 OVERLAY CORPORATIVO BANCA 2026
+   DIRECTORIO (panel) – ventana de agregar/editar miembro.
+   Mismo aspecto que las demás ventanas del panel
+   (styles/PanelAdmin.module.css, rediseño A+C).
 ========================================================= */
+
 .modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(4, 18, 38, 0.72);
-  backdrop-filter: blur(6px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  animation: overlayFade 0.25s ease;
+  composes: ventanaFondo from "../../../../../styles/PanelAdmin.module.css";
 }
 
-@keyframes overlayFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* =========================================================
-   💎 MODAL PRINCIPAL ESTILO BBVA PREMIUM
-========================================================= */
 .modal {
-  width: 520px;
-  max-width: 95%;
-  background: linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  width: 540px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
   border-radius: 18px;
-  padding: 2.3rem 2.2rem;
-  position: relative;
-
-  border: 1px solid rgba(255,255,255,0.7);
-
-  /* sombras banca real */
-  box-shadow:
-    0 45px 90px rgba(0,0,0,0.35),
-    0 15px 35px rgba(0,0,0,0.18);
-
-  transform: scale(.94);
-  animation: modalEnter .25s ease forwards;
+  padding: 0 0 4px;
+  box-shadow: 0 30px 70px rgba(11, 42, 74, 0.3);
 }
 
-@keyframes modalEnter {
-  to { transform: scale(1); }
+/* Franja con los colores del logo */
+.modal::before {
+  content: "";
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
 }
 
-/* brillo interno premium */
-.modal::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  pointer-events:none;
-  background:linear-gradient(
-    120deg,
-    rgba(255,255,255,.55),
-    transparent 40%
-  );
-  opacity:.4;
-}
-
-/* =========================================================
-   🧠 TITULO
-========================================================= */
 .modal h2 {
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #072146;
-  text-align: center;
-  margin-bottom: 1.6rem;
-  letter-spacing: .4px;
+  margin: 0;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  font: 700 1.2rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
-/* linea premium */
-.modal h2::after {
-  content:"";
-  display:block;
-  width:60px;
-  height:3px;
-  margin:10px auto 0;
-  border-radius:10px;
-  background: linear-gradient(90deg,var(--sitecorpac-blue-dark),#2d7df6);
-}
-
-/* =========================================================
-   📋 FORM
-========================================================= */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 6px;
+  padding: 18px 24px 0;
 }
 
-/* labels tipo banco */
 .form label {
-  font-size: .78rem;
-  font-weight: 700;
-  color: #344054;
-  letter-spacing: .6px;
-  margin-bottom: 2px;
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  margin-top: 8px;
 }
 
-/* =========================================================
-   🧾 INPUTS NIVEL BANCA
-========================================================= */
-.form input[type="text"],
-.form input[type="email"],
-.form input[type="date"],
-.form input[type="file"] {
-  padding: .7rem .75rem;
+.form input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #cfdbe5;
   border-radius: 10px;
-  border: 1px solid #d0d5dd;
-  font-size: .92rem;
-  background: #f4f7fb;
-  transition: all .18s ease;
-  font-weight: 500;
+  padding: 10px 12px;
+  font: 400 0.97rem var(--font-texto), Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
 }
 
-/* hover */
-.form input:hover {
-  border-color: #98b6ff;
-  background: #f0f4ff;
+.form input[type="file"] {
+  padding: 8px;
+  background: var(--panel-fondo);
+  cursor: pointer;
 }
 
-/* focus corporativo */
 .form input:focus {
   outline: none;
-  background: #fff;
-  border-color: var(--sitecorpac-blue-dark);
-  box-shadow:
-    0 0 0 3px rgba(10,88,202,.15),
-    0 6px 18px rgba(10,88,202,.18);
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
 }
 
-/* file input elegante */
-.form input[type="file"] {
-  background: #eef3ff;
-  cursor: pointer;
-  padding: .55rem;
-}
-
-/* =========================================================
-   🧱 FOOTER BOTONES
-========================================================= */
+/* Pie: "Guardar" a la derecha y "Cancelar" a su izquierda, como en las
+   demás ventanas (en el código Guardar va primero). */
 .buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: .8rem;
-  margin-top: 1.8rem;
+  flex-direction: row-reverse;
+  gap: 8px;
+  margin: 20px -24px 0;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--panel-fondo);
 }
 
-/* =========================================================
-   🔵 BOTON PRINCIPAL GUARDAR
-========================================================= */
 .primary {
-  background: linear-gradient(135deg,var(--sitecorpac-blue-dark),#072f7a);
-  color: #fff;
-  border: none;
-  padding: .65rem 1.6rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: .9rem;
-  letter-spacing: .4px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all .25s ease;
+  composes: botonPrincipal from "../../../../../styles/PanelAdmin.module.css";
 }
 
-/* efecto brillo premium */
-.primary::before {
-  content:"";
-  position:absolute;
-  left:-40%;
-  top:0;
-  width:40%;
-  height:100%;
-  background:linear-gradient(
-    120deg,
-    transparent,
-    rgba(255,255,255,.55),
-    transparent
-  );
-  transition:.6s;
-}
-
-.primary:hover::before {
-  left:120%;
-}
-
-.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(10,88,202,.45);
-  background: linear-gradient(135deg,#084298,#062c66);
-}
-
-/* =========================================================
-   ⚪ BOTON CANCELAR
-========================================================= */
 .secondary {
-  background: #eef2f7;
-  color: #344054;
-  border: none;
-  padding: .65rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: .9rem;
-  cursor: pointer;
-  transition: all .2s ease;
+  composes: botonSecundario from "../../../../../styles/PanelAdmin.module.css";
 }
 
-.secondary:hover {
-  background: #e2e8f0;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,0,0,.18);
-}
-
-/* =========================================================
-   📱 RESPONSIVE PRO
-========================================================= */
 @media (max-width: 600px) {
-  .modal {
-    padding: 1.8rem 1.4rem;
-  }
-
-  .modal h2 {
-    font-size: 1.25rem;
-  }
-
   .buttons {
     flex-direction: column;
-  }
-
-  .primary,
-  .secondary {
-    width: 100%;
   }
 }

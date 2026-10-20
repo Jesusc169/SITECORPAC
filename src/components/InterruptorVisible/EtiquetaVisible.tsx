@@ -13,7 +13,7 @@ export default function EtiquetaVisible({ visible, masculino = false }: Readonly
         fontWeight: 600,
         whiteSpace: "nowrap",
         background: visible ? "#e6f4ea" : "#fdf3dd",
-        color: visible ? "#15803d" : "#8a5a00",
+        color: visible ? "#166534" : "#8a5a00",
       }}
     >
       {visible ? "● Visible" : oculto}

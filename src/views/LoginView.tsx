@@ -1,16 +1,18 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "../styles/Login.module.css"; // 👈 Importa el CSS Module aquí
+import styles from "../styles/Login.module.css";
 
 export default function LoginView() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setEnviando(true);
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -23,6 +25,7 @@ export default function LoginView() {
 
       if (!res.ok) {
         setError(data.error || "Error en login");
+        setEnviando(false);
         return;
       }
 
@@ -30,16 +33,19 @@ export default function LoginView() {
       router.push("/dashboard");
     } catch (err) {
       setError("Error en el servidor");
+      setEnviando(false);
     }
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
+        <span className={styles.kick}>Panel administrativo</span>
         <h1 className={styles.title}>Iniciar sesión</h1>
+        <p className={styles.subtitle}>Solo para el personal autorizado del SITECORPAC.</p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          <label htmlFor="login-email" className={styles.srOnly}>
+          <label htmlFor="login-email" className={styles.label}>
             Correo
           </label>
           <input
@@ -55,7 +61,7 @@ export default function LoginView() {
             aria-describedby={error ? "login-error" : undefined}
             className={styles.input}
           />
-          <label htmlFor="login-password" className={styles.srOnly}>
+          <label htmlFor="login-password" className={styles.label}>
             Contraseña
           </label>
           <input
@@ -71,7 +77,7 @@ export default function LoginView() {
             aria-describedby={error ? "login-error" : undefined}
             className={styles.input}
           />
-          <button type="submit" className={styles.button}>
+          <button type="submit" className={styles.button} disabled={enviando}>
             Ingresar
           </button>
         </form>
@@ -83,6 +89,10 @@ export default function LoginView() {
             {error}
           </p>
         )}
+
+        <p className={styles.ayuda}>
+          ¿Olvidaste tu contraseña? Pídele al administrador del panel que te asigne una nueva.
+        </p>
       </div>
     </div>
   );

@@ -1,85 +1,23 @@
 /* =========================================================
-   BASE GENERAL
-========================================================= */
-.adminWrapper {
-  display: flex;
-  min-height: 100vh;
-  background: #f4f6f9;
-  font-family: "Segoe UI", "Inter", Arial, sans-serif;
-  color: #1a1a1a;
-}
-
-.panelContainer {
-  flex: 1;
-  margin-left: 260px;
-  padding: 40px 50px;
-  background: #f4f6f9;
-}
-
-@media (max-width: 900px) {
-  .panelContainer {
-    margin-left: 0;
-    padding: 24px;
-  }
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 35px;
-}
-
-.title {
-  font-size: 1.9rem;
-  font-weight: 700;
-  color: #0b1f3a;
-  letter-spacing: -0.2px;
-}
-
-.subtitle {
-  font-size: 0.95rem;
-  color: #6b7280;
-  margin-top: 5px;
-}
-
-/* BOTÓN NUEVO (ESTILO BANCO) */
-
-/* =========================================================
-   TABLA CONTENEDOR
+   FERIAS (panel) – lo propio de la tabla de ferias.
+   El marco, el encabezado, la tabla y los botones vienen de
+   styles/PanelAdmin.module.css (rediseño A+C).
 ========================================================= */
 
-/* =========================================================
-   TABLA
-========================================================= */
-
-/* HEADER TABLA */
-
-/* CELDAS */
-
-/* =========================================================
-   NOMBRE FERIA
-========================================================= */
+/* Nombre y descripción de la feria */
 .nombre strong {
-  font-size: 0.95rem;
-  color: #0b1f3a;
-  font-weight: 700;
+  font: 700 0.97rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
 .descripcion {
-  margin-top: 6px;
-  font-size: 0.83rem;
-  line-height: 1.55;
-  color: #4b5563;
-  text-align: justify;
+  margin: 6px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ink2);
 }
 
-/* =========================================================
-   FECHAS BLOQUES
-========================================================= */
+/* Fechas: tarjetitas con borde dorado a la izquierda */
 .fechasStack {
   display: flex;
   flex-direction: column;
@@ -87,58 +25,42 @@
 }
 
 .fechaItem {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid #0b1f3a;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 0.82rem;
+  background: var(--panel-fondo);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
 }
 
 .muted {
-  font-size: 0.78rem;
-  color: #6b7280;
+  font-size: 0.82rem;
+  color: var(--ink2);
 }
 
-/* =========================================================
-   EMPRESAS
-========================================================= */
+/* Empresas */
 .empresasList {
   padding-left: 16px;
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
 }
 
 .empresasList li {
   margin-bottom: 4px;
 }
 
-/* =========================================================
-   ACCIONES
-========================================================= */
-
-/* BOTONES ICON */
-
-/* EDITAR (gris banco) */
-
-/* DUPLICAR (azul corporativo) */
-
-/* ELIMINAR (rojo serio) */
-
-/* =========================================================
-   MENSAJES
-========================================================= */
+/* Mensajes */
 .loading {
   padding: 40px;
   text-align: center;
   font-weight: 500;
-  color: #374151;
+  color: var(--ink2);
 }
 
 .error {
   padding: 40px;
   text-align: center;
-  color: var(--sitecorpac-red);
+  color: var(--rojo);
   font-weight: 600;
 }
 

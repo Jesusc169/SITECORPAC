@@ -9,6 +9,8 @@ import { useToast } from "@/components/Toast/useToast";
 import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
 import { formatearFechaSola } from "@/lib/fechas";
 import panel from "@/styles/PanelAdmin.module.css";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
+import Icono from "@/components/Icono/Icono";
 
 export default function FeriasView() {
   const [ferias, setFerias] = useState<any[]>([]);
@@ -157,16 +159,14 @@ export default function FeriasView() {
     <>
       <Toast toast={toast} onClose={cerrarToast} />
 
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Administración de Ferias</h1>
-          <p className={styles.subtitle}>Gestión institucional de ferias</p>
-        </div>
-
+      <EncabezadoPanel
+        titulo="Administración de Ferias"
+        descripcion="Ferias con sus fechas, lugar y empresas participantes. Se muestran en Actividades › Ferias."
+      >
         <button className={panel.botonNuevo} onClick={handleNuevaFeria}>
           + Nueva Feria
         </button>
-      </div>
+      </EncabezadoPanel>
 
       <div className={panel.contenedorTabla}>
         <table className={panel.tabla}>
@@ -250,7 +250,7 @@ export default function FeriasView() {
                         title="Editar"
                         aria-label={`Editar ${feria.titulo}`}
                       >
-                        ✏️
+                        <Icono nombre="lapiz" chico />
                       </button>
 
                       <button
@@ -259,7 +259,7 @@ export default function FeriasView() {
                         title="Duplicar"
                         aria-label={`Duplicar ${feria.titulo}`}
                       >
-                        📄
+                        <Icono nombre="copiar" chico />
                       </button>
 
                       <button
@@ -268,7 +268,7 @@ export default function FeriasView() {
                         title="Eliminar"
                         aria-label={`Eliminar ${feria.titulo}`}
                       >
-                        🗑️
+                        <Icono nombre="papelera" chico />
                       </button>
                     </div>
                   </td>

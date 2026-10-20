@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import styles from "@/app/admin/directorio/AdministradorDirectorio.module.css";
 
 // 🔹 Modales
@@ -9,6 +8,8 @@ import ModalAgregarMiembro from "./components/modals/ModalAgregarMiembro";
 import ModalEditarMiembro from "./components/modals/ModalEditarMiembro";
 import panel from "@/styles/PanelAdmin.module.css";
 import { rutaPublica } from "@/lib/rutas";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
+import { fechaCorta } from "@/lib/fechas";
 
 interface Miembro {
   id: number;
@@ -127,25 +128,22 @@ export default function AdminDirectorioPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <Sidebar />
-
-      <main className={styles.main}>
-        <h1>Directorio de Representantes</h1>
-
-        <button
-          className={`${panel.botonNuevo} ${styles.btnAgregar}`}
-          onClick={() => setShowAgregarModal(true)}
-        >
+    <>
+      <EncabezadoPanel
+        titulo="Directorio de Representantes"
+        descripcion="Dirigentes que aparecen en Quiénes somos › Directorio, con su cargo y datos de contacto."
+      >
+        <button className={panel.botonNuevo} onClick={() => setShowAgregarModal(true)}>
           + Agregar Miembro
         </button>
+      </EncabezadoPanel>
 
         {loading ? (
-          <p>Cargando directorio...</p>
+          <p className={styles.mensaje}>Cargando directorio...</p>
         ) : (
           <div className={styles.listaMiembros}>
             {miembros.length === 0 ? (
-              <p>No hay miembros registrados.</p>
+              <p className={styles.mensaje}>No hay miembros registrados.</p>
             ) : (
               miembros.map(miembro => (
                 <div key={`${miembro.id}-${refreshKey}`} className={styles.miembroCard}>
@@ -162,16 +160,14 @@ export default function AdminDirectorioPage() {
                     <div className={styles.sinFoto}>Sin foto</div>
                   )}
 
-                  <div>
-                    <h3>{miembro.nombre}</h3>
-                    <p>{miembro.cargo}</p>
+                  <div className={styles.datos}>
+                    <span className={styles.cargo}>{miembro.cargo}</span>
+                    <h2>{miembro.nombre}</h2>
                     <p>{miembro.correo}</p>
                     <p>{miembro.telefono}</p>
-                    <p>
-                      {new Date(miembro.periodoInicio).toLocaleDateString()}{" "}
-                      {miembro.periodoFin
-                        ? `- ${new Date(miembro.periodoFin).toLocaleDateString()}`
-                        : ""}
+                    <p className={styles.periodo}>
+                      Periodo: {fechaCorta(miembro.periodoInicio)}
+                      {miembro.periodoFin ? ` – ${fechaCorta(miembro.periodoFin)}` : ""}
                     </p>
                   </div>
 
@@ -189,7 +185,6 @@ export default function AdminDirectorioPage() {
             )}
           </div>
         )}
-      </main>
 
       {showAgregarModal && (
         <ModalAgregarMiembro
@@ -205,6 +200,6 @@ export default function AdminDirectorioPage() {
           onSubmit={handleEditarMiembro}
         />
       )}
-    </div>
+    </>
   );
 }

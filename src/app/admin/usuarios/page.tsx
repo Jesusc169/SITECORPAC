@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import styles from "./usuarios.module.css";
 import { PRIVILEGIOS } from "@/lib/permisos";
 import panel from "@/styles/PanelAdmin.module.css";
@@ -194,26 +194,20 @@ export default function UsuariosPage() {
   };
 
   return (
-    <div className={styles.dashboard}>
-      <Sidebar />
-
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <div>
-            <h1>Usuarios</h1>
-            <p className={styles.subtitulo}>
-              Administra quién puede entrar al panel y qué secciones puede usar.
-            </p>
-          </div>
+    <>
+        <EncabezadoPanel
+          titulo="Usuarios"
+          descripcion="Administra quién puede entrar al panel y qué secciones puede usar."
+        >
           <button className={panel.botonNuevo} onClick={abrirCrear}>
             + Nuevo usuario
           </button>
-        </div>
+        </EncabezadoPanel>
 
         {error && !modalAbierto && <div className={styles.errorBanner}>{error}</div>}
 
         {cargando ? (
-          <p>Cargando...</p>
+          <p className={styles.textoMuted}>Cargando...</p>
         ) : (
           <div className={panel.contenedorTabla}>
           <table className={panel.tabla}>
@@ -374,7 +368,6 @@ export default function UsuariosPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </>
   );
 }

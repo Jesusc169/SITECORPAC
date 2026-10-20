@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./noticias.module.css";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 
 import ModalCrearNoticia from "./components/ModalCrearNoticia";
 import ModalEditarNoticia from "./components/ModalEditarNoticia";
@@ -85,21 +85,20 @@ export default function NoticiasView() {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <>
       <Toast toast={toast} onClose={cerrarToast} />
 
-      {/* ===============================
-          HEADER
-      ================================ */}
-      <div className={styles.header}>
-        <h1>Administración de Noticias</h1>
+      <EncabezadoPanel
+        titulo="Administración de Noticias"
+        descripcion="Lo que publiques aquí aparece en la sección Noticias del sitio y en la portada."
+      >
         <button
           className={panel.botonNuevo}
           onClick={() => setShowCrear(true)}
         >
           + Nueva noticia
         </button>
-      </div>
+      </EncabezadoPanel>
 
       {/* ===============================
           TABLA
@@ -187,6 +186,6 @@ export default function NoticiasView() {
           mostrarToast={mostrarToast}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import panel from "@/styles/PanelAdmin.module.css";
 import styles from "./sistema.module.css";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
@@ -180,7 +180,7 @@ function Barra({ valor }: Readonly<{ valor: number }>) {
 function Tarjeta({ titulo, children }: Readonly<{ titulo: string; children: React.ReactNode }>) {
   return (
     <section className={styles.tarjeta}>
-      <h3>{titulo}</h3>
+      <h2>{titulo}</h2>
       {children}
     </section>
   );
@@ -905,7 +905,7 @@ function SeguridadTab({ s, alCambiar }: Readonly<{ s: Seguridad; alCambiar: () =
 
       {mensaje && <output className={`${styles.alerta} ${styles.alertaOk}`}>{mensaje}</output>}
 
-      <h3 className={styles.subtitulo2}>IPs con intentos fallidos</h3>
+      <h2 className={styles.subtitulo2}>IPs con intentos fallidos</h2>
       <div className={panel.contenedorTabla}>
         <table className={panel.tabla}>
           <thead>
@@ -1034,21 +1034,15 @@ export default function SistemaView({
   };
 
   return (
-    <div className={styles.dashboard}>
-      <Sidebar />
-
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <div>
-            <h1>Sistema y registros</h1>
-            <p className={styles.subtitulo}>
-              Estado del servidor, quién hizo qué en el panel, errores y seguridad. Solo para administradores.
-            </p>
-          </div>
+    <>
+        <EncabezadoPanel
+          titulo="Sistema y registros"
+          descripcion="Estado del servidor, quién hizo qué en el panel, errores y seguridad. Solo para administradores."
+        >
           <button className={panel.boton} onClick={actualizar} disabled={actualizando}>
             {actualizando ? "Actualizando…" : "↻ Actualizar"}
           </button>
-        </div>
+        </EncabezadoPanel>
 
         <div className={styles.pestanas} role="tablist" aria-label="Secciones">
           {PESTANAS.map((p) => (
@@ -1078,7 +1072,6 @@ export default function SistemaView({
           {pestana === "seguridad" && <SeguridadTab s={seguridad} alCambiar={() => router.refresh()} />}
           {pestana === "usuarios" && <UsuariosTab u={usuarios} irARegistro={irARegistro} />}
         </div>
-      </main>
-    </div>
+    </>
   );
 }

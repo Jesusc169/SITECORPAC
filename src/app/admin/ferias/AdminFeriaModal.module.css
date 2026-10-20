@@ -1,149 +1,87 @@
-/* =========================
-   OVERLAY
-   ========================= */
+/* =========================================================
+   FERIAS (panel) – ventana de crear/editar feria.
+   La ventana y los botones componen el aspecto común de
+   styles/PanelAdmin.module.css (rediseño A+C).
+========================================================= */
+
 .modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 9999;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  composes: ventanaFondo from "../../../styles/PanelAdmin.module.css";
 }
 
-/* =========================
-   MODAL
-   ========================= */
 .modalContent {
-  background: #ffffff;
-  width: 100%;
+  composes: ventana from "../../../styles/PanelAdmin.module.css";
   max-width: 900px;
-  max-height: 90vh;
-
-  border-radius: 12px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
-/* =========================
-   HEADER
-   ========================= */
 .modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modalHeader h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  composes: ventanaCabecera from "../../../styles/PanelAdmin.module.css";
 }
 
 .modalHeader button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: none;
-  border: none;
+  border: 0;
   font-size: 26px;
-  cursor: pointer;
   line-height: 1;
+  color: var(--ink2);
+  cursor: pointer;
 }
 
-/* =========================
-   BODY
-   ========================= */
-.modalBody {
-  padding: 24px;
-  overflow-y: auto;
+.modalHeader button:hover {
+  background: var(--tint);
+  color: var(--navy);
+}
 
+.modalBody {
+  composes: ventanaCuerpo from "../../../styles/PanelAdmin.module.css";
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 8px;
 }
 
-.modalBody label {
-  font-weight: 500;
-  font-size: 14px;
-  color: #374151;
+.modalBody > label {
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  margin-top: 8px;
 }
 
 .hint {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: -6px;
-}
-
-.previewBox {
-  text-align: center;
-}
-
-.previewFrame {
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 3 / 2;
-  overflow: hidden;
-  border-radius: 12px;
-  background-color: #e5e7eb;
-  margin: 0 auto;
-}
-
-.previewFrame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.previewAviso {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #fef3c7;
-  color: #92400e;
-  border-radius: 8px;
-  font-size: 13px;
+  font-size: 0.86rem;
+  color: var(--ink2);
 }
 
 /* :not([type="checkbox"]): el interruptor "Visible en el sitio web" usa el
    estilo de Bootstrap; este fondo blanco le borraría la perilla. */
-.modalBody input:not([type="checkbox"]),
+.modalBody input:not([type="checkbox"]):not([type="file"]),
 .modalBody textarea,
 .modalBody select {
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-  background: #ffffff;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #cfdbe5;
+  font: 400 0.97rem var(--font-texto), Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
 }
 
 .modalBody input:not([type="checkbox"]):focus,
 .modalBody textarea:focus {
   outline: none;
-  border-color: var(--sitecorpac-blue-light);
-  /* Antes: `var(--sitecorpac-blue-light)33`, CSS inválido que el navegador
-     descartaba, así que el foco casi no se notaba. */
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
 }
 
 .modalBody textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 96px;
 }
 
-/* =========================
-   COMBOBOX EMPRESAS
-   ========================= */
+/* ---------- Buscador de empresas ---------- */
 .comboBox {
   position: relative;
-}
-
-.comboBox input {
-  width: 100%;
 }
 
 .comboList {
@@ -151,161 +89,155 @@
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
-
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-
-  max-height: 200px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(11, 42, 74, 0.14);
+  max-height: 220px;
   overflow-y: auto;
+  padding: 6px;
   z-index: 50;
 }
 
 .comboItem {
-  padding: 8px 10px;
-  font-size: 14px;
+  padding: 9px 10px;
+  font-size: 0.93rem;
   cursor: pointer;
-  /* es un <button> (se usa con teclado): se ve igual que antes */
+  /* es un <button> (se usa con teclado) */
   display: block;
   width: 100%;
   text-align: left;
   border: 0;
+  border-radius: 8px;
   background: transparent;
   font-family: inherit;
-  color: inherit;
+  color: var(--navy);
 }
 
-.comboItem:hover {
-  background: #f3f4f6;
+.comboItem:hover,
+.comboItem:focus-visible {
+  background: var(--tint);
 }
 
 .comboEmpty {
-  padding: 8px 10px;
-  font-size: 13px;
-  color: #6b7280;
+  padding: 9px 10px;
+  font-size: 0.88rem;
+  color: var(--ink2);
 }
 
-/* =========================
-   CHIPS SELECCIONADOS
-   ========================= */
 .selectedChips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .chip {
   display: flex;
   align-items: center;
   gap: 6px;
-
-  background: #e5e7eb;
-  color: #374151;
-  padding: 4px 10px;
+  background: var(--tint);
+  color: var(--navy);
+  border: 1px solid #c6dbe6;
+  padding: 4px 6px 4px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font: 600 0.84rem var(--font-titulos), Arial, sans-serif;
 }
 
 .chip button {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
   background: none;
-  border: none;
+  border: 0;
   font-size: 16px;
-  cursor: pointer;
   line-height: 1;
+  color: var(--ink2);
+  cursor: pointer;
 }
 
-/* =========================
-   FECHAS
-   ========================= */
+.chip button:hover {
+  background: #fff;
+  color: var(--rojo);
+}
+
+/* ---------- Fechas del evento ---------- */
 .fechasSection {
-  margin-top: 16px;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--panel-fondo);
+  border-radius: 12px;
 }
 
 .fechasHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .fechasHeader h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font: 700 1rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
+/* "+ Añadir fecha": mismo aspecto que los botones secundarios del panel
+   (composes solo funciona con una clase sola, no con "clase button"). */
 .fechasHeader button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background: var(--sitecorpac-blue-light);
-  color: #ffffff;
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid #cfdbe5;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font: 600 0.86rem var(--font-titulos), Arial, sans-serif;
   cursor: pointer;
-  font-size: 13px;
 }
 
 .fechasHeader button:hover {
-  background: var(--sitecorpac-blue);
+  background: var(--tint);
 }
 
 .fechaRow {
   display: grid;
   grid-template-columns: repeat(5, 1fr) auto;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .fechaRow input {
-  font-size: 13px;
+  font-size: 0.9rem !important;
 }
 
 .fechaRow button {
-  background: var(--sitecorpac-red);
-  color: white;
-  border: none;
-  border-radius: 6px;
+  background: #fff;
+  color: var(--rojo);
+  border: 1.5px solid #f3c7c7;
+  border-radius: 10px;
   cursor: pointer;
-  padding: 0 10px;
+  padding: 0 12px;
+  font-weight: 700;
 }
 
 .fechaRow button:hover {
-  background: var(--sitecorpac-red);
+  background: var(--rojo-claro);
 }
 
-/* =========================
-   FOOTER
-   ========================= */
+@media (max-width: 760px) {
+  .fechaRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- Pie ---------- */
 .modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  composes: ventanaPie from "../../../styles/PanelAdmin.module.css";
 }
 
-.modalActions button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
+.botonCancelar {
+  composes: botonSecundario from "../../../styles/PanelAdmin.module.css";
 }
 
-.modalActions button:first-child {
-  background: #e5e7eb;
-}
-
-.modalActions button:first-child:hover {
-  background: #d1d5db;
-}
-
-.modalActions button:last-child {
-  background: var(--sitecorpac-blue-light);
-  color: white;
-}
-
-.modalActions button:last-child:hover {
-  background: var(--sitecorpac-blue);
+.botonGuardar {
+  composes: botonPrincipal from "../../../styles/PanelAdmin.module.css";
 }

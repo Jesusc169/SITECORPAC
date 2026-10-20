@@ -205,7 +205,7 @@ export default function AdminFeriaModal({
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
           <h2>{feriaData ? "Editar Feria" : "Nueva Feria"}</h2>
-          <button onClick={onClose}>×</button>
+          <button type="button" onClick={onClose} aria-label="Cerrar">×</button>
         </div>
 
         <div className={styles.modalBody}>
@@ -291,11 +291,13 @@ export default function AdminFeriaModal({
               <div key={f.clave} className={styles.fechaRow}>
                 <input
                   type="date"
+                  aria-label={`Fecha ${i + 1}: día`}
                   value={f.fecha}
                   onChange={(e) => updateFecha(i, "fecha", e.target.value)}
                 />
                 <input
                   type="time"
+                  aria-label={`Fecha ${i + 1}: hora de inicio`}
                   value={f.hora_inicio}
                   onChange={(e) =>
                     updateFecha(i, "hora_inicio", e.target.value)
@@ -303,6 +305,7 @@ export default function AdminFeriaModal({
                 />
                 <input
                   type="time"
+                  aria-label={`Fecha ${i + 1}: hora de fin`}
                   value={f.hora_fin}
                   onChange={(e) =>
                     updateFecha(i, "hora_fin", e.target.value)
@@ -310,6 +313,7 @@ export default function AdminFeriaModal({
                 />
                 <input
                   placeholder="Ubicación"
+                  aria-label={`Fecha ${i + 1}: ubicación`}
                   value={f.ubicacion}
                   onChange={(e) =>
                     updateFecha(i, "ubicacion", e.target.value)
@@ -317,10 +321,11 @@ export default function AdminFeriaModal({
                 />
                 <input
                   placeholder="Zona"
+                  aria-label={`Fecha ${i + 1}: zona`}
                   value={f.zona ?? ""}
                   onChange={(e) => updateFecha(i, "zona", e.target.value)}
                 />
-                <button type="button" onClick={() => removeFecha(i)}>
+                <button type="button" onClick={() => removeFecha(i)} aria-label={`Quitar fecha ${i + 1}`}>
                   ✕
                 </button>
               </div>
@@ -329,8 +334,8 @@ export default function AdminFeriaModal({
         </div>
 
         <div className={styles.modalActions}>
-          <button onClick={onClose}>Cancelar</button>
-          <button onClick={handleSubmit}>Guardar cambios</button>
+          <button type="button" className={styles.botonCancelar} onClick={onClose}>Cancelar</button>
+          <button type="button" className={styles.botonGuardar} onClick={handleSubmit}>Guardar cambios</button>
         </div>
       </div>
     </div>

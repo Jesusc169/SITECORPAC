@@ -1,160 +1,130 @@
-/* ===============================
-   ACCESIBILIDAD
-   Labels reales para lectores de pantalla
-   y autocompletado, sin cambiar el diseño.
-================================ */
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+/* =========================================================
+   INICIAR SESIÓN (rediseño A+C)
+   Tarjeta blanca sobre el degradado celeste de las páginas
+   del sitio, con la franja de colores del logo y el botón
+   dorado. Se ve dentro de la cabecera y el pie públicos.
+========================================================= */
 
-/* ===============================
-   CONTENEDOR GENERAL
-================================ */
 .container {
   min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 1.5rem;
-  background: linear-gradient(
-    180deg,
-    #f9fafb 0%,
-    #eef2f6 100%
-  );
+  padding: 56px 16px 72px;
+  background: linear-gradient(180deg, var(--tint), #fff);
 }
 
-/* ===============================
-   TARJETA
-================================ */
 .card {
   width: 100%;
-  max-width: 420px;
-  background-color: #ffffff;
-  padding: 2.6rem 2.4rem;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  box-shadow:
-    0 18px 30px rgba(0, 0, 0, 0.08);
+  max-width: 440px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 0 32px 30px;
+  box-shadow: 0 18px 40px rgba(11, 42, 74, 0.1);
 }
 
-/* ===============================
-   TÍTULO
-================================ */
+/* Franja con los colores del logo */
+.card::before {
+  content: "";
+  display: block;
+  height: 5px;
+  margin: 0 -32px 28px;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
+}
+
+.kick {
+  display: block;
+  font: 600 0.78rem var(--font-titulos), Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal-claro);
+}
+
 .title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 0.3rem;
+  margin: 8px 0 6px;
+  font-size: 1.8rem;
 }
 
 .subtitle {
-  font-size: 0.92rem;
-  color: #6b7280;
-  margin-bottom: 1.9rem;
+  margin: 0;
+  font-size: 0.98rem;
+  color: var(--ink2);
 }
 
-/* ===============================
-   FORM
-================================ */
 .form {
-  margin-top: 1.2rem;
+  margin-top: 22px;
+  display: grid;
 }
 
-/* ===============================
-   INPUTS
-================================ */
+.label {
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  margin: 0 0 6px;
+}
+
 .input {
   width: 100%;
-  padding: 0.78rem 0.9rem;
-  margin-bottom: 1.05rem;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin-bottom: 16px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
-  font-size: 0.95rem;
-  color: #111827;
-  background-color: #ffffff;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  border: 1.5px solid #cfdbe5;
+  font: 400 1rem var(--font-texto), Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input::placeholder {
-  color: #9ca3af;
+  color: #8a9bab;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--sitecorpac-blue-light);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
 }
 
-/* ===============================
-   BOTÓN
-================================ */
 .button {
   width: 100%;
-  padding: 0.85rem;
-  margin-top: 0.9rem;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(
-    135deg,
-    var(--sitecorpac-blue-light),
-    var(--sitecorpac-blue)
-  );
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 13px;
+  margin-top: 4px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--gold);
+  color: var(--navy);
+  font: 700 1rem var(--font-titulos), Arial, sans-serif;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.2s ease;
+  transition: filter 0.15s ease;
 }
 
 .button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.28);
+  filter: brightness(0.95);
 }
 
-.button:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.22);
+.button:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
-/* ===============================
-   ERROR
-================================ */
 .error {
-  margin-top: 1rem;
-  padding: 0.65rem 0.8rem;
+  margin: 16px 0 0;
+  padding: 11px 14px;
   border-radius: 10px;
-  background-color: #fef2f2;
-  color: var(--sitecorpac-red-dark);
-  font-size: 0.85rem;
-  border: 1px solid #fecaca;
+  background: var(--rojo-claro);
+  color: #991b1b;
+  font-size: 0.92rem;
+  border: 1px solid #f3c7c7;
   text-align: center;
 }
 
-/* ===============================
-   LINK
-================================ */
-.link {
-  display: block;
-  margin-top: 1.4rem;
-  font-size: 0.85rem;
-  color: var(--sitecorpac-blue-light);
+.ayuda {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid #edf2f6;
+  font-size: 0.88rem;
+  color: var(--ink2);
   text-align: center;
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
 }

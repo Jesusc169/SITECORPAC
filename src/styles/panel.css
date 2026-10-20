@@ -1,0 +1,200 @@
+/* =========================================================
+   PANEL ADMINISTRATIVO: tema de Bootstrap (rediseño A+C)
+   Las ventanas de noticias y algunos formularios usan clases
+   de Bootstrap (modal, form-control, btn...). En vez de
+   reescribirlos, aquí se les da el aspecto del sitio nuevo.
+   Solo aplica dentro de .panelAdmin (ver PanelAdmin.tsx), así
+   no toca el sitio público.
+========================================================= */
+
+.panelAdmin {
+  --bs-body-font-family: var(--font-texto), Arial, sans-serif;
+  --bs-body-color: var(--ink);
+  --bs-border-color: var(--line);
+  --bs-link-color-rgb: 27, 111, 134;
+  --bs-focus-ring-color: rgba(27, 111, 134, 0.25);
+}
+
+.panelAdmin :where(h1, h2, h3, h4, h5) {
+  font-family: var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Ventanas (modal) ---------- */
+.panelAdmin .modal {
+  background: rgba(11, 42, 74, 0.55) !important;
+}
+
+.panelAdmin .modal-content {
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(11, 42, 74, 0.3);
+}
+
+/* Franja con los colores del logo, como arriba del sitio */
+.panelAdmin .modal-content::before {
+  content: "";
+  display: block;
+  height: 5px;
+  flex: none;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
+}
+
+.panelAdmin .modal-header {
+  background: #fff !important;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panelAdmin .modal-title {
+  font: 700 1.2rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+}
+
+.panelAdmin .modal-body {
+  padding: 22px 24px;
+  color: var(--ink);
+}
+
+.panelAdmin .modal-footer {
+  background: var(--panel-fondo);
+  border-top: 1px solid var(--line);
+  padding: 14px 24px;
+  gap: 8px;
+}
+
+.panelAdmin .modal-footer > * {
+  margin: 0;
+}
+
+/* ---------- Formularios ---------- */
+.panelAdmin .form-label {
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.panelAdmin .form-control,
+.panelAdmin .form-select {
+  border: 1.5px solid #cfdbe5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 0.97rem;
+}
+
+.panelAdmin .form-control:focus,
+.panelAdmin .form-select:focus {
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
+}
+
+.panelAdmin .form-control::placeholder {
+  color: #8a9bab;
+}
+
+.panelAdmin .form-text {
+  color: var(--ink2);
+  font-size: 0.86rem;
+}
+
+.panelAdmin .form-check-input:checked {
+  background-color: var(--teal-claro);
+  border-color: var(--teal-claro);
+}
+
+.panelAdmin .form-check-input:focus {
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
+}
+
+.panelAdmin .list-group-item {
+  border-color: var(--line);
+}
+
+.panelAdmin .list-group {
+  border-radius: 10px;
+}
+
+/* ---------- Botones ---------- */
+.panelAdmin .btn {
+  border-radius: 10px;
+  font: 600 0.92rem var(--font-titulos), Arial, sans-serif;
+  padding: 9px 16px;
+  border-width: 1.5px;
+}
+
+.panelAdmin .btn-sm {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+/* Acción principal (Publicar, Guardar): dorado como en el sitio */
+.panelAdmin .btn-success,
+.panelAdmin .btn-primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.panelAdmin .btn-success:hover,
+.panelAdmin .btn-primary:hover,
+.panelAdmin .btn-success:focus-visible,
+.panelAdmin .btn-primary:focus-visible,
+.panelAdmin .btn-success:disabled,
+.panelAdmin .btn-primary:disabled {
+  background: #e0b200;
+  border-color: #e0b200;
+  color: var(--navy);
+}
+
+/* Cancelar / secundarios: blanco con borde */
+.panelAdmin .btn-outline-secondary,
+.panelAdmin .btn-secondary {
+  background: #fff;
+  border-color: #cfdbe5;
+  color: var(--navy);
+}
+
+.panelAdmin .btn-outline-secondary:hover,
+.panelAdmin .btn-secondary:hover {
+  background: var(--tint);
+  border-color: #b9d2df;
+  color: var(--navy);
+}
+
+.panelAdmin .btn-danger {
+  background: var(--rojo);
+  border-color: var(--rojo);
+  color: #fff;
+}
+
+.panelAdmin .btn-danger:hover {
+  background: #8a1717;
+  border-color: #8a1717;
+}
+
+.panelAdmin .btn-outline-danger {
+  background: #fff;
+  border-color: #f3c7c7;
+  color: var(--rojo);
+}
+
+.panelAdmin .btn-outline-danger:hover {
+  background: var(--rojo-claro);
+  border-color: #f3c7c7;
+  color: var(--rojo);
+}
+
+.panelAdmin .btn-close:focus {
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.25);
+}
+
+.panelAdmin .badge.bg-success {
+  background: var(--verde-claro) !important;
+  color: var(--verde);
+}

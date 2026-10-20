@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { obtenerUsuarioActual } from "@/lib/auth";
-import InactivityGuard from "@/components/InactivityGuard/InactivityGuard";
+import PanelAdmin from "@/components/PanelAdmin/PanelAdmin";
 
 export default async function AdminLayout({
   children,
@@ -14,10 +14,7 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  return (
-    <>
-      {children}
-      <InactivityGuard />
-    </>
-  );
+  // El menú lateral, el fondo y el aviso de inactividad son comunes a todas
+  // las pantallas del panel (rediseño A+C).
+  return <PanelAdmin usuario={usuario}>{children}</PanelAdmin>;
 }

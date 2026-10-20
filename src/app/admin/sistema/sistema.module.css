@@ -1,76 +1,47 @@
-/* Misma base que /admin/usuarios (sidebar fijo de 260px). */
-.dashboard {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f4f6f8;
-}
-
-.main {
-  flex: 1;
-  margin-left: 260px;
-  padding: 2rem;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.header h1 {
-  margin: 0;
-  color: var(--sitecorpac-navy);
-}
-
-.subtitulo {
-  color: #64748b;
-  margin: 0.3rem 0 0;
-  font-size: 0.95rem;
-}
+/* =========================================================
+   SISTEMA Y REGISTROS (panel). El marco, el encabezado, las
+   tablas y los botones vienen de styles/PanelAdmin.module.css
+   (rediseño A+C); aquí va lo propio de esta pantalla.
+========================================================= */
 
 .subtitulo2 {
-  margin: 1.5rem 0 0.75rem;
-  font-size: 1.1rem;
-  color: var(--sitecorpac-navy);
+  margin: 26px 0 12px;
+  font: 700 1.15rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
-/* ---------- Pestañas ---------- */
+/* ---------- Pestañas (subrayado dorado, como el menú público) ---------- */
 .pestanas {
   display: flex;
-  gap: 0.25rem;
-  border-bottom: 2px solid #e2e8f0;
-  margin-bottom: 1.25rem;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
   overflow-x: auto;
+  overflow-y: hidden; /* sin esto aparecía una barrita de scroll vertical */
 }
 
 .pestana {
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  padding: 0.7rem 1rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #475569;
+  padding: 11px 14px 10px;
+  font: 500 0.95rem var(--font-titulos), Arial, sans-serif;
+  color: var(--ink2);
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 7px;
 }
 
 .pestana:hover {
-  color: var(--sitecorpac-azul-oscuro);
+  color: var(--navy);
 }
 
 .pestanaActiva {
-  color: var(--sitecorpac-azul-oscuro);
-  border-bottom-color: var(--sitecorpac-azul-oscuro);
+  color: var(--navy);
+  font-weight: 700;
+  border-bottom-color: var(--gold);
 }
 
 .contador {
@@ -78,8 +49,8 @@
   color: #fff;
   border-radius: 999px;
   font-size: 0.75rem;
-  padding: 0 0.45rem;
-  line-height: 1.4;
+  padding: 0 7px;
+  line-height: 1.5;
 }
 
 .contenido {
@@ -89,18 +60,18 @@
 /* ---------- Alertas ---------- */
 .alertas {
   display: grid;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .alerta {
   display: block; /* también cuando es <output> */
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  padding: 12px 16px;
   font-weight: 600;
   font-size: 0.95rem;
   border: 1px solid;
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
 }
 
 .alertas .alerta {
@@ -120,8 +91,8 @@
 }
 
 .alertaError {
-  background: #fef2f2;
-  border-color: #fca5a5;
+  background: var(--rojo-claro);
+  border-color: #f3c7c7;
   color: #991b1b;
 }
 
@@ -129,23 +100,22 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .tarjeta {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.1rem 1.25rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
   min-width: 0;
 }
 
-.tarjeta h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
-  color: var(--sitecorpac-azul-oscuro);
+.tarjeta h2 {
+  margin: 0 0 12px;
+  font: 700 1.02rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
 .tarjeta dl {
@@ -155,10 +125,10 @@
 .dato {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.35rem 0;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.92rem;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid #edf2f6;
+  font-size: 0.93rem;
 }
 
 .dato:last-child {
@@ -166,32 +136,33 @@
 }
 
 .dato dt {
-  color: #64748b;
+  color: var(--ink2);
+  font-weight: 400;
 }
 
 .dato dd {
   margin: 0;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--ink);
   text-align: right;
   overflow-wrap: anywhere;
 }
 
 .etiqueta {
-  margin: 0.75rem 0 0.3rem;
-  font-size: 0.85rem;
-  color: #475569;
+  margin: 12px 0 5px;
+  font-size: 0.86rem;
+  color: var(--ink2);
 }
 
 .nota {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin: 0.6rem 0 0;
+  font-size: 0.86rem;
+  color: var(--ink2);
+  margin: 10px 0 0;
 }
 
 .barra {
   height: 8px;
-  background: #e2e8f0;
+  background: #e6edf3;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -202,7 +173,7 @@
 }
 
 .barraOk {
-  background: #16a34a;
+  background: var(--teal-claro);
 }
 
 .barraAviso {
@@ -217,9 +188,9 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   display: grid;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .listaErrores li {
@@ -229,35 +200,38 @@
 
 .fechaChica {
   display: block;
-  color: #64748b;
-  font-size: 0.78rem;
+  color: var(--ink2);
+  font-size: 0.8rem;
 }
 
 .enlace {
   background: none;
   border: none;
   padding: 0;
-  color: #1d4ed8;
+  color: var(--teal-claro);
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
 }
 
+.enlace:hover {
+  color: var(--navy);
+}
+
 /* ---------- Niveles ---------- */
 .nivel {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font: 700 0.7rem var(--font-titulos), Arial, sans-serif;
   border-radius: 6px;
-  padding: 0.1rem 0.4rem;
-  margin-right: 0.25rem;
+  padding: 2px 6px;
+  margin-right: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .nivelInfo {
-  background: #e0f2fe;
-  color: #075985;
+  background: var(--tint);
+  color: var(--teal);
 }
 
 .nivelAviso {
@@ -270,36 +244,42 @@
   color: #991b1b;
 }
 
-/* ---------- Registro ---------- */
+/* ---------- Registro: filtros ---------- */
 .filtros {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
   align-items: end;
 }
 
 .filtros label {
   display: grid;
-  gap: 0.3rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
+  gap: 5px;
+  font: 600 0.86rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
 .filtros input,
 .filtros select {
-  font: inherit;
-  font-weight: 400;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  font: 400 0.93rem var(--font-texto), Arial, sans-serif;
+  padding: 8px 10px;
+  border: 1.5px solid #cfdbe5;
+  border-radius: 10px;
   background: #fff;
+  color: var(--ink);
   min-width: 0;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+  outline: none;
+  border-color: var(--teal-claro);
+  box-shadow: 0 0 0 3px rgba(27, 111, 134, 0.18);
 }
 
 .filtroTexto {
@@ -309,7 +289,7 @@
 .filtrosBotones {
   grid-column: 1 / -1;
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -340,8 +320,8 @@
 }
 
 .muted {
-  color: #64748b;
-  font-size: 0.85rem;
+  color: var(--ink2);
+  font-size: 0.86rem;
 }
 
 .paginacion {
@@ -349,23 +329,18 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  gap: 12px;
+  margin-top: 12px;
   font-size: 0.9rem;
-  color: #475569;
+  color: var(--ink2);
 }
 
 .paginacion div {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 @media (max-width: 640px) {
-  .main {
-    margin-left: 0;
-    padding: 4rem 1rem 1.5rem;
-  }
-
   .grid {
     grid-template-columns: 1fr;
   }
@@ -375,34 +350,44 @@
   }
 }
 
-/* ---------- Modal "Qué cambió" ---------- */
+/* ---------- Ventana "Qué cambió" ---------- */
 /* <dialog> nativo: el navegador lo centra y lo pone por encima de todo */
 .modal {
   background: #fff;
   border: 0;
-  border-radius: 14px;
+  border-radius: 18px;
   width: min(960px, calc(100% - 2rem));
   max-height: 92vh;
   overflow-y: auto;
-  padding: 1.25rem 1.5rem 1.5rem;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
+  padding: 0 24px 22px;
+  box-shadow: 0 30px 70px rgba(11, 42, 74, 0.3);
+}
+
+/* Franja con los colores del logo */
+.modal::before {
+  content: "";
+  display: block;
+  height: 5px;
+  margin: 0 -24px 16px;
+  background: linear-gradient(90deg, var(--cyan) 0 33.3%, var(--gold) 33.3% 66.6%, #d62828 66.6%);
 }
 
 .modal::backdrop {
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(11, 42, 74, 0.55);
 }
 
 .modalCabecera {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .modalCabecera h2 {
   margin: 0;
-  font-size: 1.25rem;
-  color: var(--sitecorpac-navy);
+  font: 700 1.2rem var(--font-titulos), Arial, sans-serif;
+  color: var(--navy);
 }
 
 .modalPie {
@@ -410,8 +395,8 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .celdaAntes,
