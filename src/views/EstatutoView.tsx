@@ -22,6 +22,7 @@ export default function EstatutoView({ data }: Readonly<EstatutoViewProps>) {
       titulo={estatuto?.titulo ?? "Estatuto del SITECORPAC"}
       bloques={estatuto ? [estatuto] : []}
       boton={estatuto ? { texto: "Descargar el Estatuto (PDF)", href: estatuto.enlace_pdf, descarga: true } : undefined}
+      principal={estatuto?.imagen ? { src: estatuto.imagen, alt: "Documento y lapicero sobre una mesa", tipo: "foto" } : undefined}
     />
   );
 }

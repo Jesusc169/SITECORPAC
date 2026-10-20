@@ -16,7 +16,12 @@ export default function ConstitucionView({ data }: Readonly<ConstitucionViewProp
         texto: "Consultar la Constitución",
         href: "https://www.gob.pe/institucion/presidencia/informes-publicaciones/196158-constitucion-politica-del-peru",
       }}
-      lateral={{ src: "/images/constitucion/escudo-nacional.png", alt: "Escudo Nacional del Perú" }}
+      principal={{ src: "/images/constitucion/escudo-nacional.png", alt: "Escudo Nacional del Perú", tipo: "icono" }}
+      imagenesBloques={[
+        undefined,
+        { src: "/images/constitucion/derechos-laborales.jpg", alt: "Balanza de la justicia sobre un trabajador", tipo: "icono" },
+        { src: "/images/constitucion/defensa-trabajo.jpeg", alt: "Apretón de manos entre representantes", tipo: "foto" },
+      ]}
     />
   );
 }

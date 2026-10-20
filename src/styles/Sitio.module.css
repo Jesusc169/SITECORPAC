@@ -760,7 +760,7 @@
 .prose ul.lista { display: grid; gap: 8px; }
 .prose ul.lista li { display: flex; gap: 10px; align-items: start; }
 .prose ul.lista li svg { color: #15803d; margin-top: 4px; }
-.arts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.arts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; grid-auto-flow: dense; }
 .arts li { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 6px; align-content: start; }
 .arts .an { font: 700 0.8rem var(--font-titulos), Arial, sans-serif; letter-spacing: 0.08em; color: var(--teal); text-transform: uppercase; }
 .arts h3 { font-size: 1.08rem; }
@@ -772,7 +772,27 @@
 .navybox .kick { color: var(--cyan); }
 .navybox h2 { color: #fff; font-size: 1.4rem; }
 .navybox p { color: #c6d7e7; }
-.escudo { width: 120px; max-height: 140px; height: auto; object-fit: contain; justify-self: end; }
+/* Imágenes de legislación: marco blanco redondeado. Los íconos/logos se ven
+   enteros con aire alrededor; las fotos llenan el marco. */
+.marco {
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(11, 42, 74, 0.08);
+  aspect-ratio: 4 / 3;
+  width: 100%;
+}
+.marco img { width: 100%; height: 100%; object-fit: cover; }
+.marcoIcono img { object-fit: contain; padding: 22px; }
+.marcoHero { max-width: 420px; justify-self: end; }
+.split { align-items: center; }
+.bloqueConImg { display: grid; grid-template-columns: 1fr 240px; gap: 28px; align-items: start; }
+.bloqueTexto { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.navyboxConImg { grid-template-columns: 1fr 220px; gap: 24px; align-items: center; }
+.navybox .marco { border: 0; }
+.bloqueConImg .marcoIcono img, .navyboxConImg .marcoIcono img { padding: 12px; }
 
 /* ---------- Celular ---------- */
 @media (max-width: 1100px) {
@@ -827,7 +847,9 @@
   .att { flex-wrap: wrap; }
   .att .cta { margin-left: 0; width: 100%; justify-content: center; }
   .lnav { position: static; }
-  .escudo { display: none; }
+  .marcoHero { max-width: none; justify-self: stretch; aspect-ratio: 16 / 9; }
+  .bloqueConImg, .navyboxConImg { grid-template-columns: 1fr; }
+  .bloqueConImg .marco, .navyboxConImg .marco { max-width: 320px; }
   .ctaband { padding: 24px; }
   .ctaband a { width: 100%; justify-content: center; }
   .empty { padding: 36px 18px; }
