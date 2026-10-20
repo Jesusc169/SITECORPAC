@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { obtenerBeneficioFallecido } from "@/controllers/beneficioFallecidoController";
 import BeneficioFallecidoView from "@/views/BeneficioFallecidoView";
 
-// Componentes comunes
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Beneficio por Fallecimiento | SITECORPAC",
@@ -19,11 +16,8 @@ export default async function BeneficioFallecidoPage() {
   const data = await obtenerBeneficioFallecido();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <BeneficioFallecidoView {...data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

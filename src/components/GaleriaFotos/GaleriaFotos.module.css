@@ -47,7 +47,7 @@
 /* Botón compacto para tarjetas (ferias / sorteos). Antes iba superpuesto
    sobre la foto (pill oscuro encima de la imagen, tapando parte de la
    portada); ahora las tarjetas lo colocan fuera de la imagen (ver
-   .galeriaBoton en ferias.module.css / sorteos.module.css), así que usa
+   tarjeta de ferias/sorteos), así que usa
    colores propios de tarjeta en vez de un overlay semitransparente. */
 .boton {
   display: inline-flex;

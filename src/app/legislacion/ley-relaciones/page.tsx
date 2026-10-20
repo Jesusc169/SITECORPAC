@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { LeyRelacionesController } from "@/controllers/leyRelacionesController";
 import LeyRelacionesView from "@/views/LeyRelacionesView";
 
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Ley de Relaciones Colectivas de Trabajo | SITECORPAC",
@@ -16,11 +14,8 @@ export default async function LeyRelacionesPage() {
   const data = await LeyRelacionesController.getData();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <LeyRelacionesView data={data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

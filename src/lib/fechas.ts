@@ -38,3 +38,51 @@ export function formatearFechaSola(valor: string | Date, opciones: Intl.DateTime
 export function formatearFechaHoraPeru(valor: string | Date, opciones: Intl.DateTimeFormatOptions = {}): string {
   return new Date(valor).toLocaleString("es-PE", { ...opciones, timeZone: ZONA_PERU });
 }
+
+const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+/** "14 sep 2026": fecha de publicación de una noticia, en hora de Perú ("" si no es válida). */
+export function fechaCorta(valor: string | Date): string {
+  const { fecha } = partesPeru(valor);
+  if (!fecha) return "";
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+  return `${dia} ${MESES_CORTOS[mes - 1]} ${anio}`;
+}
+
+/** Día de feria (@db.Date, medianoche UTC) → { dia, mes (0-11), anio, semana (0-6) }. */
+function partesDia(valor: string | Date) {
+  const d = new Date(valor);
+  return { dia: d.getUTCDate(), mes: d.getUTCMonth(), anio: d.getUTCFullYear(), semana: d.getUTCDay() };
+}
+
+/** "Lun 30 de marzo" (fecha sin hora de una feria). */
+export function diaConSemana(valor: string | Date): string {
+  const p = partesDia(valor);
+  return `${DIAS_CORTOS[p.semana]} ${p.dia} de ${MESES[p.mes]}`;
+}
+
+/** Une textos como en castellano: "a", "a y b", "a, b y c". */
+function unir(partes: string[]): string {
+  return partes.length > 1 ? `${partes.slice(0, -1).join(", ")} y ${partes.at(-1)}` : partes.join("");
+}
+
+/**
+ * Días de una feria en una frase: "30 y 31 de marzo", "2, 3 y 4 de marzo",
+ * "31 de marzo y 1 de abril". Ordena las fechas; "" si no hay ninguna.
+ */
+export function rangoDias(fechas: (string | Date)[]): string {
+  const partes = fechas.map(partesDia).sort((a, b) => a.anio - b.anio || a.mes - b.mes || a.dia - b.dia);
+  if (partes.length === 0) return "";
+  const mismoMes = partes.every((p) => p.mes === partes[0].mes && p.anio === partes[0].anio);
+  if (mismoMes) return `${unir(partes.map((p) => String(p.dia)))} de ${MESES[partes[0].mes]}`;
+  return unir(partes.map((p) => `${p.dia} de ${MESES[p.mes]}`));
+}
+
+/** ¿Ya pasaron todos los días de la feria? (comparado con la fecha de hoy en Perú). */
+export function feriaFinalizada(fechas: (string | Date)[], hoy: Date = new Date()): boolean {
+  if (fechas.length === 0) return false;
+  const hoyPeru = partesPeru(hoy).fecha;
+  return fechas.every((f) => new Date(f).toISOString().slice(0, 10) < hoyPeru);
+}

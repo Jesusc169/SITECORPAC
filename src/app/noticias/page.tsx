@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import { NoticiasController } from "@/controllers/noticiasController";
 import NoticiasPageView from "@/views/NoticiasPageView";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Noticias | SITECORPAC",
@@ -14,10 +15,6 @@ export const metadata: Metadata = {
     "Actividades, comunicados y acciones del SITECORPAC en defensa de los trabajadores.",
 };
 
-// Componentes comunes
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
 
 export default async function NoticiasPage() {
   const noticias = await NoticiasController.obtenerNoticias();
@@ -35,11 +32,8 @@ export default async function NoticiasPage() {
   }));
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <NoticiasPageView noticias={noticiasAdaptadas} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

@@ -1,181 +1,59 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Image from "next/image";
+// "Lo último · Noticias" de la portada (rediseño A+C): una noticia destacada
+// grande y las tres siguientes al costado. Reemplaza al carrusel de 18 s.
 import Link from "next/link";
-import styles from "@/components/NoticiasHome/Noticias.module.css";
+import Afiche from "@/components/Sitio/Afiche";
+import Icono from "@/components/Icono/Icono";
+import { fechaCorta } from "@/lib/fechas";
+import s from "@/styles/Sitio.module.css";
 
-interface Noticia {
+export interface NoticiaResumen {
   id: number;
   titulo: string;
   descripcion: string;
-  imagen: string;
+  imagen: string | null;
+  fecha: string;
 }
 
-interface Props {
-  noticias?: Noticia[];
-}
-
-const MAX_INDICADORES = 8;
-const INTERVALO_MS = 18000;
-
-export default function NoticiasHome({ noticias = [] }: Readonly<Props>) {
-  const [indexActual, setIndexActual] = useState(0);
-  const [pausado, setPausado] = useState(false);
-
-  useEffect(() => {
-    if (!noticias.length || pausado) return;
-
-    const prefiereMenosMovimiento = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (prefiereMenosMovimiento) return;
-
-    const interval = setInterval(() => {
-      setIndexActual((prev) =>
-        prev === noticias.length - 1 ? 0 : prev + 1
-      );
-    }, INTERVALO_MS);
-
-    return () => clearInterval(interval);
-  }, [noticias, pausado]);
-
-  const irAnterior = () => {
-    setIndexActual((prev) => (prev === 0 ? noticias.length - 1 : prev - 1));
-  };
-
-  const irSiguiente = () => {
-    setIndexActual((prev) => (prev === noticias.length - 1 ? 0 : prev + 1));
-  };
+export default function NoticiasHome({ noticias }: Readonly<{ noticias: NoticiaResumen[] }>) {
+  const [destacada, ...resto] = noticias;
 
   return (
-    <section className={styles.noticiasSection}>
-      {/* HEADER */}
-      <header className={styles.header}>
-        <h2 className={styles.titulo}>Noticias SITECORPAC</h2>
-        <p className={styles.subtitulo}>
-          Mantente informado sobre nuestras actividades, comunicados y acciones
-          en defensa de los trabajadores.
-        </p>
-      </header>
+    <section className={s.seccion} aria-labelledby="titulo-noticias">
+      <div className={s.ancho}>
+        <div className={s.sh}>
+          <div>
+            <span className={s.kick}>Lo último</span>
+            <h2 id="titulo-noticias">Noticias</h2>
+          </div>
+          <Link className={s.more} href="/noticias">
+            Ver todas <Icono nombre="flecha" chico />
+          </Link>
+        </div>
 
-      {!noticias.length ? (
-        <p className={styles.sinNoticias}>
-          No hay noticias disponibles en este momento.
-        </p>
-      ) : (
-        <>
-          {/* CARRUSEL */}
-          <section
-            className={styles.carruselWrapper}
-            aria-roledescription="carrusel"
-            aria-label="Noticias destacadas"
-            onMouseEnter={() => setPausado(true)}
-            onMouseLeave={() => setPausado(false)}
-            onFocus={() => setPausado(true)}
-            onBlur={() => setPausado(false)}
-          >
-            <div
-              className={styles.carrusel}
-              style={{
-                transform: `translateX(-${indexActual * 100}%)`,
-              }}
-            >
-              {noticias.map((noticia, i) => (
-                <article
-                  key={noticia.id}
-                  className={styles.noticiaCard}
-                  aria-roledescription="diapositiva"
-                  aria-label={`Noticia ${i + 1} de ${noticias.length}: ${noticia.titulo}`}
-                  // Las diapositivas fuera de pantalla siguen en el DOM: sin
-                  // `inert`, la tecla Tab entraba a sus enlaces invisibles y
-                  // el lector de pantalla las leía todas.
-                  inert={i !== indexActual}
-                >
-                  <div className={styles.imagenWrapper}>
-                    <Image
-                      src={noticia.imagen}
-                      alt={noticia.titulo}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      className={styles.imagen}
-                    />
+        {destacada ? (
+          <div className={s.news}>
+            <Link className={s.lead} href={`/actividades/noticias/${destacada.id}`}>
+              <Afiche src={destacada.imagen} alt={destacada.titulo} prioridad />
+              <span className={s.date}>{fechaCorta(destacada.fecha)}</span>
+              <h3>{destacada.titulo}</h3>
+              {destacada.descripcion && <p className={s.resumen}>{destacada.descripcion}</p>}
+            </Link>
+            <div className={s.side}>
+              {resto.slice(0, 3).map((n) => (
+                <Link key={n.id} href={`/actividades/noticias/${n.id}`}>
+                  <Afiche src={n.imagen} alt={n.titulo} />
+                  <div>
+                    <p className={s.date}>{fechaCorta(n.fecha)}</p>
+                    <h3>{n.titulo}</h3>
                   </div>
-
-                  <div className={styles.contenido}>
-                    <h3 className={styles.cardTitulo}>
-                      {noticia.titulo}
-                    </h3>
-
-                    <p className={styles.descripcion}>
-                      {noticia.descripcion}
-                    </p>
-
-                    <Link
-                      href={`/actividades/noticias/${noticia.id}`}
-                      className={styles.verMas}
-                    >
-                      Leer noticia completa
-                    </Link>
-                  </div>
-                </article>
+                </Link>
               ))}
             </div>
-
-            {noticias.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  className={`${styles.flecha} ${styles.flechaIzq}`}
-                  onClick={irAnterior}
-                  aria-label="Noticia anterior"
-                >
-                  <i className="bi bi-chevron-left" aria-hidden="true"></i>
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.flecha} ${styles.flechaDer}`}
-                  onClick={irSiguiente}
-                  aria-label="Siguiente noticia"
-                >
-                  <i className="bi bi-chevron-right" aria-hidden="true"></i>
-                </button>
-              </>
-            )}
-          </section>
-
-          {/* INDICADORES */}
-          {noticias.length > 1 && (
-            noticias.length <= MAX_INDICADORES ? (
-              <div className={styles.indicadores}>
-                {noticias.map((n, i) => (
-                  <button
-                    key={n.id}
-                    type="button"
-                    className={`${styles.indicador} ${
-                      i === indexActual ? styles.activo : ""
-                    }`}
-                    onClick={() => setIndexActual(i)}
-                    aria-label={`Ir a noticia ${i + 1}`}
-                    aria-current={i === indexActual ? "true" : undefined}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className={styles.contador}>
-                {indexActual + 1} de {noticias.length}
-              </p>
-            )
-          )}
-
-          {/* VER TODAS */}
-          <div className={styles.verTodasWrapper}>
-            <Link href="/noticias" className={styles.verTodasBtn}>
-              Ver todas las noticias
-            </Link>
           </div>
-        </>
-      )}
+        ) : (
+          <p className={s.sinDatos}>No hay noticias disponibles en este momento.</p>
+        )}
+      </div>
     </section>
   );
 }

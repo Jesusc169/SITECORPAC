@@ -1,4 +1,10 @@
-import styles from '@/app/tramites/beneficio-fallecido/beneficio-fallecido.module.css'
+import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
+import Preguntas from "@/components/Sitio/Preguntas";
+import BotonCopiar from "@/components/Sitio/BotonCopiar";
+import Icono from "@/components/Icono/Icono";
+import { ENLACES } from "@/lib/datosInstitucionales";
+import { correoYAsunto, quitarVineta } from "@/lib/textoRico";
+import s from "@/styles/Sitio.module.css";
 
 interface Requisito {
   id: number
@@ -20,94 +26,93 @@ interface BeneficioFallecidoProps {
   faqs: Faq[]
 }
 
+function PasoRequisito({ texto }: Readonly<{ texto: string }>) {
+  const correo = correoYAsunto(texto);
+  if (!correo) return <b>{quitarVineta(texto)}</b>;
+  // "Enviar la sucesión intestada al correo … con asunto: …" → correo y
+  // asunto aparte, con botón de copiar, para que no se escriban mal.
+  return (
+    <>
+      <b>Enviar la sucesión intestada por correo</b>
+      <span>Usa estos datos tal cual:</span>
+      <div className={s.mailbox}>
+        <div className={s.r}>
+          <span>
+            Para: <code>{correo.correo}</code>
+          </span>
+          <BotonCopiar texto={correo.correo} etiqueta="Copiar correo" />
+        </div>
+        <div className={s.r}>
+          <span>
+            Asunto: <code>{correo.asunto}</code>
+          </span>
+          <BotonCopiar texto={correo.asunto} etiqueta="Copiar asunto" />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function BeneficioFallecidoView({
-  titulo,
   descripcion,
-  imagenHero,
-  imagenRequisitos,
   requisitos,
   faqs
 }: Readonly<BeneficioFallecidoProps>) {
   return (
-    <section className={styles.container}>
-      {/* =====================
-          TÍTULO
-      ===================== */}
-      <h1 className={styles.titulo}>{titulo}</h1>
-      <p className={styles.descripcion}>{descripcion}</p>
+    <>
+      <EncabezadoPagina
+        migas={[{ texto: "Trámites" }, { texto: "Beneficio por fallecimiento" }]}
+        rotulo="Trámites"
+        titulo="Beneficio por fallecimiento"
+        entrada={descripcion}
+      />
 
-      
-
-      {/* =====================
-          REQUISITOS
-      ===================== */}
-      <section className={styles.requisitos}>
-        
-
-        <h2 className="fw-bold">Requisitos</h2>
-
-        <div className={`row ${styles.requisitosLayout}`}>
-          {/* Imagen a la izquierda */}
-            <div className="col-md-5">
-            <img
-                src="/images/beneficios/requisito-beneficio-fallecido.jpeg"
-                alt="Beneficio por fallecimiento"
-                className={styles.heroImage}
-            />
-            </div>
-
-          {/* Lista a la derecha */}
-            <div className="col-md-7">
-            <ul className="list-group list-group-flush">
-                {requisitos.map((r) => (
-                <li key={r.id} className="list-group-item">
-                    {r.descripcion}
+      <section className={`${s.seccion} ${s.tight}`}>
+        <div className={`${s.ancho} ${s.grid2}`}>
+          <div>
+            <span className={`${s.kick} ${s.h2k}`}>Paso a paso</span>
+            <h2 className={s.h2}>Requisitos</h2>
+            <ol className={s.steps}>
+              {requisitos.map((r) => (
+                <li key={r.id}>
+                  <div>
+                    <PasoRequisito texto={r.descripcion} />
+                  </div>
                 </li>
-                ))}
-            </ul>
+              ))}
+            </ol>
+          </div>
+          {/* Cifras resumidas de las preguntas frecuentes (beneficio_fallecido_faq). */}
+          <aside className={s.facts} aria-label="Datos del beneficio">
+            <div className={s.fact}>
+              <span>Apoyo económico</span>
+              <span className={s.big}>Hasta S/ 5,000</span>
+              <span>Para la familia del afiliado.</span>
             </div>
+            <div className={`${s.fact} ${s.factLight}`}>
+              <span>Tiempo de trámite</span>
+              <span className={s.big}>1 a 3 días hábiles</span>
+            </div>
+            <a className={s.cta} href={ENLACES.whatsappFallecimiento} target="_blank" rel="noopener noreferrer">
+              <Icono nombre="telefono" chico />
+              Consultar por WhatsApp
+              <span className="sr-only"> (abre WhatsApp en una pestaña nueva)</span>
+            </a>
+          </aside>
         </div>
       </section>
 
-      {/* =====================
-          FAQ
-      ===================== */}
-      <section className={styles.faqs}>
-        <h2 className="fw-bold mb-3">Preguntas frecuentes</h2>
-
-        <div className="accordion" id="faqBeneficio">
-          {faqs.map((faq, index) => (
-            <div className="accordion-item mb-2" key={faq.id}>
-              <h2 className="accordion-header">
-                <button
-                  className={`accordion-button ${
-                    index !== 0 ? 'collapsed' : ''
-                  }`}
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#faq-${faq.id}`}
-                  aria-expanded={index === 0}
-                  aria-controls={`faq-${faq.id}`}
-                >
-                  {faq.pregunta}
-                </button>
-              </h2>
-
-              <div
-                id={`faq-${faq.id}`}
-                className={`accordion-collapse collapse ${
-                  index === 0 ? 'show' : ''
-                }`}
-                data-bs-parent="#faqBeneficio"
-              >
-                <div className="accordion-body">
-                  {faq.respuesta}
-                </div>
-              </div>
+      {faqs.length > 0 && (
+        <section className={`${s.seccion} ${s.tight} ${s.sinArriba}`}>
+          <div className={s.ancho}>
+            <div className={s.estrecho}>
+              <span className={`${s.kick} ${s.h2k}`}>Dudas</span>
+              <h2 className={s.h2}>Preguntas frecuentes</h2>
+              <Preguntas faqs={faqs} />
             </div>
-          ))}
-        </div>
-      </section>
-    </section>
-  )
+          </div>
+        </section>
+      )}
+    </>
+  );
 }

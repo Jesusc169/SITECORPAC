@@ -15,6 +15,17 @@
      encabezados de las tablas del panel. */
   --sitecorpac-azul-oscuro: #0b2a4a;
   --sitecorpac-azul-oscuro-hover: #123c66;
+
+  /* Rediseño A+C (oct-2026): colores que salen del logo. */
+  --navy: #0b2a4a;
+  --ink: #14263a;
+  --ink2: #40566d;
+  --line: #dde6ee;
+  --gold: #f0c00c;
+  --cyan: #30e4f0;
+  --tint: #eef9fc;
+  --teal: #136a80;
+  --teal-claro: #1b6f86;
 }
 
 /* Reset básico */
@@ -22,22 +33,21 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden; /* 👈 evita scroll horizontal */
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-texto), Arial, Helvetica, sans-serif;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   min-height: 100vh;
 }
 
 /* ===============================
    TIPOGRAFÍA DE MARCA
-   Archivo (Google Fonts) para títulos
-   y botones. El cuerpo de texto se
-   mantiene en Arial — es legible y
-   no era el problema.
+   Lexend para títulos y botones,
+   Source Sans 3 para el texto
+   (ver app/layout.tsx).
 ================================ */
 h1, h2, h3,
 .btn,
 button {
-  font-family: var(--font-archivo), Arial, Helvetica, sans-serif;
+  font-family: var(--font-titulos), Arial, Helvetica, sans-serif;
   letter-spacing: -0.01em;
 }
 

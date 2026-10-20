@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { EstatutoController } from "@/controllers/estatutoController";
 import EstatutoView from "@/views/EstatutoView";
 
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Estatuto del SITECORPAC | SITECORPAC",
@@ -15,11 +13,8 @@ export default async function EstatutoPage() {
   const data = await EstatutoController.getData();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <EstatutoView data={data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

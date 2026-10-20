@@ -2,9 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 import styles from "./error.module.css";
 
 export default function ErrorGlobal({
@@ -19,11 +17,8 @@ export default function ErrorGlobal({
   }, [error]);
 
   return (
-    <>
-      <Cabecera />
-      <Navbar />
-
-      <main className={styles.container}>
+    <PaginaPublica>
+      <div className={styles.container}>
         <p className={styles.codigo}>Ocurrió un error</p>
         <h1 className={styles.titulo}>Algo no salió bien</h1>
         <p className={styles.texto}>
@@ -38,9 +33,7 @@ export default function ErrorGlobal({
             Ir al inicio
           </Link>
         </div>
-      </main>
-
-      <Footer />
-    </>
+      </div>
+    </PaginaPublica>
   );
 }

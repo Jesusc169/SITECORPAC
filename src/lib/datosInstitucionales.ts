@@ -18,3 +18,15 @@ export const INSTITUCION = {
 
 /** Fecha de la última revisión de los textos legales (mostrar en cada página). */
 export const FECHA_POLITICAS = "8 de octubre de 2026";
+
+const WHATSAPP = "https://wa.me/51950215616?text=";
+
+/** Enlaces de contacto del sitio público (botones de WhatsApp con mensaje listo). */
+export const ENLACES = {
+  whatsappUnete: WHATSAPP + encodeURIComponent("Hola, quiero unirme al SITECORPAC"),
+  whatsappPrestamo: WHATSAPP + encodeURIComponent("Hola, quisiera información para solicitar un préstamo"),
+  whatsappFallecimiento: WHATSAPP + encodeURIComponent("Hola, quisiera consultar por el beneficio por fallecimiento"),
+  whatsappAsesoria: WHATSAPP + encodeURIComponent("Hola, quisiera una asesoría legal del SITECORPAC"),
+  facebook: "https://www.facebook.com/SITECORPAC",
+  soporteTecnico: "https://wa.me/51941361585",
+} as const;

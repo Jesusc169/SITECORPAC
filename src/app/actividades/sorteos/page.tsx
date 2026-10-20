@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
+import { NoticiasController } from "@/controllers/noticiasController";
 import SorteosClient from "./SorteosClient";
 
 export const metadata: Metadata = {
@@ -9,13 +8,21 @@ export const metadata: Metadata = {
   description: "Sorteos especiales del SITECORPAC en fechas conmemorativas.",
 };
 
-export default function Page() {
+export default async function Page() {
+  // La noticia más reciente se sugiere cuando no hay sorteos que mostrar.
+  const [n] = await NoticiasController.obtenerNoticias();
+  const noticia = n
+    ? {
+        id: n.id,
+        titulo: n.titulo,
+        imagen: n.imagen,
+        fecha: typeof n.fecha === "string" ? n.fecha : n.fecha.toISOString(),
+      }
+    : null;
+
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
-      <SorteosClient />
-      <Footer />
-    </main>
+    <PaginaPublica>
+      <SorteosClient noticia={noticia} />
+    </PaginaPublica>
   );
 }

@@ -6,7 +6,7 @@
 }
 
 .codigo {
-  font-family: var(--font-archivo), Arial, sans-serif;
+  font-family: var(--font-titulos), Arial, sans-serif;
   font-size: 3.4rem;
   font-weight: 800;
   color: var(--sitecorpac-red);

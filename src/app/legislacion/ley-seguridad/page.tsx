@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { LeySeguridadController } from "@/controllers/leySeguridadController";
 import LeySeguridadView from "@/views/LeySeguridadView";
 
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Ley de Seguridad y Salud en el Trabajo | SITECORPAC",
@@ -16,11 +14,8 @@ export default async function LeySeguridadPage() {
   const data = await LeySeguridadController.getData();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <LeySeguridadView data={data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

@@ -1,7 +1,5 @@
 import Link from "next/link";
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 import { FECHA_POLITICAS } from "@/lib/datosInstitucionales";
 import styles from "./PaginaLegal.module.css";
 
@@ -30,10 +28,8 @@ const PAGINAS_LEGALES = [
 // directo a la parte que le interesa.
 export default function PaginaLegal({ titulo, resumen, secciones, children }: Readonly<Props>) {
   return (
-    <>
-      <Cabecera />
-      <Navbar />
-      <main className={styles.pagina}>
+    <PaginaPublica>
+      <div className={styles.pagina}>
         <article className={styles.documento}>
           <header className={styles.encabezado}>
             <h1 className={styles.titulo}>{titulo}</h1>
@@ -66,8 +62,7 @@ export default function PaginaLegal({ titulo, resumen, secciones, children }: Re
             </ul>
           </nav>
         </article>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </PaginaPublica>
   );
 }

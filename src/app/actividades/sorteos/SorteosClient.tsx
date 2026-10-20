@@ -1,118 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import SorteosView from "./SorteosView";
+import { useEffect, useMemo, useState } from "react";
+import SorteosView, { type Sorteo, type NoticiaMini } from "./SorteosView";
 import { fetchSorteos } from "@/services/sorteo.client";
 
-interface SorteoProducto {
-  id?: number;
-  nombre: string;
-  descripcion?: string | null;
-  cantidad?: number | null;
+function tiempo(s: Sorteo) {
+  const t = new Date(s.fecha_hora).getTime();
+  return isNaN(t) ? 0 : t;
 }
 
-interface Sorteo {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  imagen?: string | null;
-  lugar: string;
-  fecha_hora: string;
-  anio: number;
-  sorteo_producto?: SorteoProducto[];
-  premios?: SorteoProducto[];
-  sorteo_imagen?: { id: number; url: string; principal: boolean }[];
+function anioDe(s: Sorteo) {
+  const fecha = new Date(s.fecha_hora);
+  return isNaN(fecha.getTime()) ? null : fecha.getFullYear();
 }
 
-export default function SorteosClient() {
-  const [anio, setAnio] = useState<number | null>(null);
-  const [sorteos, setSorteos] = useState<Sorteo[]>([]);
+export default function SorteosClient({ noticia }: Readonly<{ noticia?: NoticiaMini | null }>) {
+  // Por defecto se ven los sorteos del año en curso (propuesta A+C);
+  // "Ver todos" quita el filtro.
+  const [anio, setAnio] = useState<number | null>(() => new Date().getFullYear());
   const [todos, setTodos] = useState<Sorteo[]>([]);
-  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  /* =========================================
-     CARGAR TODOS LOS SORTEOS
-  ========================================= */
   useEffect(() => {
-    cargarSorteos();
+    fetchSorteos(null)
+      .then((data) => setTodos(Array.isArray(data) ? [...data].sort((a, b) => tiempo(b) - tiempo(a)) : []))
+      .catch((error) => {
+        console.error("Error cargando sorteos:", error);
+        setTodos([]);
+      })
+      .finally(() => setCargando(false));
   }, []);
 
-  async function cargarSorteos() {
-    try {
-      const data = await fetchSorteos(null);
-
-      if (!Array.isArray(data)) {
-        setTodos([]);
-        setSorteos([]);
-        return;
-      }
-
-      const ordenados = [...data].sort((a: Sorteo, b: Sorteo) => {
-        const fechaA = new Date(a.fecha_hora);
-        const fechaB = new Date(b.fecha_hora);
-
-        const timeA = isNaN(fechaA.getTime()) ? 0 : fechaA.getTime();
-        const timeB = isNaN(fechaB.getTime()) ? 0 : fechaB.getTime();
-
-        return timeB - timeA;
-      });
-
-      setTodos(ordenados);
-      setSorteos(ordenados);
-
-      const aniosUnicos = Array.from(
-        new Set(
-          ordenados
-            .map((s) => new Date(s.fecha_hora).getFullYear())
-            .filter((a) => !isNaN(a))
-        )
-      ).sort((a, b) => b - a);
-
-      setAniosDisponibles(aniosUnicos);
-    } catch (error) {
-      console.error("Error cargando sorteos:", error);
-      setTodos([]);
-      setSorteos([]);
+  const aniosDisponibles = useMemo(() => {
+    const anios = new Set<number>([new Date().getFullYear()]);
+    for (const s of todos) {
+      const a = anioDe(s);
+      if (a !== null) anios.add(a);
     }
-  }
+    return Array.from(anios).sort((a, b) => b - a);
+  }, [todos]);
 
-  /* =========================================
-     FILTRAR POR AÑO + ORDENAR
-  ========================================= */
-  useEffect(() => {
-    aplicarFiltro();
-  }, [anio, todos]);
-
-  function aplicarFiltro() {
-    let lista = [...todos];
-
-    if (anio) {
-      lista = lista.filter((s) => {
-        const fecha = new Date(s.fecha_hora);
-        if (isNaN(fecha.getTime())) return false;
-        return fecha.getFullYear() === anio;
-      });
-    }
-
-    lista.sort((a, b) => {
-      const fechaA = new Date(a.fecha_hora);
-      const fechaB = new Date(b.fecha_hora);
-
-      const timeA = isNaN(fechaA.getTime()) ? 0 : fechaA.getTime();
-      const timeB = isNaN(fechaB.getTime()) ? 0 : fechaB.getTime();
-
-      return timeB - timeA;
-    });
-
-    setSorteos(lista);
-  }
+  const sorteos = anio === null ? todos : todos.filter((s) => anioDe(s) === anio);
 
   return (
     <SorteosView
       sorteos={sorteos}
+      hayAnteriores={todos.length > 0}
+      cargando={cargando}
       onChangeAnio={setAnio}
       aniosDisponibles={aniosDisponibles}
       anioSeleccionado={anio}
+      noticia={noticia ?? null}
     />
   );
 }

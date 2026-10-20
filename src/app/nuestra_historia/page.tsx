@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { NuestraHistoriaController } from "../../controllers/NuestraHistoriaController";
 import NuestraHistoriaView from "../../views/NuestraHistoriaView";
 
-// Componentes comunes
-import Cabecera from "../../components/Cabecera/Cabecera";
-import Navbar from "../../components/Navbar/Navbar";
-import Footer from "../../components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Nuestra Historia | SITECORPAC",
@@ -17,11 +14,8 @@ export default function NuestraHistoriaPage() {
   const data = NuestraHistoriaController.getData();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <NuestraHistoriaView data={data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

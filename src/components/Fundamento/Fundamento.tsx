@@ -1,48 +1,62 @@
-import styles from "./Fundamento.module.css";
+import Link from "next/link";
+import Icono from "@/components/Icono/Icono";
+import { MENU } from "@/components/Cabecera/menu";
+import s from "@/styles/Sitio.module.css";
+
+const COLUMNAS = [
+  {
+    titulo: "Base legal",
+    texto: "Nuestra organización se sustenta en el marco jurídico vigente.",
+    puntos: ["Constitución Política", "Ley N.º 728", "Registro oficial"],
+  },
+  {
+    titulo: "Principios institucionales",
+    texto: "Valores que guían nuestras acciones y decisiones.",
+    puntos: ["Democracia", "Solidaridad", "Transparencia"],
+  },
+  {
+    titulo: "Estructura organizacional",
+    texto: "Organización clara y orientada al servicio sindical.",
+    puntos: ["Estatuto aprobado", "Estructura definida", "Funciones sindicales"],
+  },
+];
 
 export default function Fundamento() {
-  const fundamentos = [
-    {
-      titulo: "Base legal",
-      descripcion: "Nuestra organización se sustenta en el marco jurídico vigente",
-      items: ["Constitución Política", "Ley N.º 728", "Registro oficial"],
-    },
-    {
-      titulo: "Principios institucionales",
-      descripcion: "Valores que guían nuestras acciones y decisiones",
-      items: ["Democracia", "Solidaridad", "Transparencia"],
-    },
-    {
-      titulo: "Estructura organizacional",
-      descripcion: "Organización clara y orientada al servicio sindical",
-      items: ["Estatuto aprobado", "Estructura definida", "Funciones sindicales"],
-    },
-  ];
+  const legislacion = MENU.find((g) => g.titulo === "Legislación laboral")!;
 
   return (
-    <section className={styles.fundamentoSection}>
-      <div className={styles.header}>
-        <h2 className={styles.titulo}>Fundamento sindical</h2>
-        <p className={styles.subtitulo}>
-          Nuestra labor se apoya en principios legales, organizativos y éticos
-        </p>
-      </div>
-
-      <div className={styles.cardsContainer}>
-        {fundamentos.map((fundamento) => (
-          <div key={fundamento.titulo} className={styles.card}>
-            <h3 className={styles.cardTitulo}>{fundamento.titulo}</h3>
-            <p className={styles.cardDescripcion}>
-              {fundamento.descripcion}
-            </p>
-
-            <ul className={styles.lista}>
-              {fundamento.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+    <section className={s.seccion} aria-labelledby="titulo-fundamento">
+      <div className={s.ancho}>
+        <div className={s.sh}>
+          <div>
+            <span className={s.kick}>Quiénes somos</span>
+            <h2 id="titulo-fundamento">Fundamento sindical</h2>
           </div>
-        ))}
+        </div>
+        <div className={s.cols}>
+          {COLUMNAS.map((c) => (
+            <div key={c.titulo} className={s.col}>
+              <h3>{c.titulo}</h3>
+              <p>{c.texto}</p>
+              <ul>
+                {c.puntos.map((p) => (
+                  <li key={p}>
+                    <Icono nombre="check" chico />
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <nav className={s.legis} aria-label="Legislación laboral">
+          <b>Legislación laboral:</b>
+          {legislacion.enlaces.map((e) => (
+            <Link key={e.href} href={e.href}>
+              {e.texto}
+            </Link>
+          ))}
+        </nav>
       </div>
     </section>
   );

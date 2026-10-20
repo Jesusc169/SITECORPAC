@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 import styles from "./not-found.module.css";
 
 export const metadata: Metadata = {
@@ -11,11 +9,8 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <>
-      <Cabecera />
-      <Navbar />
-
-      <main className={styles.container}>
+    <PaginaPublica>
+      <div className={styles.container}>
         <p className={styles.codigo}>404</p>
         <h1 className={styles.titulo}>No encontramos esta página</h1>
         <p className={styles.texto}>
@@ -30,9 +25,7 @@ export default function NotFound() {
             Ver noticias
           </Link>
         </div>
-      </main>
-
-      <Footer />
-    </>
+      </div>
+    </PaginaPublica>
   );
 }

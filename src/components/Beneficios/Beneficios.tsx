@@ -1,57 +1,50 @@
-// components/Beneficios.tsx
-import styles from "./Beneficios.module.css";
+import Icono, { type NombreIcono } from "@/components/Icono/Icono";
+import s from "@/styles/Sitio.module.css";
+
+const BENEFICIOS: { icono: NombreIcono; titulo: string; texto: string }[] = [
+  {
+    icono: "balanza",
+    titulo: "Asesoría legal",
+    texto: "Acompañamiento en reclamos laborales, sanciones, despidos injustificados y defensa de los derechos del trabajador.",
+  },
+  {
+    icono: "corazon",
+    titulo: "Apoyo en casos especiales",
+    texto: "Apoyo solidario en casos de fallecimiento, emergencias médicas y gestiones ante CORPAC.",
+  },
+  {
+    icono: "dinero",
+    titulo: "Préstamos por convenio",
+    texto: "Acceso a préstamos con tasas preferenciales para apoyar el bienestar económico de nuestros afiliados.",
+  },
+  {
+    icono: "megafono",
+    titulo: "Ferias y campañas",
+    texto: "Campañas de salud y ferias de productos a precios accesibles para los afiliados.",
+  },
+];
 
 export default function Beneficios() {
-  const beneficios = [
-    {
-      titulo: "Asesoría legal",
-      descripcion:
-        "Acompañamiento en reclamos laborales, sanciones, despidos injustificados y defensa de los derechos del trabajador.",
-      icono: "bi bi-file-earmark-text",
-    },
-    {
-      titulo: "Apoyo en casos especiales",
-      descripcion:
-        "Apoyo solidario en casos de fallecimiento, emergencias médicas y gestiones ante CORPAC.",
-      icono: "bi bi-heart-pulse",
-    },
-    {
-      titulo: "Préstamos por convenio",
-      descripcion:
-        "Acceso a préstamos con tasas preferenciales para apoyar el bienestar económico de nuestros afiliados.",
-      icono: "bi bi-cash-coin",
-    },
-    {
-      titulo: "Ferias y campañas",
-      descripcion:
-        "Organización de campañas de salud y ferias de productos a precios accesibles para los afiliados.",
-      icono: "bi bi-megaphone",
-    },
-  ];
-
   return (
-    <section className={styles.beneficiosSection}>
-      <header className={styles.header}>
-        <h2 className={styles.titulo}>Beneficios para nuestros afiliados</h2>
-        <p className={styles.subtitulo}>
-          Comprometidos con la defensa, el bienestar y el desarrollo de nuestros
-          afiliados.
-        </p>
-      </header>
-
-      <div className={styles.grid}>
-        {beneficios.map((beneficio) => (
-          <article key={beneficio.titulo} className={styles.card}>
-            <div className={styles.icono}>
-              <i className={beneficio.icono} />
-            </div>
-
-            <div className={styles.contenido}>
-              <h3 className={styles.cardTitulo}>{beneficio.titulo}</h3>
-              <p className={styles.descripcion}>{beneficio.descripcion}</p>
-            </div>
-          </article>
-        ))}
+    <section className={`${s.seccion} ${s.ben}`} aria-labelledby="titulo-beneficios">
+      <div className={s.ancho}>
+        <div className={s.sh}>
+          <div>
+            <span className={s.kick}>Para ti</span>
+            <h2 id="titulo-beneficios">Beneficios para nuestros afiliados</h2>
+          </div>
+        </div>
+        <ul className={s.benLista}>
+          {BENEFICIOS.map((b) => (
+            <li key={b.titulo}>
+              <span className={s.ico}>
+                <Icono nombre={b.icono} />
+              </span>
+              <h3>{b.titulo}</h3>
+              <p>{b.texto}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

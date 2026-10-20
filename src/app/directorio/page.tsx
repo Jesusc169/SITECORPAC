@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Cabecera from "../../components/Cabecera/Cabecera";
-import Navbar from "../../components/Navbar/Navbar";
-import Footer from "../../components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 import DirectorioClient from "./DirectorioClient";
 
 export const metadata: Metadata = {
@@ -11,11 +9,8 @@ export const metadata: Metadata = {
 
 export default function DirectorioPage() {
   return (
-    <>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <DirectorioClient />
-      <Footer />
-    </>
+    </PaginaPublica>
   );
 }

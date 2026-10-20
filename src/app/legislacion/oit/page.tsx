@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { OitController } from "@/controllers/oitController";
 import OitView from "@/views/OitView";
 
-import Cabecera from "@/components/Cabecera/Cabecera";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
+import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
 export const metadata: Metadata = {
   title: "Organización Internacional del Trabajo | SITECORPAC",
@@ -16,11 +14,8 @@ export default async function OitPage() {
   const data = await OitController.getData();
 
   return (
-    <main>
-      <Cabecera />
-      <Navbar />
+    <PaginaPublica>
       <OitView data={data} />
-      <Footer />
-    </main>
+    </PaginaPublica>
   );
 }

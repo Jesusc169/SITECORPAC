@@ -30,9 +30,8 @@ for (const ruta of PAGINAS) {
 
     const res = await page.goto(ruta);
     expect(res?.status()).toBe(200);
-    // Título principal visible. Lo ideal es <h1>; varias páginas usan <h2>
-    // como título (pendiente para el rediseño), por eso se acepta cualquiera.
-    await expect(page.locator("h1, h2").first()).toBeVisible();
+    // Desde el rediseño A+C todas las páginas tienen un <h1> visible.
+    await expect(page.locator("h1").first()).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(ruta);
@@ -47,7 +46,7 @@ for (const ruta of PAGINAS) {
 test("una noticia publicada aparece en el listado y abre su detalle", async ({ page }) => {
   await page.goto("/noticias");
   const tarjeta = page.locator("article", { hasText: "Bienvenida E2E" });
-  await tarjeta.getByRole("link", { name: "Ver más" }).click();
+  await tarjeta.getByRole("link", { name: "Leer más" }).click();
   await expect(page.locator("h1")).toContainText("Bienvenida E2E");
 });
 
@@ -66,7 +65,7 @@ test("una página inexistente da 404", async ({ page }) => {
 
 test("visor de fotos: se abre, se recorre con las flechas y se cierra con Escape", async ({ page }) => {
   await page.goto("/noticias");
-  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Ver más" }).click();
+  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Leer más" }).click();
   const abrir = page.getByRole("button", { name: /^Ver foto 1 de 2/ });
   await abrir.click();
   const visor = page.getByRole("dialog");
@@ -86,7 +85,7 @@ test("visor de fotos: se abre, se recorre con las flechas y se cierra con Escape
 
 test("visor de fotos: clic en la foto no cierra; clic en el fondo sí", async ({ page }) => {
   await page.goto("/noticias");
-  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Ver más" }).click();
+  await page.locator("article", { hasText: "Galería E2E" }).getByRole("link", { name: "Leer más" }).click();
   await page.getByRole("button", { name: /^Ver foto 2 de 2/ }).click();
   const visor = page.getByRole("dialog");
   await visor.locator("img").first().click();

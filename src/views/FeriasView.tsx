@@ -1,8 +1,12 @@
 "use client";
 
-import styles from "@/app/actividades/ferias/ferias.module.css";
+import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
+import Afiche from "@/components/Sitio/Afiche";
+import Icono from "@/components/Icono/Icono";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
-import { formatearFechaSola } from "@/lib/fechas";
+import { diaConSemana, feriaFinalizada, rangoDias } from "@/lib/fechas";
+import { rutaPublica } from "@/lib/rutas";
+import s from "@/styles/Sitio.module.css";
 
 // =========================
 // Tipos
@@ -45,9 +49,7 @@ export interface EventoFeria {
 
 export interface FeriasViewProps {
   feriasList: EventoFeria[];
-  empresasList?: Empresa[];
   loading: boolean;
-  transitioning?: boolean;
   aniosDisponibles?: number[];
   anioSeleccionado?: number | null;
   onChangeAnio?: (anio: number | null) => void;
@@ -58,23 +60,12 @@ export interface FeriasViewProps {
 // =========================
 function formatHora(hora: string) {
   const [h, m] = hora.split(":").map(Number);
-  const ampm = h >= 12 ? "PM" : "AM";
+  const ampm = h >= 12 ? "p. m." : "a. m.";
   const hora12 = h % 12 || 12;
   return `${hora12}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
-function formatFecha(fecha: string) {
-  // Fecha sin hora guardada como medianoche UTC: en hora de Perú se veía un día antes.
-  return formatearFechaSola(fecha, {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-// =========================
-// ORDENAR POR FECHA REAL DESC
-// =========================
+// Ordenar por fecha real, de la más reciente a la más antigua.
 function ordenarFerias(ferias: EventoFeria[]) {
   return [...ferias].sort((a, b) => {
     const fechaA = a.evento_feria_fecha?.[0]?.fecha;
@@ -87,23 +78,72 @@ function ordenarFerias(ferias: EventoFeria[]) {
   });
 }
 
-// =========================
-// AGRUPAR POR AÑO (usando campo BD)
-// =========================
-function agruparPorAnio(ferias: EventoFeria[]) {
-  const grupos: Record<number, EventoFeria[]> = {};
+function TarjetaFeria({ feria }: Readonly<{ feria: EventoFeria }>) {
+  const dias = feria.evento_feria_fecha.map((f) => f.fecha);
+  const finalizada = feriaFinalizada(dias);
+  const fotos = (feria.evento_feria_imagen ?? []).map((i) => i.url);
 
-  ferias.forEach((feria) => {
-    const anio = feria.anio;
+  return (
+    <article className={s.feria}>
+      <div>
+        <Afiche src={feria.imagen_portada} alt={feria.titulo} />
+        <div className={s.galeria}>
+          <GaleriaBoton imagenes={fotos} titulo={feria.titulo} className={s.chip} />
+        </div>
+      </div>
 
-    if (!grupos[anio]) {
-      grupos[anio] = [];
-    }
+      <div>
+        {dias.length > 0 && (
+          <span className={`${s.badge} ${finalizada ? s.badgePast : ""}`}>
+            <Icono nombre="calendario" chico />
+            {rangoDias(dias)}
+            {finalizada ? " · Finalizada" : ""}
+          </span>
+        )}
+        <h3>{feria.titulo}</h3>
+        {feria.descripcion && <p className={s.texto}>{feria.descripcion}</p>}
 
-    grupos[anio].push(feria);
-  });
+        {feria.evento_feria_fecha.length > 0 && (
+          <ul className={s.sched}>
+            {feria.evento_feria_fecha.map((f) => (
+              <li key={f.id}>
+                <span>
+                  <Icono nombre="calendario" chico />
+                  {diaConSemana(f.fecha)}
+                </span>
+                <span>
+                  <Icono nombre="reloj" chico />
+                  {formatHora(f.hora_inicio)} – {formatHora(f.hora_fin)}
+                </span>
+                <span>
+                  <Icono nombre="ubicacion" chico />
+                  {f.ubicacion}
+                  {f.zona ? ` · ${f.zona}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-  return grupos;
+        {feria.evento_feria_empresa.length > 0 && (
+          <>
+            <p className={s.lbl}>Empresas participantes</p>
+            <div className={s.logos}>
+              {feria.evento_feria_empresa.map(({ empresa }) => (
+                <span key={empresa.id} title={empresa.nombre}>
+                  <img
+                    src={empresa.logo_url ? rutaPublica(empresa.logo_url) : "/images/empresas/default.png"}
+                    alt={empresa.nombre}
+                    loading="lazy"
+                  />
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </article>
+  );
 }
 
 // =========================
@@ -111,129 +151,54 @@ function agruparPorAnio(ferias: EventoFeria[]) {
 // =========================
 export default function FeriasView({
   feriasList,
-  empresasList = [],
   loading,
-  transitioning = false,
-  aniosDisponibles,
-  anioSeleccionado,
+  aniosDisponibles = [],
+  anioSeleccionado = null,
   onChangeAnio,
 }: Readonly<FeriasViewProps>) {
-  const feriasOrdenadas = ordenarFerias(feriasList);
-
-  const feriasAgrupadas = agruparPorAnio(feriasOrdenadas);
-
-  const aniosOrdenados = Object.keys(feriasAgrupadas)
-    .map(Number)
-    .sort((a, b) => b - a);
+  const ferias = ordenarFerias(feriasList);
 
   return (
-    <main className={styles.main}>
-      <h1>Ferias</h1>
-
-      {/* EMPRESAS */}
-      {empresasList.length > 0 && (
-        <section className={styles.empresas}>
-          <div className={styles.empresasTrack}>
-            {[...empresasList, ...empresasList].map((empresa, index) => (
-              <div key={`${empresa.id}-${index}`} className={styles.logoItem}>
-                <img
-                  src={empresa.logo_url ? empresa.logo_url : "/images/empresas/default.png"}
-                  alt={empresa.nombre}
-                  title={empresa.nombre}
-                  loading="lazy"
-                />
-              </div>
+    <>
+      <EncabezadoPagina
+        migas={[{ texto: "Actividades" }, { texto: "Ferias" }]}
+        rotulo="Actividades"
+        titulo="Ferias"
+        entrada="Productos de calidad a precios accesibles para los afiliados, en tu sede."
+      >
+        {onChangeAnio && aniosDisponibles.length > 0 && (
+          <fieldset className={s.chips} aria-label="Filtrar ferias por año">
+            {aniosDisponibles.map((anio) => (
+              <button
+                key={anio}
+                type="button"
+                onClick={() => onChangeAnio(anio)}
+                className={`${s.chip} ${anioSeleccionado === anio ? s.chipOn : ""}`}
+                aria-pressed={anioSeleccionado === anio}
+              >
+                {anio}
+              </button>
             ))}
-          </div>
-        </section>
-      )}
-
-      {/* FILTRO AÑO */}
-      {aniosDisponibles && onChangeAnio && (
-        <fieldset className={styles.filtros} aria-label="Filtrar ferias por año">
-          {aniosDisponibles.map((anio) => (
             <button
-              key={anio}
               type="button"
-              onClick={() => onChangeAnio(anio)}
-              className={anioSeleccionado === anio ? styles.activo : ""}
-              aria-pressed={anioSeleccionado === anio}
+              onClick={() => onChangeAnio(null)}
+              className={`${s.chip} ${anioSeleccionado === null ? s.chipOn : ""}`}
+              aria-pressed={anioSeleccionado === null}
             >
-              Año {anio}
-            </button>
-          ))}
-
-          {anioSeleccionado !== null && (
-            <button type="button" onClick={() => onChangeAnio(null)}>
               Ver todas
             </button>
-          )}
-        </fieldset>
-      )}
+          </fieldset>
+        )}
+      </EncabezadoPagina>
 
-      {/* ESTADOS */}
-      {(loading || transitioning) && (
-        <p className={styles.estado}>Cargando ferias…</p>
-      )}
-
-      {!loading && !transitioning && feriasOrdenadas.length === 0 && (
-        <p className={styles.estado}>No hay ferias disponibles.</p>
-      )}
-
-      {/* LISTADO AGRUPADO POR AÑO */}
-      {!loading &&
-        !transitioning &&
-        aniosOrdenados.map((anio) => (
-          <div key={anio}>
-            <h2 className={styles.anioTitulo}>Año {anio}</h2>
-
-            {feriasAgrupadas[anio].map((feria) => (
-              <section key={feria.id} className={styles.feria}>
-                <div className={styles.feriaImgWrap}>
-                  <img
-                    src={feria.imagen_portada ? feria.imagen_portada : "/images/ferias/default.jpg"}
-                    alt={feria.titulo}
-                    loading="lazy"
-                  />
-                  <GaleriaBoton
-                    imagenes={(feria.evento_feria_imagen ?? []).map((i) => i.url)}
-                    titulo={feria.titulo}
-                    className={styles.galeriaBoton}
-                  />
-                </div>
-
-                <div className={styles.feriaBody}>
-                  <h3>{feria.titulo}</h3>
-
-                  <p className={styles.descripcion}>
-                    {feria.descripcion}
-                  </p>
-
-                  {feria.evento_feria_fecha.map((fecha) => (
-                    <div key={fecha.id} className={styles.datos}>
-                      <p>📅 {formatFecha(fecha.fecha)}</p>
-                      <p>
-                        🕘 {formatHora(fecha.hora_inicio)} –{" "}
-                        {formatHora(fecha.hora_fin)}
-                      </p>
-                      <p>
-                        📍 {fecha.ubicacion}
-                        {fecha.zona ? ` - ${fecha.zona}` : ""}
-                      </p>
-                    </div>
-                  ))}
-
-                  <p className={styles.empresasTexto}>
-                    🏢 Empresas participantes:{" "}
-                    {feria.evento_feria_empresa
-                      .map((e) => e.empresa.nombre)
-                      .join(", ")}
-                  </p>
-                </div>
-              </section>
-            ))}
-          </div>
-        ))}
-    </main>
+      <section className={`${s.seccion} ${s.tight}`}>
+        <div className={s.ancho}>
+          <h2 className="sr-only">{anioSeleccionado ? `Ferias de ${anioSeleccionado}` : "Todas las ferias"}</h2>
+          {loading && <p className={s.estado}>Cargando ferias…</p>}
+          {!loading && ferias.length === 0 && <p className={s.estado}>No hay ferias disponibles.</p>}
+          {!loading && ferias.map((feria) => <TarjetaFeria key={feria.id} feria={feria} />)}
+        </div>
+      </section>
+    </>
   );
 }

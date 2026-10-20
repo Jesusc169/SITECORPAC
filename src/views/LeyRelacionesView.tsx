@@ -1,4 +1,4 @@
-import styles from "@/app/legislacion/ley-relaciones/ley-relaciones.module.css";
+import PaginaLegislacion from "@/components/Sitio/PaginaLegislacion";
 
 interface Props {
   data: {
@@ -12,36 +12,14 @@ interface Props {
 }
 
 export default function LeyRelacionesView({ data }: Readonly<Props>) {
-  if (!data.ley) {
-    return <p style={{ padding: "3rem", textAlign: "center" }}>Contenido no disponible</p>;
-  }
-
-  const { titulo, descripcion, imagen, enlace_pdf } = data.ley;
+  const { ley } = data;
 
   return (
-    <section className={styles.container}>
-      <h1 className={styles.titulo}>{titulo}</h1>
-
-      <div className={styles.contenido}>
-        <p className={styles.descripcion}>{descripcion}</p>
-
-        {imagen && (
-          <div className={styles.imagenWrapper}>
-            <img src={imagen} alt={titulo} className={styles.imagen} />
-          </div>
-        )}
-      </div>
-
-      <div className={styles.cta}>
-        <a
-          href={enlace_pdf}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.ctaLink}
-        >
-          📄 Descarga la ley de relaciones colectivas de trabajo
-        </a>
-      </div>
-    </section>
+    <PaginaLegislacion
+      ruta="/legislacion/ley-relaciones"
+      titulo={ley?.titulo ?? "Ley de Relaciones Colectivas de Trabajo"}
+      bloques={ley ? [ley] : []}
+      boton={ley ? { texto: "Descargar la ley (PDF)", href: ley.enlace_pdf, descarga: true } : undefined}
+    />
   );
 }
