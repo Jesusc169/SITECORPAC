@@ -103,16 +103,17 @@ describe("PUT /api/administrador/ferias/[id]", () => {
     const e1 = await empresa("A");
     const e2 = await empresa("B");
     const f = await (await crearFeria({ empresas: JSON.stringify([e1.id]) })).json();
-    const res = await editar(f.id, { anio: "2027", empresas: JSON.stringify([e2.id]), fechas: JSON.stringify([]), estado: "false" });
+    // dos empresas: el historial las guarda en orden alfabético
+    const res = await editar(f.id, { anio: "2027", empresas: JSON.stringify([e2.id, e1.id]), fechas: JSON.stringify([]), estado: "false" });
     expect(res.status).toBe(200);
     const d = await prisma.evento_feria.findUnique({ where: { id: f.id }, include: { evento_feria_empresa: true, evento_feria_fecha: true } });
     expect(d).toMatchObject({ titulo: "Feria editada", anio: 2027, estado: false });
-    expect(d?.evento_feria_empresa.map((x) => x.empresa_id)).toEqual([e2.id]);
+    expect(d?.evento_feria_empresa.map((x) => x.empresa_id).sort()).toEqual([e1.id, e2.id].sort());
     expect(d?.evento_feria_fecha).toHaveLength(0);
     const r = await prisma.registro_actividad.findFirst({ where: { accion: "editar" } });
     expect(r?.detalle).toBe('Editó la feria "Feria editada" (no visible en el sitio)');
     expect(r?.antes).toMatchObject({ titulo: "Feria Colinda", empresas: ["A"] });
-    expect(r?.despues).toMatchObject({ titulo: "Feria editada", empresas: ["B"] });
+    expect(r?.despues).toMatchObject({ titulo: "Feria editada", empresas: ["A", "B"] });
   });
 
   it("sin año ni empresas ni fechas en el formulario conserva el año", async () => {

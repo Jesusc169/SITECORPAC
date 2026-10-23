@@ -75,6 +75,12 @@ describe("PUT /api/administrador/directorio/[id]", () => {
     expect(r?.antes).toMatchObject({ cargo: "Secretaria General" });
   });
 
+  it("solo el nombre: el resto queda como estaba", async () => {
+    const m = await (await agregar()).json();
+    await PUT(peticion(ruta(m.id), "PUT", { form: { nombre: "Solo nombre" } }));
+    expect(await prisma.directorio.findUnique({ where: { id: m.id } })).toMatchObject({ nombre: "Solo nombre", cargo: "Secretaria General" });
+  });
+
   it("todos los campos de texto, sin foto", async () => {
     const m = await (await agregar()).json();
     await PUT(peticion(ruta(m.id), "PUT", { form: { nombre: "N", cargo: "C", correo: "x@y.z", telefono: "1" } }));

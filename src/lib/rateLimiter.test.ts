@@ -53,6 +53,10 @@ describe("obtenerIp", () => {
   it("devuelve 'desconocida' si no hay ningún header de IP", () => {
     expect(obtenerIp(req({}))).toBe("desconocida");
   });
+
+  it("un X-Forwarded-For con solo comas o espacios cuenta como vacío", () => {
+    expect(obtenerIp(req({ "x-forwarded-for": " , ," }))).toBe("desconocida");
+  });
 });
 
 describe("estaBloqueado", () => {
@@ -76,6 +80,12 @@ describe("estaBloqueado", () => {
     const resultado = await estaBloqueado("1.2.3.4");
     expect(resultado).toBeNull();
     expect(prismaMock.login_intento.delete).toHaveBeenCalledWith({ where: { ip: "1.2.3.4" } });
+  });
+
+  it("si el registro vencido ya no existe al borrarlo, igual deja intentar", async () => {
+    prismaMock.login_intento.findUnique.mockResolvedValue({ bloqueadoHasta: new Date(Date.now() - 1000) });
+    prismaMock.login_intento.delete.mockRejectedValue(new Error("P2025"));
+    expect(await estaBloqueado("1.2.3.4")).toBeNull();
   });
 });
 

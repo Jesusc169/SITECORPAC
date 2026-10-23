@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { NextRequest } from "next/server";
+import * as auth from "@/lib/auth";
 import { POST as login } from "@/app/api/auth/login/route";
 import { POST as logout } from "@/app/api/auth/logout/route";
 import { GET as me } from "@/app/api/administrador/me/route";
@@ -84,6 +85,13 @@ describe("POST /api/auth/logout", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("set-cookie")).toMatch(/token=;/);
     expect(await ultimoRegistro()).toMatchObject({ accion: "logout", usuarioId: u.id });
+  });
+
+  it("si no se puede leer la sesión (p. ej. base caída) igual borra la cookie", async () => {
+    vi.spyOn(auth, "obtenerUsuarioActual").mockRejectedValueOnce(new Error("BD caída"));
+    const res = await logout(peticion("/api/auth/logout", "POST"));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("set-cookie")).toMatch(/token=;/);
   });
 
   it("sin sesión no registra nada", async () => {

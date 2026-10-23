@@ -44,6 +44,12 @@ describe("GET /api/administrador/sistema/registro", () => {
     await registrarActividad({ accion: "error", modulo: "ferias", nivel: "error", detalle: "Crear feria: disco" });
   });
 
+  it("las ediciones con instantánea salen marcadas con cambios", async () => {
+    await registrarActividad({ usuario: admin, accion: "editar", modulo: "noticias", entidadId: 5, detalle: "Editó", antes: { titulo: "a" }, despues: { titulo: "b" } });
+    const d = await (await reg()).json();
+    expect(d.filas.find((f: { accion: string }) => f.accion === "editar").conCambios).toBe(true);
+  });
+
   it("pagina, filtra y marca qué filas tienen historial", async () => {
     const d = await (await reg()).json();
     expect(d).toMatchObject({ pagina: 1, porPagina: 50, total: 3 });

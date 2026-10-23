@@ -130,6 +130,12 @@ describe("archivosSubidos", () => {
     expect(r.bytes).toBe(0);
     rmSync(path.join(raiz(), "public", "uploads", "fugaz.txt"));
   });
+  it("ignora lo que no es archivo ni carpeta (enlaces, sockets)", async () => {
+    mkdirSync(path.join(raiz(), "public", "uploads"), { recursive: true });
+    const raro = { name: "enlace", isDirectory: () => false, isFile: () => false };
+    vi.spyOn(fsp, "readdir").mockResolvedValue([raro] as never);
+    expect(await archivosSubidos()).toEqual({ archivos: 0, bytes: 0 });
+  });
 });
 
 describe("estadoRespaldos", () => {

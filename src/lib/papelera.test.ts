@@ -76,6 +76,27 @@ describe("eliminarDefinitivamente", () => {
   });
 });
 
+describe("archivos en uso", () => {
+  it("revisa noticias, fotos, documentos, ferias, sorteos y directorio", async () => {
+    const usados = ["n", "ni", "np", "f", "fi", "s", "si", "d"].map((x) => `/uploads/x/${x}.jpg`);
+    db.papelera.findUnique.mockResolvedValue({ id: 6, modulo: "noticias", titulo: "N", entidadId: 1, archivos: usados });
+    db.noticia.findMany.mockResolvedValueOnce([{ imagen: usados[0] }]);
+    db.noticia_imagen.findMany.mockResolvedValueOnce([{ url: usados[1] }]);
+    db.noticia_pdf.findMany.mockResolvedValueOnce([{ url: usados[2] }]);
+    db.evento_feria.findMany.mockResolvedValueOnce([{ imagen_portada: usados[3] }]);
+    db.evento_feria_imagen.findMany.mockResolvedValueOnce([{ url: usados[4] }]);
+    db.sorteo.findMany.mockResolvedValueOnce([{ imagen: usados[5] }]);
+    db.sorteo_imagen.findMany.mockResolvedValueOnce([{ url: usados[6] }]);
+    db.directorio.findMany.mockResolvedValueOnce([{ fotoUrl: usados[7] }]);
+    // una entrada de papelera sin lista de archivos no rompe nada
+    db.papelera.findMany.mockResolvedValueOnce([{ archivos: null }]);
+
+    const r = await eliminarDefinitivamente(6);
+    expect(r.archivosBorrados).toBe(0);
+    expect(unlink).not.toHaveBeenCalled();
+  });
+});
+
 describe("esModuloPapelera", () => {
   it("usuarios no va a la papelera (se desactivan)", () => {
     expect(esModuloPapelera("noticias")).toBe(true);

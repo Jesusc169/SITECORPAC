@@ -89,11 +89,16 @@ describe("texto con formato (editor)", () => {
     expect(htmlATexto("<p><strong>Hola</strong> &amp; adiós</p><ul><li><p>uno</p></li></ul>")).toBe("Hola & adiós\nuno");
     expect(htmlATexto("<p></p>")).toBe("");
     expect(htmlATexto("  texto plano ")).toBe("texto plano");
+    expect(htmlATexto(null)).toBe("");
   });
 
   it("textoAHtml convierte el texto antiguo en párrafos y listas, escapando", () => {
     expect(textoAHtml("Uno <b>\n- a\n- b")).toBe("<p>Uno &lt;b&gt;</p><ul><li><p>a</p></li><li><p>b</p></li></ul>");
     expect(textoAHtml("<p>ya es html</p>")).toBe("<p>ya es html</p>");
     expect(textoAHtml("")).toBe("");
+    // las listas de artículos (legislación) se abren como lista simple
+    expect(textoAHtml("- Derecho al trabajo (Artículo 22): El trabajo es un deber")).toBe(
+      "<ul><li><p>Derecho al trabajo (Artículo 22): El trabajo es un deber</p></li></ul>"
+    );
   });
 });

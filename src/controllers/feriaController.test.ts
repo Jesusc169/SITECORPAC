@@ -61,6 +61,13 @@ describe("FeriaController.crearFeria", () => {
     await expect(
       FeriaController.crearFeria({ ...inputBase, descripcion: "" })
     ).rejects.toThrow(FeriaValidationError);
+    await expect(
+      FeriaController.crearFeria({ ...inputBase, descripcion: undefined })
+    ).rejects.toThrow(FeriaValidationError);
+    // el editor vacío manda "<p></p>": también cuenta como sin descripción
+    await expect(
+      FeriaController.crearFeria({ ...inputBase, descripcion: "<p></p>" })
+    ).rejects.toThrow(FeriaValidationError);
   });
 
   it("rechaza más de 5 fotos", async () => {

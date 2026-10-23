@@ -1,9 +1,9 @@
 import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { urlBasePrueba } from "./tests/urlBasePrueba";
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  // Alias "@/…" de tsconfig.json (Vite los resuelve sin plugin desde la v8)
+  resolve: { tsconfigPaths: true },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
