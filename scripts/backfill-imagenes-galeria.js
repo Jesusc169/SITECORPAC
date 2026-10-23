@@ -9,8 +9,20 @@
 //
 // Uso: node scripts/backfill-imagenes-galeria.js
 
+// Prisma 7 ya no lee el .env por su cuenta y necesita el adaptador de MySQL
+require("dotenv").config({ quiet: true });
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const { PrismaMariaDb } = require("@prisma/adapter-mariadb");
+// En el servidor se conecta por el socket de MySQL (ver src/lib/prisma.ts)
+const urlConexion = (url, socket) => {
+  if (!socket) return url;
+  const u = new URL(url);
+  u.searchParams.set("socketPath", socket);
+  return u.toString();
+};
+const prisma = new PrismaClient({
+  adapter: new PrismaMariaDb(urlConexion(process.env.DATABASE_URL, process.env.DATABASE_SOCKET)),
+});
 
 async function backfillNoticias() {
   const noticias = await prisma.noticia.findMany({

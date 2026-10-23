@@ -18,7 +18,7 @@ export default function setup() {
   }
   // Sin --force-reset: cada test vacía las tablas que usa (limpiarBD), así
   // que aquí solo hace falta dejar el esquema al día.
-  execSync("npx prisma db push --skip-generate", {
+  execSync("npx prisma db push", {
     env: { ...process.env, DATABASE_URL: url },
     stdio: "pipe",
   });

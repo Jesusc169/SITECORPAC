@@ -74,8 +74,8 @@ jobs:
 
       - name: Escaneo de dependencias (npm audit)
         # No bloquea el pipeline: hoy hay un hallazgo conocido y aceptado
-        # (deepmerge-ts, via el CLI de Prisma, solo se usa en build/deploy,
-        # nunca en el sitio en produccion; sin fix estable disponible aun).
+        # (braces, via el plugin de ESLint de Next: solo herramienta de
+        # desarrollo, sin version corregida aun). `npm audit --omit=dev` = 0.
         # El resultado siempre queda visible en el log de esta ejecucion.
         run: npm audit --audit-level=high
         continue-on-error: true

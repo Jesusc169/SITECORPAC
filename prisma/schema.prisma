@@ -2,9 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// La URL de conexión está en prisma.config.ts (Prisma 7)
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model cooperativas {

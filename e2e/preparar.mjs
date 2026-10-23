@@ -9,6 +9,7 @@ import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 function urlBasePrueba() {
   if (process.env.TEST_DATABASE_URL) return process.env.TEST_DATABASE_URL;
@@ -23,9 +24,9 @@ const url = urlBasePrueba();
 const base = url.split("/").pop().split("?")[0];
 if (!base.endsWith("_test")) throw new Error(`La base E2E debe terminar en "_test" (es "${base}")`);
 
-execSync("npx prisma db push --skip-generate", { env: { ...process.env, DATABASE_URL: url }, stdio: "inherit" });
+execSync("npx prisma db push", { env: { ...process.env, DATABASE_URL: url }, stdio: "inherit" });
 
-const prisma = new PrismaClient({ datasources: { db: { url } } });
+const prisma = new PrismaClient({ adapter: new PrismaMariaDb(url) });
 
 export const CLAVE_E2E = "Clave-E2E-2026!";
 
