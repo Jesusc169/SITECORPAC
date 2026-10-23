@@ -11,6 +11,7 @@ import { formatearFechaSola } from "@/lib/fechas";
 import panel from "@/styles/PanelAdmin.module.css";
 import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import Icono from "@/components/Icono/Icono";
+import { htmlATexto } from "@/lib/textoRico";
 
 export default function FeriasView() {
   const [ferias, setFerias] = useState<any[]>([]);
@@ -203,7 +204,7 @@ export default function FeriasView() {
                   <td className={styles.nombre}>
                     <strong>{feria.titulo}</strong>
                     {feria.descripcion && (
-                      <p className={styles.descripcion}>{feria.descripcion}</p>
+                      <p className={styles.descripcion}>{htmlATexto(feria.descripcion)}</p>
                     )}
                   </td>
 

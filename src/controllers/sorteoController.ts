@@ -7,6 +7,7 @@ import { actualizarGaleria } from "@/lib/galeria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
+import { limpiarTextoRico } from "@/lib/htmlSeguro";
 
 export class SorteoValidationError extends Error {}
 
@@ -59,7 +60,8 @@ function fechaValida(fecha: Date): Date {
 // Lectura pública cacheada 60s, con tag "sorteos" para invalidarla al
 // instante desde crear/editar/duplicar/eliminar (invalidarCache más abajo).
 const obtenerSorteosPublicosCacheados = unstable_cache(
-  async (anio: number | null) => SorteoModel.obtenerActivos(anio),
+  async (anio: number | null) =>
+    (await SorteoModel.obtenerActivos(anio)).map((s) => ({ ...s, descripcion: limpiarTextoRico(s.descripcion) })),
   ["sorteos-publicos"],
   { revalidate: 60, tags: ["sorteos"] }
 );
@@ -106,7 +108,7 @@ export const SorteoController = {
 
     const sorteo = await SorteoModel.crear({
       nombre: input.nombre,
-      descripcion: input.descripcion,
+      descripcion: limpiarTextoRico(input.descripcion),
       lugar,
       anio: input.anio,
       estado: input.estado,
@@ -166,7 +168,7 @@ export const SorteoController = {
 
     const sorteo = await SorteoModel.actualizar(id, {
       nombre: input.nombre,
-      descripcion: input.descripcion,
+      descripcion: limpiarTextoRico(input.descripcion),
       lugar,
       anio: input.anio,
       estado: input.estado,

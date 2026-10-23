@@ -7,6 +7,8 @@ import { actualizarGaleria } from "@/lib/galeria";
 import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
+import { limpiarTextoRico } from "@/lib/htmlSeguro";
+import { htmlATexto } from "@/lib/textoRico";
 
 export class FeriaValidationError extends Error {}
 
@@ -33,7 +35,10 @@ function normalizarFechas(fechas: FechaInput[]) {
 // instante desde crear/editar/duplicar/eliminar (invalidarCache más abajo).
 const obtenerFeriasPublicasCacheadas = unstable_cache(
   async (anio: number | null, skip: number, take: number) =>
-    FeriaModel.obtenerPublicas({ anio, skip, take }),
+    (await FeriaModel.obtenerPublicas({ anio, skip, take })).map((f) => ({
+      ...f,
+      descripcion: limpiarTextoRico(f.descripcion),
+    })),
   ["ferias-publicas"],
   { revalidate: 60, tags: ["ferias"] }
 );
@@ -67,9 +72,10 @@ export const FeriaController = {
     estado: boolean;
   }) => {
     const titulo = input.titulo?.trim();
-    const descripcion = input.descripcion?.trim();
+    const descripcion = limpiarTextoRico(input.descripcion?.trim() ?? "");
 
-    if (!titulo || !descripcion || !input.anio) {
+    // "<p></p>" del editor cuenta como vacío
+    if (!titulo || !htmlATexto(descripcion) || !input.anio) {
       throw new FeriaValidationError("Datos incompletos");
     }
 
@@ -133,7 +139,7 @@ export const FeriaController = {
 
     const feriaActual = await FeriaModel.obtenerPorId(id);
     if (!feriaActual) return null;
-    if (!input.titulo.trim() || !input.descripcion.trim()) {
+    if (!input.titulo.trim() || !htmlATexto(input.descripcion)) {
       throw new FeriaValidationError("Datos incompletos");
     }
 
@@ -163,7 +169,7 @@ export const FeriaController = {
 
     await FeriaModel.actualizar(id, {
       titulo: input.titulo,
-      descripcion: input.descripcion,
+      descripcion: limpiarTextoRico(input.descripcion),
       imagen_portada,
       estado: input.estado,
       ...(input.anio != null ? { anio: input.anio } : {}),

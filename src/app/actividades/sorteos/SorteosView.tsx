@@ -2,6 +2,7 @@ import Link from "next/link";
 import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
 import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
+import TextoRico from "@/components/Sitio/TextoRico";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
 import { fechaCorta, formatearFechaHoraPeru } from "@/lib/fechas";
 import s from "@/styles/Sitio.module.css";
@@ -79,7 +80,7 @@ function TarjetaSorteo({ sorteo }: Readonly<{ sorteo: Sorteo }>) {
           </span>
         )}
         <h3>{sorteo.nombre}</h3>
-        {sorteo.descripcion && <p className={s.texto}>{sorteo.descripcion}</p>}
+        {sorteo.descripcion && <TextoRico texto={sorteo.descripcion} className={s.texto} />}
         <ul className={s.sched}>
           <li>
             <span>

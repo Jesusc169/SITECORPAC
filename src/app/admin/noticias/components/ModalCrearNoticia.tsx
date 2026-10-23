@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
+import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
 interface Props {
   onClose: () => void;
@@ -133,13 +134,13 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label htmlFor="crear-noticia-contenido" className="form-label fw-semibold">Contenido</label>
-              <textarea id="crear-noticia-contenido"
-                className="form-control"
-                rows={6}
+              <label id="crear-noticia-contenido-etiqueta" className="form-label fw-semibold">Contenido</label>
+              <EditorTexto
+                id="crear-noticia-contenido"
+                etiquetaId="crear-noticia-contenido-etiqueta"
                 placeholder="Contenido completo de la noticia"
-                value={contenido}
-                onChange={(e) => setContenido(e.target.value)}
+                valor={contenido}
+                onChange={setContenido}
               />
             </div>
 

@@ -859,3 +859,21 @@
   .quick a, .cta, .ghost { transition: none; }
   .quick a:hover { transform: none; }
 }
+
+/* Texto con formato del editor del panel (noticias, ferias, sorteos) */
+.rico { white-space: normal; overflow-wrap: anywhere; }
+.rico > * { margin: 0 0 0.75em; }
+.rico > :last-child { margin-bottom: 0; }
+.rico h2 { font-size: 1.35rem; }
+.rico h3 { font-size: 1.15rem; }
+.rico h4 { font-size: 1.2rem; }
+.rico h5 { font-size: 1.05rem; }
+.rico ul, .rico ol { display: block; padding-left: 1.5em; }
+.rico ul { list-style: disc; }
+.rico ol { list-style: decimal; }
+.rico li { display: list-item; }
+.rico li > p { margin: 0 0 0.25em; }
+.rico blockquote { border-left: 4px solid var(--gold); padding: 4px 0 4px 16px; color: var(--ink); font-style: italic; }
+.rico a { color: var(--teal); text-decoration: underline; }
+.rico mark { background: #fff1a8; color: inherit; padding: 0 2px; }
+.feria .rico { white-space: normal; }

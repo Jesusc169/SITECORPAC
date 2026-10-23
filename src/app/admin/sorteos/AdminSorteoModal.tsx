@@ -5,6 +5,7 @@ import styles from "./sorteos.admin.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
+import EditorTexto from "@/components/EditorTexto/EditorTexto";
 import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
 
 /** Valor que se usaba fijo antes de existir el campo; se propone al crear. */
@@ -227,11 +228,12 @@ export default function AdminSorteoModal({
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label htmlFor="sorteo-descripcion">Descripción</label>
-              <textarea id="sorteo-descripcion"
-                name="descripcion"
-                value={form.descripcion}
-                onChange={handleChange}
+              <label id="sorteo-descripcion-etiqueta">Descripción</label>
+              <EditorTexto
+                id="sorteo-descripcion"
+                etiquetaId="sorteo-descripcion-etiqueta"
+                valor={form.descripcion}
+                onChange={(descripcion) => setForm((prev) => ({ ...prev, descripcion }))}
               />
             </div>
 

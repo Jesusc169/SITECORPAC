@@ -7,6 +7,7 @@ import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import panel from "@/styles/PanelAdmin.module.css";
 import styles from "./sistema.module.css";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
+import { esHtml, htmlATexto } from "@/lib/textoRico";
 import type { SistemaController } from "@/controllers/sistemaController";
 
 type Estado = Awaited<ReturnType<typeof SistemaController.estado>>;
@@ -148,6 +149,9 @@ function valorTexto(campo: string, v: string): string {
   if (ES_FECHA.test(v)) return campo === "fecha_hora" ? fecha(v) : formatearFechaHoraPeru(v, { dateStyle: "medium" });
   if (ES_ARCHIVO.test(v)) return nombreArchivo(v);
   if (campo === "estado" && (v === "ACTIVO" || v === "INACTIVO")) return v === "ACTIVO" ? "Sí" : "No";
+  // Texto del editor: se muestra sin etiquetas, indicando que lleva formato.
+  if (esHtml(v)) return `${htmlATexto(v)}
+(con formato)`;
   return v;
 }
 

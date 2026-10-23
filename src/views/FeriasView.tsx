@@ -3,6 +3,7 @@
 import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
 import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
+import TextoRico from "@/components/Sitio/TextoRico";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
 import { diaConSemana, feriaFinalizada, rangoDias } from "@/lib/fechas";
 import { rutaPublica } from "@/lib/rutas";
@@ -101,7 +102,7 @@ function TarjetaFeria({ feria }: Readonly<{ feria: EventoFeria }>) {
           </span>
         )}
         <h3>{feria.titulo}</h3>
-        {feria.descripcion && <p className={s.texto}>{feria.descripcion}</p>}
+        {feria.descripcion && <TextoRico texto={feria.descripcion} className={s.texto} />}
 
         {feria.evento_feria_fecha.length > 0 && (
           <ul className={s.sched}>

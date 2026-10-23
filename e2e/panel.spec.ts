@@ -37,7 +37,12 @@ test("ciclo completo de una noticia: crear, ver, editar, historial, eliminar y r
   await page.getByRole("button", { name: "+ Nueva noticia" }).click();
   await page.getByPlaceholder("Título de la noticia").fill("Asamblea E2E");
   await page.getByPlaceholder("Resumen corto para la portada").fill("Resumen de la asamblea");
-  await page.getByPlaceholder("Contenido completo de la noticia").fill("Detalle de la asamblea");
+  // Editor con formato: se escribe y se pone en negrita con la barra
+  await page.getByRole("textbox", { name: "Contenido" }).click();
+  await page.keyboard.type("Detalle de la asamblea");
+  await page.keyboard.press("ControlOrMeta+A");
+  await page.getByRole("button", { name: "Negrita" }).click();
+  await expect(page.getByRole("button", { name: "Negrita" })).toHaveAttribute("aria-pressed", "true");
   await page.locator('input[type="file"][accept="image/*"]').first().setInputFiles(FOTO);
   await page.getByRole("button", { name: "Publicar noticia" }).click();
   await expect(page.getByText("Asamblea E2E")).toBeVisible();
@@ -45,6 +50,8 @@ test("ciclo completo de una noticia: crear, ver, editar, historial, eliminar y r
   // Se ve en el sitio
   await page.goto("/noticias");
   await expect(page.getByText("Asamblea E2E").first()).toBeVisible();
+  await page.getByRole("link", { name: /Asamblea E2E/ }).first().click();
+  await expect(page.locator("strong", { hasText: "Detalle de la asamblea" })).toBeVisible();
 
   // Editar el título
   await page.goto("/admin/noticias");

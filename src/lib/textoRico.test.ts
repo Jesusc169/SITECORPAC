@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { textoABloques, separarEntrada, quitarVineta, correoYAsunto } from "./textoRico";
+import { textoABloques, separarEntrada, quitarVineta, correoYAsunto, esHtml, htmlATexto, textoAHtml } from "./textoRico";
 
 describe("textoABloques", () => {
   it("sin texto no hay bloques", () => {
@@ -72,5 +72,28 @@ describe("quitarVineta y correoYAsunto", () => {
     ).toEqual({ correo: "sitecorpac@corpac.pe", asunto: "DOCUMENTO SUCESION INTESTADA - NOMBRE" });
     expect(correoYAsunto("- Copia de DNI.")).toBeNull();
     expect(correoYAsunto("Escribe a a@b.pe")).toBeNull();
+  });
+});
+
+describe("texto con formato (editor)", () => {
+  it("esHtml reconoce lo que produce el editor y no el texto plano", () => {
+    expect(esHtml("<p>hola</p>")).toBe(true);
+    expect(esHtml('  <h2 style="text-align:center">x</h2>')).toBe(true);
+    expect(esHtml("<ul><li>x</li></ul>")).toBe(true);
+    expect(esHtml("Hola <b>mundo</b>")).toBe(false);
+    expect(esHtml("<pre>x</pre>")).toBe(false);
+    expect(esHtml(null)).toBe(false);
+  });
+
+  it("htmlATexto quita etiquetas y respeta los saltos", () => {
+    expect(htmlATexto("<p><strong>Hola</strong> &amp; adiós</p><ul><li><p>uno</p></li></ul>")).toBe("Hola & adiós\nuno");
+    expect(htmlATexto("<p></p>")).toBe("");
+    expect(htmlATexto("  texto plano ")).toBe("texto plano");
+  });
+
+  it("textoAHtml convierte el texto antiguo en párrafos y listas, escapando", () => {
+    expect(textoAHtml("Uno <b>\n- a\n- b")).toBe("<p>Uno &lt;b&gt;</p><ul><li><p>a</p></li><li><p>b</p></li></ul>");
+    expect(textoAHtml("<p>ya es html</p>")).toBe("<p>ya es html</p>");
+    expect(textoAHtml("")).toBe("");
   });
 });

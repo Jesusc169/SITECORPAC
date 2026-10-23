@@ -5,6 +5,7 @@ import styles from "./AdminFeriaModal.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
+import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
 /* =========================
    TIPOS
@@ -214,10 +215,12 @@ export default function AdminFeriaModal({
           <label htmlFor="feria-titulo">Título</label>
           <input id="feria-titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
 
-          <label htmlFor="feria-descripcion">Descripción</label>
-          <textarea id="feria-descripcion"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
+          <label id="feria-descripcion-etiqueta">Descripción</label>
+          <EditorTexto
+            id="feria-descripcion"
+            etiquetaId="feria-descripcion-etiqueta"
+            valor={descripcion}
+            onChange={setDescripcion}
           />
 
           <label htmlFor="feria-ano">Año</label>

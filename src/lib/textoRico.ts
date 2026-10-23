@@ -79,3 +79,45 @@ export function correoYAsunto(texto: string): { correo: string; asunto: string }
   const asunto = /asunto\s*:\s*(.+?)\.?\s*$/i.exec(texto)?.[1];
   return correo && asunto ? { correo, asunto: asunto.trim() } : null;
 }
+
+/*
+ * Texto con formato (editor del panel): noticias, ferias y sorteos guardan
+ * HTML. Los textos antiguos siguen siendo texto plano y se distinguen porque
+ * el editor siempre empieza con un bloque (<p>, <h2>, <ul>…).
+ */
+const INICIO_HTML = /^\s*<(?:p|h[1-6]|ul|ol|blockquote)[\s>]/i;
+
+export function esHtml(texto: string | null | undefined): boolean {
+  return INICIO_HTML.test(texto ?? "");
+}
+
+const ENTIDADES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
+
+/** Texto sin etiquetas (resúmenes, búsquedas, validar que no esté vacío). */
+export function htmlATexto(texto: string | null | undefined): string {
+  if (!esHtml(texto)) return (texto ?? "").trim();
+  return (texto as string)
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(?:p|h[1-6]|li|blockquote)>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, e: string) => ENTIDADES[e])
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
+const escapar = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Texto plano antiguo → HTML para abrirlo en el editor sin perder párrafos ni listas. */
+export function textoAHtml(texto: string | null | undefined): string {
+  if (esHtml(texto)) return texto as string;
+  return textoABloques(texto)
+    .map((b) => {
+      if (b.tipo === "parrafo") return `<p>${escapar(b.texto)}</p>`;
+      const items =
+        b.tipo === "lista" ? b.items : b.items.map((a) => `${a.titulo} (${a.articulo}): ${a.texto}`);
+      return `<ul>${items.map((i) => `<li><p>${escapar(i)}</p></li>`).join("")}</ul>`;
+    })
+    .join("");
+}

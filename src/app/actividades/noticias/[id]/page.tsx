@@ -12,7 +12,8 @@ import Compartir from "@/components/Sitio/Compartir";
 import Icono from "@/components/Icono/Icono";
 import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
 import { fechaCorta } from "@/lib/fechas";
-import { textoABloques } from "@/lib/textoRico";
+import { esHtml, textoABloques } from "@/lib/textoRico";
+import { limpiarHtml } from "@/lib/htmlSeguro";
 import { INSTITUCION } from "@/lib/datosInstitucionales";
 import s from "@/styles/Sitio.module.css";
 
@@ -78,7 +79,10 @@ export default async function NoticiaPage({
 
   const otras = (await NoticiasController.obtenerNoticias()).filter((n) => n.id !== noticia.id).slice(0, 3);
   // Sin contenido (o vacío) se muestra la descripción.
-  const bloques = textoABloques(noticia.contenido?.trim() ? noticia.contenido : noticia.descripcion);
+  const cuerpo = noticia.contenido?.trim() ? noticia.contenido : noticia.descripcion;
+  // Texto con formato del editor (limpio) o texto plano de antes, en bloques.
+  const html = esHtml(cuerpo) ? limpiarHtml(cuerpo) : null;
+  const bloques = html === null ? textoABloques(cuerpo) : [];
   const url = `${process.env.NEXT_PUBLIC_BASE_URL ?? INSTITUCION.sitio}/actividades/noticias/${noticia.id}`;
 
   return (
@@ -102,7 +106,11 @@ export default async function NoticiaPage({
             {noticia.imagen && <Afiche src={noticia.imagen} alt={noticia.titulo} prioridad />}
 
             <div className={s.body}>
-              <BloquesTexto bloques={bloques} />
+              {html === null ? (
+                <BloquesTexto bloques={bloques} />
+              ) : (
+                <div className={s.rico} dangerouslySetInnerHTML={{ __html: html }} />
+              )}
 
               <GaleriaFotos
                 imagenes={noticia.noticia_imagen.filter((img) => !img.principal).map((img) => img.url)}

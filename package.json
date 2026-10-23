@@ -13,6 +13,13 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
+    "@tiptap/extension-highlight": "3.31.4",
+    "@tiptap/extension-text-align": "3.31.4",
+    "@tiptap/extension-text-style": "3.31.4",
+    "@tiptap/extensions": "3.31.4",
+    "@tiptap/pm": "3.31.4",
+    "@tiptap/react": "3.31.4",
+    "@tiptap/starter-kit": "3.31.4",
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
@@ -24,6 +31,7 @@
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.4",
     "react-icons": "^5.5.0",
+    "sanitize-html": "2.18.0",
     "sharp": "^0.35.4"
   },
   "devDependencies": {
@@ -35,6 +43,7 @@
     "@types/node": "^20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.0",
     "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",

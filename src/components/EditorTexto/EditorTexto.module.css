@@ -1,0 +1,95 @@
+.editor {
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  background: #fff;
+  /* Sin overflow:hidden ni min-height: dentro de la grilla del modal de
+     ferias cualquiera de los dos dejaba la fila en 2 px (el editor tapaba
+     los campos de abajo). */
+}
+.editor:focus-within {
+  border-color: var(--teal, #136a80);
+  box-shadow: 0 0 0 3px rgba(19, 106, 128, 0.2);
+}
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 6px;
+  background: var(--panel-fondo, #f4f8fb);
+  border-bottom: 1px solid #dde6ee;
+  border-radius: 9px 9px 0 0;
+}
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.grupo + .grupo {
+  border-left: 1px solid #dde6ee;
+  padding-left: 8px;
+}
+
+.boton {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink, #14263a);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+}
+.boton:hover:not(:disabled) { background: #e3edf5; }
+.boton:focus-visible { outline: 3px solid var(--teal, #136a80); outline-offset: 1px; }
+.boton:disabled { color: #8a99a8; cursor: default; }
+.activo { background: var(--navy, #0b2a4a); color: #fff; }
+.activo:hover:not(:disabled) { background: #123c66; }
+
+/* Selects de la barra: mismo alto que los botones (gana a los estilos del modal) */
+.barra .lista {
+  width: auto;
+  height: 34px;
+  margin: 0;
+  padding: 0 6px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink, #14263a);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.barra .tamano { width: 84px; }
+
+.area {
+  min-height: 180px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink, #14263a);
+  white-space: pre-wrap;
+}
+.area > * { margin: 0 0 0.6em; }
+.area h2 { font-size: 1.35rem; font-weight: 700; }
+.area h3 { font-size: 1.15rem; font-weight: 700; }
+.area ul, .area ol { padding-left: 1.5em; }
+.area ul { list-style: disc; }
+.area ol { list-style: decimal; }
+.area li > p { margin: 0 0 0.25em; }
+.area blockquote { border-left: 4px solid var(--gold, #f0c00c); padding-left: 14px; font-style: italic; }
+.area a { color: var(--teal, #136a80); text-decoration: underline; }
+.area mark { background: #fff1a8; color: inherit; }
+/* Placeholder del editor vacío */
+.area :global(p.is-editor-empty:first-child)::before {
+  content: attr(data-placeholder);
+  color: #5b6b7a;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
+import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
 interface NoticiaPdf {
   id: number;
@@ -184,12 +185,12 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label htmlFor="editar-noticia-contenido" className="form-label fw-semibold">Contenido</label>
-              <textarea id="editar-noticia-contenido"
-                className="form-control"
-                rows={6}
-                value={contenido}
-                onChange={(e) => setContenido(e.target.value)}
+              <label id="editar-noticia-contenido-etiqueta" className="form-label fw-semibold">Contenido</label>
+              <EditorTexto
+                id="editar-noticia-contenido"
+                etiquetaId="editar-noticia-contenido-etiqueta"
+                valor={contenido}
+                onChange={setContenido}
               />
             </div>
 
