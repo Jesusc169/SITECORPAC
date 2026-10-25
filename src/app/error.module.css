@@ -21,7 +21,7 @@
 }
 
 .texto {
-  color: #64748b;
+  color: var(--ink2);
   font-size: 1.02rem;
   line-height: 1.6;
   margin: 0 0 32px;
@@ -56,11 +56,11 @@
 }
 
 .btnSecundario {
-  background-color: #f1f5f9;
+  background-color: var(--superficie-2);
   color: var(--sitecorpac-navy);
 }
 
 .btnSecundario:hover {
-  background-color: #e2e8f0;
+  background-color: var(--superficie-3);
   transform: translateY(-2px);
 }

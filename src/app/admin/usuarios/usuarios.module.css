@@ -6,7 +6,7 @@
 
 .errorBanner {
   background: var(--rojo-claro);
-  border: 1px solid #f3c7c7;
+  border: 1px solid var(--rojo-borde);
   color: var(--rojo);
   padding: 11px 14px;
   border-radius: 10px;
@@ -21,7 +21,7 @@
 }
 
 .badgeAdmin {
-  background: var(--navy);
+  background: var(--navy-fondo);
   color: #fff;
 }
 
@@ -36,12 +36,12 @@
 }
 
 .badgeInactiva {
-  background: #eef2f6;
+  background: var(--superficie-3);
   color: var(--ink2);
 }
 
 .filaInactiva td {
-  color: #8a9bab;
+  color: var(--ink3);
 }
 
 .chips {
@@ -71,7 +71,7 @@
 }
 
 .modal {
-  background: #fff;
+  background: var(--superficie);
   border-radius: 18px;
   width: 100%;
   max-width: 480px;
@@ -145,7 +145,7 @@
 .checkboxItem input {
   width: 18px;
   height: 18px;
-  accent-color: var(--teal-claro);
+  accent-color: var(--teal-fondo);
 }
 
 .modalFooter {

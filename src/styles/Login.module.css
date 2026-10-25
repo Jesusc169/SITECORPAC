@@ -11,13 +11,13 @@
   align-items: center;
   justify-content: center;
   padding: 56px 16px 72px;
-  background: linear-gradient(180deg, var(--tint), #fff);
+  background: linear-gradient(180deg, var(--tint), var(--superficie));
 }
 
 .card {
   width: 100%;
   max-width: 440px;
-  background: #fff;
+  background: var(--superficie);
   border: 1px solid var(--line);
   border-radius: 20px;
   overflow: hidden;
@@ -70,15 +70,15 @@
   padding: 12px 14px;
   margin-bottom: 16px;
   border-radius: 10px;
-  border: 1.5px solid #cfdbe5;
+  border: 1.5px solid var(--borde-campo);
   font: 400 1rem var(--font-texto), Arial, sans-serif;
   color: var(--ink);
-  background: #fff;
+  background: var(--superficie);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input::placeholder {
-  color: #8a9bab;
+  color: var(--ink3);
 }
 
 .input:focus {
@@ -94,7 +94,7 @@
   border-radius: 10px;
   border: 0;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--sobre-dorado);
   font: 700 1rem var(--font-titulos), Arial, sans-serif;
   cursor: pointer;
   transition: filter 0.15s ease;
@@ -114,16 +114,16 @@
   padding: 11px 14px;
   border-radius: 10px;
   background: var(--rojo-claro);
-  color: #991b1b;
+  color: var(--rojo);
   font-size: 0.92rem;
-  border: 1px solid #f3c7c7;
+  border: 1px solid var(--rojo-borde);
   text-align: center;
 }
 
 .ayuda {
   margin: 20px 0 0;
   padding-top: 16px;
-  border-top: 1px solid #edf2f6;
+  border-top: 1px solid var(--line);
   font-size: 0.88rem;
   color: var(--ink2);
   text-align: center;

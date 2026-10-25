@@ -5,6 +5,7 @@ import "@/styles/global.css"; // tus estilos globales
 
 import { Metadata } from "next";
 import BootstrapClient from "@/components/BootstrapClient/BootstrapClient";
+import { SCRIPT_TEMA } from "@/components/BotonTema/BotonTema";
 import { Lexend, Source_Sans_3 } from "next/font/google";
 
 // Tipografía del rediseño A+C: Lexend para títulos y botones, Source Sans 3
@@ -40,8 +41,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${lexend.variable} ${sourceSans.variable}`}>
-      <head />
+    // suppressHydrationWarning: SCRIPT_TEMA pone data-theme en <html> antes
+    // de que React hidrate, así que el atributo difiere del HTML del servidor.
+    <html lang="es" className={`${lexend.variable} ${sourceSans.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body>
         {children}
 

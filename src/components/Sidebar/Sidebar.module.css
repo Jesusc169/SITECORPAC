@@ -15,7 +15,7 @@
 .sidebar {
   width: var(--panel-menu);
   height: 100vh;
-  background: #fff;
+  background: var(--superficie);
   color: var(--ink);
   position: fixed;
   top: 0;
@@ -145,6 +145,11 @@
   min-width: 0;
 }
 
+/* Botón sol/luna a la derecha de la cuenta. */
+.tema {
+  margin-left: auto;
+}
+
 .avatar {
   width: 36px;
   height: 36px;
@@ -152,7 +157,7 @@
   flex: none;
   display: grid;
   place-items: center;
-  background: var(--navy);
+  background: var(--navy-fondo);
   color: var(--gold);
   font: 700 0.95rem var(--font-titulos), Arial, sans-serif;
 }
@@ -194,7 +199,7 @@
 .verSitio {
   color: var(--navy);
   border: 1.5px solid var(--line);
-  background: #fff;
+  background: var(--superficie);
 }
 
 .verSitio:hover {
@@ -203,13 +208,13 @@
 }
 
 .logoutBtn {
-  color: #a51c1c;
-  border: 1.5px solid #f3c7c7;
-  background: #fff;
+  color: var(--rojo);
+  border: 1.5px solid var(--rojo-borde);
+  background: var(--superficie);
 }
 
 .logoutBtn:hover {
-  background: #fdecec;
+  background: var(--rojo-claro);
 }
 
 /* ---------- Celular y tablet ---------- */
@@ -235,7 +240,7 @@
   place-content: center;
   gap: 5px;
   border: 1px solid var(--navy);
-  background: #fff;
+  background: var(--superficie);
   color: var(--navy);
   cursor: pointer;
 }
@@ -254,7 +259,7 @@
     position: sticky;
     top: 0;
     z-index: 1030;
-    background: #fff;
+    background: var(--superficie);
     border-bottom: 1px solid var(--line);
   }
 

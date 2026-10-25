@@ -79,21 +79,21 @@
 }
 
 .alertaOk {
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #065f46;
+  background: var(--verde-claro);
+  border-color: var(--verde-borde);
+  color: var(--verde);
 }
 
 .alertaAviso {
-  background: #fffbeb;
-  border-color: #fcd34d;
-  color: #92400e;
+  background: var(--ambar-claro);
+  border-color: var(--ambar-borde);
+  color: var(--ambar);
 }
 
 .alertaError {
   background: var(--rojo-claro);
-  border-color: #f3c7c7;
-  color: #991b1b;
+  border-color: var(--rojo-borde);
+  color: var(--rojo);
 }
 
 /* ---------- Tarjetas ---------- */
@@ -105,7 +105,7 @@
 }
 
 .tarjeta {
-  background: #fff;
+  background: var(--superficie);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 18px 20px;
@@ -127,7 +127,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 6px 0;
-  border-bottom: 1px solid #edf2f6;
+  border-bottom: 1px solid var(--line);
   font-size: 0.93rem;
 }
 
@@ -162,7 +162,7 @@
 
 .barra {
   height: 8px;
-  background: #e6edf3;
+  background: var(--superficie-3);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -173,7 +173,7 @@
 }
 
 .barraOk {
-  background: var(--teal-claro);
+  background: var(--teal-fondo);
 }
 
 .barraAviso {
@@ -195,7 +195,7 @@
 
 .listaErrores li {
   overflow-wrap: anywhere;
-  color: #7f1d1d;
+  color: var(--rojo);
 }
 
 .fechaChica {
@@ -235,13 +235,13 @@
 }
 
 .nivelAviso {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--ambar-claro);
+  color: var(--ambar);
 }
 
 .nivelError {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--rojo-claro);
+  color: var(--rojo);
 }
 
 /* ---------- Registro: filtros ---------- */
@@ -249,7 +249,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 12px;
-  background: #fff;
+  background: var(--superficie);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 18px;
@@ -268,9 +268,9 @@
 .filtros select {
   font: 400 0.93rem var(--font-texto), Arial, sans-serif;
   padding: 8px 10px;
-  border: 1.5px solid #cfdbe5;
+  border: 1.5px solid var(--borde-campo);
   border-radius: 10px;
-  background: #fff;
+  background: var(--superficie);
   color: var(--ink);
   min-width: 0;
 }
@@ -300,7 +300,7 @@
 }
 
 .filaError td {
-  background: #fff7f7;
+  background: var(--rojo-claro);
 }
 
 .celdaFecha {
@@ -353,7 +353,7 @@
 /* ---------- Ventana "Qué cambió" ---------- */
 /* <dialog> nativo: el navegador lo centra y lo pone por encima de todo */
 .modal {
-  background: #fff;
+  background: var(--superficie);
   border: 0;
   border-radius: 18px;
   width: min(960px, calc(100% - 2rem));
@@ -409,9 +409,9 @@
 }
 
 .celdaAntes {
-  background: #fef2f2;
+  background: var(--rojo-claro);
 }
 
 .celdaDespues {
-  background: #f0fdf4;
+  background: var(--verde-claro);
 }

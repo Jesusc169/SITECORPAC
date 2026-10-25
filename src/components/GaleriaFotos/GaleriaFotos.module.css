@@ -1,12 +1,12 @@
 .seccion {
   margin-top: 34px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
 }
 
 .titulo {
   font-weight: 700;
-  color: #1f2937;
+  color: var(--ink);
   margin-bottom: 14px;
 }
 
@@ -24,7 +24,7 @@
   cursor: pointer;
   border: none;
   padding: 0;
-  background-color: #e5e7eb;
+  background-color: var(--superficie-3);
 }
 
 .tile img {
@@ -40,7 +40,7 @@
 }
 
 .tile:focus-visible {
-  outline: 3px solid var(--sitecorpac-blue, #1d4ed8);
+  outline: 3px solid var(--sitecorpac-blue);
   outline-offset: 2px;
 }
 
@@ -53,9 +53,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: var(--superficie-2);
+  color: var(--ink2);
+  border: 1px solid var(--line);
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 0.78rem;
@@ -65,7 +65,7 @@
 }
 
 .boton:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-  color: #111827;
+  background: var(--superficie-3);
+  border-color: var(--line);
+  color: var(--ink);
 }

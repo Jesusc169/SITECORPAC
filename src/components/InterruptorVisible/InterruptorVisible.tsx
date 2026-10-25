@@ -23,7 +23,7 @@ export default function InterruptorVisible({ visible, onChange, tipo, masculino 
   const oculto = masculino ? "Oculto" : "Oculta";
 
   return (
-    <div className="mb-3 p-3 rounded" style={{ background: visible ? "#e6f4ea" : "#fdf3dd" }}>
+    <div className="mb-3 p-3 rounded" style={{ background: visible ? "var(--verde-claro)" : "var(--ambar-claro)" }}>
       <div className="form-check form-switch m-0">
         <input
           className="form-check-input"
@@ -39,7 +39,7 @@ export default function InterruptorVisible({ visible, onChange, tipo, masculino 
           {visible ? "Visible en el sitio web" : `${oculto}: no se muestra en el sitio web`}
         </label>
       </div>
-      <div id={ayudaId} className="form-text mt-1" style={{ color: "#40566d" }}>
+      <div id={ayudaId} className="form-text mt-1" style={{ color: "var(--ink2)" }}>
         {visible
           ? `Los afiliados verán ${este} ${tipo}. Apaga el interruptor para ocultar${lo} sin borrar${lo}.`
           : `${este[0].toUpperCase()}${este.slice(1)} ${tipo} queda ${guardado} en el panel, pero nadie ${lo} ve en el sitio. Enciende el interruptor para volver a mostrar${lo}.`}

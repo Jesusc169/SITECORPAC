@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Sidebar.module.css";
+import BotonTema from "@/components/BotonTema/BotonTema";
 import Icono, { type NombreIcono } from "@/components/Icono/Icono";
 import { tienePermiso, type ClavePrivilegio } from "@/lib/permisos";
 
@@ -48,7 +49,10 @@ export default function Sidebar({ usuario }: Readonly<{ usuario: UsuarioPanel }>
       console.error("Error al cerrar sesión", e);
     }
 
+    // Se conserva solo la preferencia de tema (no es un dato de la sesión).
+    const tema = localStorage.getItem("sitecorpac-tema");
     localStorage.clear();
+    if (tema) localStorage.setItem("sitecorpac-tema", tema);
     sessionStorage.clear();
 
     // Navegación del lado del cliente: evita recargar el JS/CSS completo
@@ -133,6 +137,7 @@ export default function Sidebar({ usuario }: Readonly<{ usuario: UsuarioPanel }>
               <span className={styles.cuentaNombre}>{usuario.nombre}</span>
               <span className={styles.cuentaRol}>{usuario.rol}</span>
             </span>
+            <BotonTema className={styles.tema} />
           </div>
 
           <a href="/" target="_blank" rel="noopener noreferrer" className={styles.verSitio}>

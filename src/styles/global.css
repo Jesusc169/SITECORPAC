@@ -34,6 +34,110 @@
   --rojo-claro: #fdecec;
   --verde: #166534;
   --verde-claro: #dcfce7;
+
+  /* Tema claro/oscuro (oct-2026). Los módulos usan estos tokens en vez de
+     colores fijos; el tema oscuro solo redefine valores (más abajo).
+     --navy y --teal se usan sobre todo como COLOR DE TEXTO: cuando un
+     bloque necesita el azul de la marca como FONDO (cabeceras, franjas,
+     botones con letra blanca) usa la variante "-fondo", que sigue oscura
+     en el tema oscuro. */
+  --superficie: #ffffff;
+  --superficie-2: #f6f9fb;
+  --superficie-3: #e8eef3;
+  --ink3: #8a9bab;
+  --borde-campo: #cfdbe5;
+  --navy-fondo: #0b2a4a;
+  --teal-fondo: #1b6f86;
+  --rojo-fondo: #a51c1c;
+  --rojo-borde: #f3c7c7;
+  --verde-fondo: #166534;
+  --verde-borde: #a7f3d0;
+  --ambar: #92400e;
+  --ambar-claro: #fef3c7;
+  --ambar-borde: #fcd34d;
+  --enlace: #1d4ed8;
+  --ok: #15803d;
+  --resaltado: #fff1a8;
+  /* Texto sobre el dorado de la marca: azul oscuro en ambos temas. */
+  --sobre-dorado: #0b2a4a;
+  /* Texto en formato de código (nombres de cookies en las páginas legales). */
+  --codigo: #9d174d;
+  color-scheme: light;
+}
+
+/* Tema oscuro: lo activa el botón sol/luna (o la preferencia del sistema)
+   poniendo data-theme="dark" en <html> antes de pintar (ver app/layout.tsx).
+   Solo en pantalla: al imprimir (constancias) se usa siempre el tema claro. */
+@media screen {
+  :root[data-theme="dark"] {
+    --superficie: #122130;
+    --superficie-2: #0f1c29;
+    --superficie-3: #1b2c3e;
+    --panel-fondo: #0b1520;
+    --tint: #10283a;
+
+    --ink: #e6edf5;
+    --ink2: #a9bacb;
+    --ink3: #7f93a8;
+    --line: #24384c;
+    --borde-campo: #3a536c;
+
+    --navy: #dbe7f3;
+    --sitecorpac-navy: #e6edf5;
+    --navy-fondo: #163a5c;
+    --sitecorpac-azul-oscuro: #dbe7f3;
+    --teal: #5fc4dc;
+    --teal-claro: #5fc4dc;
+    --sitecorpac-blue: #7aa7ff;
+    --sitecorpac-blue-dark: #8ab4ff;
+    --sitecorpac-blue-light: #a5c4ff;
+    --enlace: #8ab4ff;
+    --ok: #5bd18b;
+
+    --rojo: #f19a9a;
+    --rojo-claro: #3a1a1e;
+    --rojo-borde: #6b2a30;
+    --verde: #6fd99a;
+    --verde-claro: #10301f;
+    --verde-borde: #1f5b3a;
+    --ambar: #f5c46b;
+    --ambar-claro: #33270c;
+    --ambar-borde: #6b5214;
+    --resaltado: #5c4b00;
+    --codigo: #f9a8d4;
+    color-scheme: dark;
+  }
+
+  /* Bootstrap ya trae su tema oscuro (data-bs-theme); se alinean su fondo
+     y su texto con los de la marca. */
+  :root[data-theme="dark"] body {
+    --bs-body-bg: var(--panel-fondo);
+    --bs-body-color: var(--ink);
+    --bs-border-color: var(--line);
+    background: var(--panel-fondo);
+    color: var(--ink);
+  }
+}
+
+/* Botón sol/luna para cambiar entre tema claro y oscuro. */
+.boton-tema {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--superficie);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.boton-tema:hover {
+  border-color: var(--teal-claro);
+  background: var(--tint);
 }
 
 /* Reset básico */
@@ -79,7 +183,7 @@ button {
   left: 12px;
   top: -100px;
   z-index: 2000;
-  background: var(--sitecorpac-navy);
+  background: var(--navy-fondo);
   color: #ffffff;
   padding: 10px 18px;
   border-radius: 8px;

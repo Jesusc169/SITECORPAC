@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import BotonTema from "@/components/BotonTema/BotonTema";
 import Icono from "@/components/Icono/Icono";
 import { ENLACES } from "@/lib/datosInstitucionales";
 import s from "@/styles/Sitio.module.css";
@@ -107,6 +108,7 @@ export default function Cabecera() {
             </ul>
           </nav>
 
+          <BotonTema />
           <Link className={s.login} href="/login">
             <Icono nombre="usuario" chico />
             Iniciar sesión

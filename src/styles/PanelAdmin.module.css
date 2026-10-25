@@ -84,7 +84,7 @@
 
 /* ---------- Tarjeta blanca genérica ---------- */
 .tarjeta {
-  background: #fff;
+  background: var(--superficie);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 22px 24px;
@@ -98,7 +98,7 @@
   justify-content: center;
   gap: 8px;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--sobre-dorado);
   border: 0;
   padding: 11px 18px;
   border-radius: 10px;
@@ -121,7 +121,7 @@
 .contenedorTabla {
   width: 100%;
   overflow-x: auto;
-  background: #fff;
+  background: var(--superficie);
   border: 1px solid var(--line);
   border-radius: 16px;
 }
@@ -149,12 +149,12 @@
 .tabla tbody td {
   padding: 14px 16px;
   color: var(--ink);
-  border-bottom: 1px solid #edf2f6;
+  border-bottom: 1px solid var(--line);
   vertical-align: middle;
 }
 
 .tabla tbody tr:hover {
-  background: #f8fbfd;
+  background: var(--superficie-2);
 }
 
 .tabla tbody tr:last-child td {
@@ -193,7 +193,7 @@
 }
 
 .boton {
-  background: #fff;
+  background: var(--superficie);
   border-color: var(--line);
   color: var(--navy);
   padding: 6px 13px;
@@ -201,7 +201,7 @@
 
 .boton:hover {
   background: var(--tint);
-  border-color: #c6dbe6;
+  border-color: var(--line);
 }
 
 .boton:disabled {
@@ -210,8 +210,8 @@
 }
 
 .botonPeligro {
-  background: #fff;
-  border-color: #f3c7c7;
+  background: var(--superficie);
+  border-color: var(--rojo-borde);
   color: var(--rojo);
   padding: 6px 13px;
 }
@@ -222,7 +222,7 @@
 
 /* Botones con ícono (✏️ 📄 🗑️): mismo alto que los de texto */
 .botonIcono {
-  background: #fff;
+  background: var(--superficie);
   border-color: var(--line);
   padding: 6px 9px;
   min-width: 38px;
@@ -234,7 +234,7 @@
 }
 
 .botonIcono.botonPeligro {
-  border-color: #f3c7c7;
+  border-color: var(--rojo-borde);
 }
 
 .botonIcono.botonPeligro:hover {
@@ -268,7 +268,7 @@
 }
 
 .ventana {
-  background: #fff;
+  background: var(--superficie);
   width: 100%;
   max-height: 90vh;
   border-radius: 18px;
@@ -329,12 +329,12 @@
 .entrada {
   width: 100%;
   box-sizing: border-box;
-  border: 1.5px solid #cfdbe5;
+  border: 1.5px solid var(--borde-campo);
   border-radius: 10px;
   padding: 10px 12px;
   font: 400 0.97rem var(--font-texto), Arial, sans-serif;
   color: var(--ink);
-  background: #fff;
+  background: var(--superficie);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -350,7 +350,7 @@
 }
 
 .entrada::placeholder {
-  color: #8a9bab;
+  color: var(--ink3);
 }
 
 .ayuda {
@@ -376,7 +376,7 @@
 
 .botonPrincipal {
   background: var(--gold);
-  color: var(--navy);
+  color: var(--sobre-dorado);
   border: 1.5px solid var(--gold);
   font-weight: 700;
 }
@@ -392,9 +392,9 @@
 }
 
 .botonSecundario {
-  background: #fff;
+  background: var(--superficie);
   color: var(--navy);
-  border: 1.5px solid #cfdbe5;
+  border: 1.5px solid var(--borde-campo);
 }
 
 .botonSecundario:hover {

@@ -315,7 +315,7 @@ function BarraHerramientas({
           style={colorActual ? { color: colorActual } : undefined}
           onChange={(e) => (e.target.value ? cadena().setColor(e.target.value).run() : cadena().unsetColor().run())}
         >
-          <option value="" style={{ color: "#14263a" }}>
+          <option value="" style={{ color: "var(--ink)" }}>
             Color normal
           </option>
           {COLORES.map((c) => (

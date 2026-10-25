@@ -43,7 +43,7 @@
 }
 
 .panelAdmin .modal-header {
-  background: #fff !important;
+  background: var(--superficie) !important;
   padding: 18px 24px;
   border-bottom: 1px solid var(--line);
 }
@@ -78,7 +78,7 @@
 
 .panelAdmin .form-control,
 .panelAdmin .form-select {
-  border: 1.5px solid #cfdbe5;
+  border: 1.5px solid var(--borde-campo);
   border-radius: 10px;
   padding: 10px 12px;
   color: var(--ink);
@@ -92,7 +92,7 @@
 }
 
 .panelAdmin .form-control::placeholder {
-  color: #8a9bab;
+  color: var(--ink3);
 }
 
 .panelAdmin .form-text {
@@ -101,7 +101,7 @@
 }
 
 .panelAdmin .form-check-input:checked {
-  background-color: var(--teal-claro);
+  background-color: var(--teal-fondo);
   border-color: var(--teal-claro);
 }
 
@@ -137,7 +137,7 @@
 .panelAdmin .btn-primary {
   background: var(--gold);
   border-color: var(--gold);
-  color: var(--navy);
+  color: var(--sobre-dorado);
   font-weight: 700;
 }
 
@@ -149,26 +149,26 @@
 .panelAdmin .btn-primary:disabled {
   background: #e0b200;
   border-color: #e0b200;
-  color: var(--navy);
+  color: var(--sobre-dorado);
 }
 
 /* Cancelar / secundarios: blanco con borde */
 .panelAdmin .btn-outline-secondary,
 .panelAdmin .btn-secondary {
-  background: #fff;
-  border-color: #cfdbe5;
+  background: var(--superficie);
+  border-color: var(--borde-campo);
   color: var(--navy);
 }
 
 .panelAdmin .btn-outline-secondary:hover,
 .panelAdmin .btn-secondary:hover {
   background: var(--tint);
-  border-color: #b9d2df;
+  border-color: var(--line);
   color: var(--navy);
 }
 
 .panelAdmin .btn-danger {
-  background: var(--rojo);
+  background: var(--rojo-fondo);
   border-color: var(--rojo);
   color: #fff;
 }
@@ -179,14 +179,14 @@
 }
 
 .panelAdmin .btn-outline-danger {
-  background: #fff;
-  border-color: #f3c7c7;
+  background: var(--superficie);
+  border-color: var(--rojo-borde);
   color: var(--rojo);
 }
 
 .panelAdmin .btn-outline-danger:hover {
   background: var(--rojo-claro);
-  border-color: #f3c7c7;
+  border-color: var(--rojo-borde);
   color: var(--rojo);
 }
 
