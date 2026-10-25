@@ -4,8 +4,10 @@ Vigía de SITECORPAC: bitácora de caídas e incidentes del servidor.
 
 Corre como root cada minuto desde el crontab de root:
   * * * * * /usr/bin/python3 /root/vigia_sitecorpac.py >/dev/null 2>&1
-Se instala COPIANDO este archivo a /root (igual que alertas-sitecorpac.sh):
+Se instala COPIANDO este archivo a /root (igual que alertas-sitecorpac.sh),
+junto con la plantilla de los correos:
   install -o root -m 700 scripts/vigia-sitecorpac.py /root/vigia_sitecorpac.py
+  install -o root -m 700 scripts/correo-sitecorpac.py /root/correo_sitecorpac.py
 
 Qué hace en cada pasada:
   1. Revisa el sitio (por internet y por dentro), nginx, MySQL, PM2 y el disco.
@@ -34,6 +36,7 @@ Uso manual:
 """
 import datetime
 import fcntl
+import importlib.util
 import json
 import os
 import re
@@ -210,10 +213,21 @@ def arreglo_seguro(obs):
 
 
 # ---------------------------------------------------------------- avisos y registro
-def correo(asunto, cuerpo):
-    texto = f"{cuerpo}\n\n--\nVigía de SITECORPAC · {hora_peru()} (hora de Perú)\nPanel: https://{DOMINIO}/admin/sistema\n"
+def correo(nivel, asunto, titulo, resumen, cuerpo):
+    """Envía con la plantilla HTML (/root/correo_sitecorpac.py); si no está, en texto plano."""
     try:
-        subprocess.run(["mail", "-s", asunto, DESTINO], input=texto, text=True, timeout=30, check=False)
+        ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "correo_sitecorpac.py")
+        spec = importlib.util.spec_from_file_location("correo_sitecorpac", ruta)
+        plantilla = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(plantilla)
+        plantilla.enviar(nivel, asunto, titulo, resumen, cuerpo, origen="Vigía (revisa cada minuto)", destino=DESTINO)
+        return
+    except Exception:  # noqa: BLE001
+        pass
+    texto = (f"{titulo}\n\n{resumen}\n\n{cuerpo}\n\n--\nVigía de SITECORPAC · {hora_peru()} (hora de Perú)\n"
+             f"Panel: https://{DOMINIO}/admin/sistema\n")
+    try:
+        subprocess.run(["mail", "-s", f"SITECORPAC: {asunto}", DESTINO], input=texto, text=True, timeout=30, check=False)
     except Exception:  # noqa: BLE001
         pass
 
@@ -267,12 +281,18 @@ def cerrar(estado, prueba=False):
     os.chmod(BITACORA, 0o600)
     if a.get("avisado") and not prueba:
         minutos = max(1, round(a["duracionSeg"] / 60))
-        correo("✅ SITECORPAC: el sitio volvió a funcionar",
-               f"El incidente {a['id']} se resolvió. Duró unos {minutos} minuto(s) "
-               f"({hora_peru(a['inicio'])} → {hora_peru(a['fin'])}).\n\n"
-               f"Causa probable: {a['causa']}\n"
-               f"Arreglo automático: {a.get('accionAutomatica') or 'ninguno (se recuperó solo)'}\n\n"
-               f"Evidencia guardada en el servidor: {a['carpeta']}")
+        correo("ok", "el sitio volvió a funcionar", "El sitio volvió a funcionar",
+               f"Todo responde con normalidad otra vez. El problema duró unos {minutos} minuto(s).",
+               "## Qué pasó\n"
+               f"Desde :: {hora_peru(a['inicio'])}\n"
+               f"Hasta :: {hora_peru(a['fin'])}\n"
+               f"Duración :: {minutos} minuto(s)\n"
+               f"Causa probable :: {a['causa']}\n"
+               f"Arreglo automático :: {a.get('accionAutomatica') or 'ninguno (se recuperó solo)'}\n"
+               "\n## Evidencia guardada\n"
+               f"Registros del momento de la falla (incidente `{a['id']}`):\n"
+               f"$ {a['carpeta']}\n"
+               "\nNo tienes que hacer nada. Si se repite seguido, revisa la evidencia.")
     return a
 
 
@@ -309,13 +329,18 @@ def pasada():
             if accion:
                 abierto["accionAutomatica"] = f"{accion} ({'funcionó' if ok else 'falló'})"
             abierto["avisado"] = True
-            correo("🚨 SITECORPAC: el sitio tiene un problema",
-                   "Desde las " + hora_peru(abierto["inicio"]) + " (hora de Perú):\n"
+            correo("critico", "el sitio tiene un problema", "El sitio tiene un problema",
+                   f"Desde las {hora_peru(abierto['inicio'])} (hora de Perú) algo no funciona. "
+                   "Te aviso de nuevo cuando se resuelva.",
+                   "## Qué está fallando\n"
                    + "\n".join(f"• {s}" for s in sintomas)
-                   + f"\n\nCausa probable: {abierto['causa']}\nCómo se arregla: {abierto['solucion']}\n"
-                   + f"Arreglo automático: {abierto['accionAutomatica'] or 'ninguno (no hay un servicio detenido que levantar)'}\n\n"
-                   + f"Evidencia guardada en el servidor: {abierto['carpeta']}\n"
-                   + "Te aviso de nuevo cuando vuelva a funcionar.")
+                   + "\n\n## Diagnóstico\n"
+                   + f"Causa probable :: {abierto['causa']}\n"
+                   + f"Arreglo automático :: {abierto['accionAutomatica'] or 'ninguno (no hay un servicio detenido que levantar)'}\n"
+                   + f"\n## Cómo se arregla\n{abierto['solucion']}\n"
+                   + f"\n## Evidencia guardada\nRegistros del momento de la falla (incidente `{abierto['id']}`):\n"
+                   + f"$ {abierto['carpeta']}\n"
+                   + "$ python3 /root/vigia_sitecorpac.py diagnostico")
     elif not sintomas and abierto:
         cerrar(estado)
 
