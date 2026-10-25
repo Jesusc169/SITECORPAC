@@ -8,6 +8,7 @@ import { ENLACES } from "@/lib/datosInstitucionales";
 import s from "@/styles/Sitio.module.css";
 
 import { NoticiasController } from "@/controllers/noticiasController";
+import { limpiarResumen } from "@/lib/htmlSeguro";
 
 // NoticiasController cachea 60s y se invalida al instante al
 // publicar/editar/eliminar (revalidateTag("noticias")).
@@ -34,7 +35,7 @@ export default async function HomePage() {
   const noticias: NoticiaResumen[] = noticiasRaw.map((n) => ({
     id: n.id,
     titulo: n.titulo,
-    descripcion: n.descripcion,
+    descripcion: limpiarResumen(n.descripcion),
     imagen: n.imagen,
     // n.fecha puede llegar como Date (cache miss, recién leído de Prisma) o
     // como string (cache hit: unstable_cache lo serializó a JSON).

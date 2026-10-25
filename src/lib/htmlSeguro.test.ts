@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { limpiarHtml, limpiarTextoRico } from "./htmlSeguro";
+import { limpiarHtml, limpiarResumen, limpiarTextoRico } from "./htmlSeguro";
 
 describe("limpiarHtml", () => {
   it("conserva el formato que produce el editor", () => {
@@ -44,5 +44,28 @@ describe("limpiarTextoRico", () => {
 
   it("el HTML del editor se limpia", () => {
     expect(limpiarTextoRico('<p>ok<script>x</script></p>')).toBe("<p>ok</p>");
+  });
+});
+
+describe("limpiarResumen", () => {
+  it("conserva el formato de letra y la alineación", () => {
+    const html =
+      '<p style="text-align: center"><strong>a</strong> <em>b</em> <u>c</u> <s>d</s> <mark>e</mark> ' +
+      '<span style="font-size: 20px; color: #a51c1c">f</span></p>';
+    expect(limpiarResumen(html)).toBe(
+      '<p style="text-align:center"><strong>a</strong> <em>b</em> <u>c</u> <s>d</s> <mark>e</mark> ' +
+        '<span style="font-size:20px;color:#a51c1c">f</span></p>'
+    );
+  });
+
+  it("quita enlaces, títulos, listas y scripts pero deja su texto", () => {
+    expect(limpiarResumen('<h2>T</h2><ul><li><p>x</p></li></ul><p><a href="https://x.pe">y</a><script>z</script></p>')).toBe(
+      "T<p>x</p><p>y</p>"
+    );
+  });
+
+  it("el texto plano antiguo no se toca", () => {
+    expect(limpiarResumen("Resumen <b>")).toBe("Resumen <b>");
+    expect(limpiarResumen(undefined)).toBeUndefined();
   });
 });

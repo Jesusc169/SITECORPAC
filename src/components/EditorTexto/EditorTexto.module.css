@@ -76,6 +76,8 @@
   white-space: pre-wrap;
 }
 .area > * { margin: 0 0 0.6em; }
+/* Descripción breve: unas pocas líneas */
+.area.compacto { min-height: 72px; max-height: 160px; }
 .area h2 { font-size: 1.35rem; font-weight: 700; }
 .area h3 { font-size: 1.15rem; font-weight: 700; }
 .area ul, .area ol { padding-left: 1.5em; }

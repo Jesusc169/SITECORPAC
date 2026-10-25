@@ -123,13 +123,14 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
-              <label htmlFor="crear-noticia-descripcion-breve" className="form-label fw-semibold">Descripción breve</label>
-              <textarea id="crear-noticia-descripcion-breve"
-                className="form-control"
-                rows={2}
+              <label id="crear-noticia-descripcion-breve-etiqueta" className="form-label fw-semibold">Descripción breve</label>
+              <EditorTexto
+                id="crear-noticia-descripcion-breve"
+                etiquetaId="crear-noticia-descripcion-breve-etiqueta"
+                valor={descripcion}
+                onChange={setDescripcion}
                 placeholder="Resumen corto para la portada"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
+                compacto
               />
             </div>
 

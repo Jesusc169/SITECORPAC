@@ -6,6 +6,7 @@
 
 import type { Metadata } from "next";
 import { NoticiasController } from "@/controllers/noticiasController";
+import { limpiarResumen } from "@/lib/htmlSeguro";
 import NoticiasPageView from "@/views/NoticiasPageView";
 import PaginaPublica from "@/components/PaginaPublica/PaginaPublica";
 
@@ -23,7 +24,7 @@ export default async function NoticiasPage() {
   const noticiasAdaptadas = noticias.map((n) => ({
     id: n.id,
     titulo: n.titulo,
-    descripcion: n.descripcion,
+    descripcion: limpiarResumen(n.descripcion),
     imagen: n.imagen,
     // n.fecha puede llegar como Date (cache miss) o string (cache hit:
     // unstable_cache lo serializa a JSON), así que no se puede asumir

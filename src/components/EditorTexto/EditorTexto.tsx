@@ -71,9 +71,21 @@ interface Props {
   valor: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  /**
+   * Solo formato de letra y alineación (descripción breve de las tarjetas):
+   * sin títulos, listas, citas ni enlaces.
+   */
+  compacto?: boolean;
 }
 
-export default function EditorTexto({ id, etiquetaId, valor, onChange, placeholder }: Readonly<Props>) {
+export default function EditorTexto({
+  id,
+  etiquetaId,
+  valor,
+  onChange,
+  placeholder,
+  compacto = false,
+}: Readonly<Props>) {
   // Lo último que se entregó con onChange: si `valor` cambia desde fuera
   // (p. ej. al cargar la noticia a editar) se vuelve a cargar el editor.
   const ultimo = useRef(valor);
@@ -82,25 +94,27 @@ export default function EditorTexto({ id, etiquetaId, valor, onChange, placehold
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [2, 3] },
+        heading: compacto ? false : { levels: [2, 3] },
         code: false,
         codeBlock: false,
         horizontalRule: false,
-        link: { openOnClick: false, autolink: true, defaultProtocol: "https", protocols: ["mailto"] },
+        ...(compacto
+          ? { bulletList: false, orderedList: false, listItem: false, blockquote: false, link: false }
+          : { link: { openOnClick: false, autolink: true, defaultProtocol: "https", protocols: ["mailto"] } }),
       }),
       TextStyle,
       FontFamily,
       FontSize,
       Color,
       Highlight,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({ types: compacto ? ["paragraph"] : ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: placeholder ?? "" }),
     ],
     content: textoAHtml(valor),
     editorProps: {
       attributes: {
         id,
-        class: styles.area,
+        class: compacto ? `${styles.area} ${styles.compacto}` : styles.area,
         role: "textbox",
         "aria-multiline": "true",
         "aria-labelledby": etiquetaId,
@@ -121,7 +135,7 @@ export default function EditorTexto({ id, etiquetaId, valor, onChange, placehold
 
   return (
     <div className={styles.editor}>
-      {editor && <BarraHerramientas editor={editor} controla={id} />}
+      {editor && <BarraHerramientas editor={editor} controla={id} compacto={compacto} />}
       <EditorContent editor={editor} />
     </div>
   );
@@ -151,7 +165,11 @@ function Boton({
   );
 }
 
-function BarraHerramientas({ editor, controla }: Readonly<{ editor: Editor; controla: string }>) {
+function BarraHerramientas({
+  editor,
+  controla,
+  compacto,
+}: Readonly<{ editor: Editor; controla: string; compacto: boolean }>) {
   const estado = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -209,21 +227,23 @@ function BarraHerramientas({ editor, controla }: Readonly<{ editor: Editor; cont
       </div>
 
       <div className={styles.grupo}>
-        <select
-          className={styles.lista}
-          aria-label="Estilo del párrafo"
-          title="Estilo del párrafo"
-          value={estado.bloque}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v === "p") cadena().setParagraph().run();
-            else cadena().setHeading({ level: v === "h2" ? 2 : 3 }).run();
-          }}
-        >
-          <option value="p">Texto normal</option>
-          <option value="h2">Título</option>
-          <option value="h3">Subtítulo</option>
-        </select>
+        {!compacto && (
+          <select
+            className={styles.lista}
+            aria-label="Estilo del párrafo"
+            title="Estilo del párrafo"
+            value={estado.bloque}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "p") cadena().setParagraph().run();
+              else cadena().setHeading({ level: v === "h2" ? 2 : 3 }).run();
+            }}
+          >
+            <option value="p">Texto normal</option>
+            <option value="h2">Título</option>
+            <option value="h3">Subtítulo</option>
+          </select>
+        )}
 
         <select
           className={styles.lista}
@@ -321,22 +341,26 @@ function BarraHerramientas({ editor, controla }: Readonly<{ editor: Editor; cont
         </Boton>
       </div>
 
-      <div className={styles.grupo}>
-        <Boton etiqueta="Lista con viñetas" activo={estado.vinetas} onClick={() => cadena().toggleBulletList().run()}>
-          <MdFormatListBulleted aria-hidden />
-        </Boton>
-        <Boton etiqueta="Lista numerada" activo={estado.numerada} onClick={() => cadena().toggleOrderedList().run()}>
-          <MdFormatListNumbered aria-hidden />
-        </Boton>
-        <Boton etiqueta="Cita" activo={estado.cita} onClick={() => cadena().toggleBlockquote().run()}>
-          <MdFormatQuote aria-hidden />
-        </Boton>
-      </div>
+      {!compacto && (
+        <div className={styles.grupo}>
+          <Boton etiqueta="Lista con viñetas" activo={estado.vinetas} onClick={() => cadena().toggleBulletList().run()}>
+            <MdFormatListBulleted aria-hidden />
+          </Boton>
+          <Boton etiqueta="Lista numerada" activo={estado.numerada} onClick={() => cadena().toggleOrderedList().run()}>
+            <MdFormatListNumbered aria-hidden />
+          </Boton>
+          <Boton etiqueta="Cita" activo={estado.cita} onClick={() => cadena().toggleBlockquote().run()}>
+            <MdFormatQuote aria-hidden />
+          </Boton>
+        </div>
+      )}
 
       <div className={styles.grupo}>
-        <Boton etiqueta={estado.enlace ? "Cambiar enlace" : "Poner enlace"} activo={estado.enlace} onClick={ponerEnlace}>
-          <MdLink aria-hidden />
-        </Boton>
+        {!compacto && (
+          <Boton etiqueta={estado.enlace ? "Cambiar enlace" : "Poner enlace"} activo={estado.enlace} onClick={ponerEnlace}>
+            <MdLink aria-hidden />
+          </Boton>
+        )}
         {estado.enlace && (
           <Boton etiqueta="Quitar enlace" onClick={() => cadena().extendMarkRange("link").unsetLink().run()}>
             <MdLinkOff aria-hidden />

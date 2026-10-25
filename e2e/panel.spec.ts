@@ -36,13 +36,21 @@ test("ciclo completo de una noticia: crear, ver, editar, historial, eliminar y r
   await page.goto("/admin/noticias");
   await page.getByRole("button", { name: "+ Nueva noticia" }).click();
   await page.getByPlaceholder("Título de la noticia").fill("Asamblea E2E");
-  await page.getByPlaceholder("Resumen corto para la portada").fill("Resumen de la asamblea");
+  // Hay dos barras de formato: la de la descripción breve (compacta, sin
+  // títulos ni listas) y la del contenido.
+  const [barraResumen, barraContenido] = [page.getByRole("toolbar").nth(0), page.getByRole("toolbar").nth(1)];
+  await page.getByRole("textbox", { name: "Descripción breve" }).click();
+  await page.keyboard.type("Resumen de la asamblea");
+  await page.keyboard.press("ControlOrMeta+A");
+  await barraResumen.getByRole("button", { name: "Cursiva" }).click();
+  await expect(barraResumen.getByRole("button", { name: "Cursiva" })).toHaveAttribute("aria-pressed", "true");
+  await expect(barraResumen.getByRole("button", { name: "Lista con viñetas" })).toHaveCount(0);
   // Editor con formato: se escribe y se pone en negrita con la barra
   await page.getByRole("textbox", { name: "Contenido" }).click();
   await page.keyboard.type("Detalle de la asamblea");
   await page.keyboard.press("ControlOrMeta+A");
-  await page.getByRole("button", { name: "Negrita" }).click();
-  await expect(page.getByRole("button", { name: "Negrita" })).toHaveAttribute("aria-pressed", "true");
+  await barraContenido.getByRole("button", { name: "Negrita" }).click();
+  await expect(barraContenido.getByRole("button", { name: "Negrita" })).toHaveAttribute("aria-pressed", "true");
   await page.locator('input[type="file"][accept="image/*"]').first().setInputFiles(FOTO);
   await page.getByRole("button", { name: "Publicar noticia" }).click();
   await expect(page.getByText("Asamblea E2E")).toBeVisible();
@@ -50,6 +58,8 @@ test("ciclo completo de una noticia: crear, ver, editar, historial, eliminar y r
   // Se ve en el sitio
   await page.goto("/noticias");
   await expect(page.getByText("Asamblea E2E").first()).toBeVisible();
+  // La descripción breve sale con su formato en la tarjeta
+  await expect(page.locator("em", { hasText: "Resumen de la asamblea" }).first()).toBeVisible();
   await page.getByRole("link", { name: /Asamblea E2E/ }).first().click();
   await expect(page.locator("strong", { hasText: "Detalle de la asamblea" })).toBeVisible();
 

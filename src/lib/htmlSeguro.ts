@@ -38,6 +38,16 @@ const OPCIONES: sanitizeHtml.IOptions = {
   },
 };
 
+// Descripción breve de una noticia (editor compacto): solo formato de letra y
+// alineación. Va dentro de la tarjeta, que ya es un enlace y tiene su <h3>,
+// así que no se permiten enlaces, títulos, listas ni citas (su texto se queda).
+const OPCIONES_RESUMEN: sanitizeHtml.IOptions = {
+  ...OPCIONES,
+  allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "mark"],
+  allowedAttributes: { span: ["style"], mark: ["style"], p: ["style"] },
+  transformTags: {},
+};
+
 export function limpiarHtml(html: string): string {
   return sanitizeHtml(html, OPCIONES).trim();
 }
@@ -45,4 +55,9 @@ export function limpiarHtml(html: string): string {
 /** HTML del editor → limpio; texto plano antiguo → igual. */
 export function limpiarTextoRico<T extends string | null | undefined>(valor: T): T {
   return (esHtml(valor) ? limpiarHtml(valor as string) : valor) as T;
+}
+
+/** Igual que limpiarTextoRico, pero con lo que admite la descripción breve. */
+export function limpiarResumen<T extends string | null | undefined>(valor: T): T {
+  return (esHtml(valor) ? sanitizeHtml(valor as string, OPCIONES_RESUMEN).trim() : valor) as T;
 }

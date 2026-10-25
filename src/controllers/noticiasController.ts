@@ -17,7 +17,7 @@ import { MAX_IMAGENES_GALERIA } from "@/lib/resolverGaleria";
 import { actualizarGaleria } from "@/lib/galeria";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
-import { limpiarTextoRico } from "@/lib/htmlSeguro";
+import { limpiarResumen, limpiarTextoRico } from "@/lib/htmlSeguro";
 
 export class NoticiaValidationError extends Error {}
 
@@ -174,7 +174,7 @@ export class NoticiasController {
     const now = new Date();
     const noticia = await NoticiaModel.crear({
       titulo,
-      descripcion: input.descripcion,
+      descripcion: limpiarResumen(input.descripcion),
       contenido: limpiarTextoRico(input.contenido),
       autor: input.autor,
       imagen: imagenPath,
@@ -247,7 +247,7 @@ export class NoticiasController {
 
     const actualizada = await NoticiaModel.actualizar(id, {
       titulo: input.titulo,
-      descripcion: input.descripcion,
+      descripcion: limpiarResumen(input.descripcion),
       contenido: input.contenido ? limpiarTextoRico(input.contenido) : null,
       autor: input.autor,
       imagen: imagenPath,

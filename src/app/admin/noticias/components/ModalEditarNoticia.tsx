@@ -175,12 +175,13 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
-              <label htmlFor="editar-noticia-descripcion-breve" className="form-label fw-semibold">Descripción breve</label>
-              <textarea id="editar-noticia-descripcion-breve"
-                className="form-control"
-                rows={2}
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
+              <label id="editar-noticia-descripcion-breve-etiqueta" className="form-label fw-semibold">Descripción breve</label>
+              <EditorTexto
+                id="editar-noticia-descripcion-breve"
+                etiquetaId="editar-noticia-descripcion-breve-etiqueta"
+                valor={descripcion}
+                onChange={setDescripcion}
+                compacto
               />
             </div>
 

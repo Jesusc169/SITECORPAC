@@ -2,6 +2,7 @@
 // grande y las tres siguientes al costado. Reemplaza al carrusel de 18 s.
 import Link from "next/link";
 import Afiche from "@/components/Sitio/Afiche";
+import Resumen from "@/components/Sitio/Resumen";
 import Icono from "@/components/Icono/Icono";
 import { fechaCorta } from "@/lib/fechas";
 import s from "@/styles/Sitio.module.css";
@@ -36,7 +37,7 @@ export default function NoticiasHome({ noticias }: Readonly<{ noticias: NoticiaR
               <Afiche src={destacada.imagen} alt={destacada.titulo} prioridad />
               <span className={s.date}>{fechaCorta(destacada.fecha)}</span>
               <h3>{destacada.titulo}</h3>
-              {destacada.descripcion && <p className={s.resumen}>{destacada.descripcion}</p>}
+              {destacada.descripcion && <Resumen texto={destacada.descripcion} />}
             </Link>
             <div className={s.side}>
               {resto.slice(0, 3).map((n) => (

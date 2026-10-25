@@ -150,3 +150,35 @@ describe("Visibilidad de la noticia (interruptor del panel)", () => {
     expect(NoticiaModel.actualizar).toHaveBeenCalledWith(7, expect.objectContaining({ activo: false }));
   });
 });
+
+describe("Descripción breve con formato", () => {
+  it("al crear, limpia el HTML y quita lo que no cabe en la tarjeta", async () => {
+    await NoticiasController.crearNoticiaCompleta({
+      ...inputBase,
+      descripcion: '<p><strong>Importante</strong><script>x</script> <a href="https://x.pe">ver</a></p>',
+    });
+    expect(NoticiaModel.crear).toHaveBeenCalledWith(
+      expect.objectContaining({ descripcion: "<p><strong>Importante</strong> ver</p>" })
+    );
+  });
+
+  it("al editar, también la limpia; el texto plano queda igual", async () => {
+    (NoticiaModel.obtenerPorId as any).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
+    const datos = {
+      titulo: "Asamblea",
+      contenido: null,
+      autor: "SITECORPAC",
+      activo: true,
+      imagenesNuevas: [],
+      imagenesEliminar: [],
+      imagenPrincipalId: null,
+      imagenPrincipalNuevaIndex: null,
+      pdfFilesNuevos: [],
+      pdfsEliminar: [],
+    };
+    await NoticiasController.actualizarNoticiaCompleta(7, { ...datos, descripcion: '<h2>Título</h2><p onclick="x()">hola</p>' });
+    expect(NoticiaModel.actualizar).toHaveBeenCalledWith(7, expect.objectContaining({ descripcion: "Título<p>hola</p>" }));
+    await NoticiasController.actualizarNoticiaCompleta(7, { ...datos, descripcion: "texto <b> plano" });
+    expect(NoticiaModel.actualizar).toHaveBeenLastCalledWith(7, expect.objectContaining({ descripcion: "texto <b> plano" }));
+  });
+});

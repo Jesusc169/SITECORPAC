@@ -12,7 +12,7 @@ import Compartir from "@/components/Sitio/Compartir";
 import Icono from "@/components/Icono/Icono";
 import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
 import { fechaCorta } from "@/lib/fechas";
-import { esHtml, textoABloques } from "@/lib/textoRico";
+import { esHtml, htmlATexto, textoABloques } from "@/lib/textoRico";
 import { limpiarHtml } from "@/lib/htmlSeguro";
 import { INSTITUCION } from "@/lib/datosInstitucionales";
 import s from "@/styles/Sitio.module.css";
@@ -40,7 +40,7 @@ export async function generateMetadata({
   }
 
   const titulo = `${noticia.titulo} | SITECORPAC`;
-  const descripcion = noticia.descripcion;
+  const descripcion = htmlATexto(noticia.descripcion);
 
   return {
     title: titulo,

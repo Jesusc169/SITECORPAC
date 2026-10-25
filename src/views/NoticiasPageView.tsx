@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
 import Afiche from "@/components/Sitio/Afiche";
+import Resumen from "@/components/Sitio/Resumen";
 import Icono from "@/components/Icono/Icono";
 import { fechaCorta, partesPeru } from "@/lib/fechas";
+import { htmlATexto } from "@/lib/textoRico";
 import s from "@/styles/Sitio.module.css";
 
 interface NoticiaFromApi {
@@ -45,7 +47,7 @@ export default function NoticiasPageView({
   const visibles = noticias.filter(
     (n) =>
       (anio === null || anioDe(n.fecha) === anio) &&
-      (!termino || normalizar(`${n.titulo} ${n.descripcion}`).includes(termino))
+      (!termino || normalizar(`${n.titulo} ${htmlATexto(n.descripcion)}`).includes(termino))
   );
 
   return (
@@ -112,7 +114,7 @@ export default function NoticiasPageView({
                     <Afiche src={n.imagen} alt={n.titulo} prioridad={i < 2} />
                     <p className={s.date}>{fechaCorta(n.fecha)}</p>
                     <h3>{n.titulo}</h3>
-                    {n.descripcion && <p className={s.resumen}>{n.descripcion}</p>}
+                    {n.descripcion && <Resumen texto={n.descripcion} />}
                     <span className={s.go}>
                       Leer más <Icono nombre="flecha" chico />
                     </span>
