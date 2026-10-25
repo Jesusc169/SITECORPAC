@@ -120,6 +120,26 @@ describe("calcularAlertas: alertas por correo", () => {
   });
 });
 
+describe("calcularAlertas: bitácora de caídas", () => {
+  const reciente = new Date(AHORA - 2 * 60 * 1000).toISOString();
+
+  it("error si hay un incidente en curso", () => {
+    const a = calcularAlertas({ ...sano, vigiaInstalado: true, vigiaUltimaRevision: reciente, incidenteEnCurso: "MySQL se detuvo" });
+    expect(a).toEqual([{ gravedad: "error", texto: "Hay un problema en curso en el servidor: MySQL se detuvo" }]);
+  });
+
+  it("aviso si no está instalada; error si dejó de revisar", () => {
+    expect(calcularAlertas({ ...sano, vigiaInstalado: false })[0].gravedad).toBe("aviso");
+    const a = calcularAlertas({ ...sano, vigiaInstalado: true, vigiaUltimaRevision: new Date(AHORA - 15 * 60 * 1000).toISOString() });
+    expect(a[0].texto).toContain("dejó de ejecutarse");
+  });
+
+  it("aviso con las caídas de la semana; nada si todo en orden", () => {
+    expect(calcularAlertas({ ...sano, vigiaInstalado: true, vigiaUltimaRevision: reciente, caidasUltimos7Dias: 2 })[0].texto).toContain("2 caída(s)");
+    expect(calcularAlertas({ ...sano, vigiaInstalado: true, vigiaUltimaRevision: reciente, caidasUltimos7Dias: 0 })).toEqual([]);
+  });
+});
+
 describe("calcularAlertas: casos sin datos", () => {
   it("certificado sin datos ni mensaje de error", () => {
     const a = calcularAlertas({ ...sano, diasCertificado: null, errorCertificado: null });

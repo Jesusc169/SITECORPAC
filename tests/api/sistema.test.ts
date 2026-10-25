@@ -349,6 +349,11 @@ describe("resumen, seguridad y usuarios del panel de sistema", () => {
     vi.spyOn(estado, "estadoCertificado").mockResolvedValue({ dominio: "sitecorpac.com", venceEl: null, diasRestantes: 5, emisor: null, error: null });
     vi.spyOn(estado, "estadoAlertas").mockResolvedValue({ instaladas: true, ultimaRevision: new Date().toISOString(), destinatario: "x", resumenDiario: true, ultimoCorreo: null });
     vi.spyOn(estado, "estadoRespaldos").mockResolvedValue({ disponible: true, carpeta: "/x", cantidad: 1, bytesTotal: 1, ultimo: { nombre: "a", fecha: new Date().toISOString(), bytes: 1 } });
+    const caida = { id: "a", inicio: new Date().toISOString(), fin: null, duracionSeg: 60, sintomas: [], causa: "x", solucion: "y", accionAutomatica: null, prueba: false };
+    vi.spyOn(estado, "estadoIncidentes").mockResolvedValue({
+      instalado: true, ultimaRevision: new Date().toISOString(), mantenimiento: false, enCurso: null,
+      incidentes: [caida, { ...caida, id: "b", prueba: true }, { ...caida, id: "c", inicio: "2020-01-01T00:00:00Z" }],
+    });
     await prisma.login_intento.create({ data: { ip: "1.1.1.1", fallos: 5, primerFalloEn: new Date(), bloqueadoHasta: new Date(Date.now() + 600000) } });
     await prisma.login_intento.create({ data: { ip: "2.2.2.2", fallos: 1, primerFalloEn: new Date() } });
     await registrarActividad({ accion: "error", modulo: "sistema", nivel: "error", detalle: "x" });
@@ -357,11 +362,14 @@ describe("resumen, seguridad y usuarios del panel de sistema", () => {
     expect(e.baseDatos.totales.usuarios).toBe(1);
     expect(e.papelera.dias).toBe(30);
     expect(e.ultimosErrores[0].fecha).toMatch(/Z$/);
+    expect(e.alertas.map((a) => a.texto)).toContain("1 caída(s) o falla(s) en los últimos 7 días. Revisa «Caídas e incidentes».");
   });
 
   it("estado: si no se puede medir la base, el tamaño queda null", async () => {
     vi.spyOn(estado, "estadoCertificado").mockResolvedValue({ dominio: "x", venceEl: null, diasRestantes: 80, emisor: null, error: null });
     vi.spyOn(RegistroModel, "tamanoBaseDatos").mockRejectedValueOnce(new Error("sin permiso"));
+    const enCurso = { id: "a", inicio: new Date().toISOString(), fin: null, duracionSeg: null, sintomas: [], causa: "MySQL se detuvo", solucion: "", accionAutomatica: null, prueba: false };
+    vi.spyOn(estado, "estadoIncidentes").mockResolvedValue({ instalado: true, ultimaRevision: new Date().toISOString(), mantenimiento: false, enCurso, incidentes: [] });
     vi.spyOn(papeleraLib, "depurarPapelera").mockRejectedValueOnce(new Error("x"));
     expect((await SistemaController.estado()).baseDatos.bytes).toBeNull();
   });

@@ -26,7 +26,7 @@ vi.mock("tls", () => ({
 }));
 
 import {
-  leerVersion, estadoMaquina, archivosSubidos, estadoRespaldos, estadoCertificado, estadoAlertas,
+  leerVersion, estadoMaquina, archivosSubidos, estadoRespaldos, estadoCertificado, estadoAlertas, estadoIncidentes,
 } from "@/lib/estadoServidor";
 
 const raiz = () => process.cwd();
@@ -221,5 +221,49 @@ describe("estadoAlertas", () => {
 
   it("sin archivo (o ruta por defecto en Windows) → no instaladas", async () => {
     expect((await estadoAlertas()).instaladas).toBe(false);
+  });
+});
+
+describe("estadoIncidentes", () => {
+  const archivo = (contenido: string) => {
+    const f = path.join(mkdtempSync(path.join(os.tmpdir(), "inc-")), "incidentes.json");
+    writeFileSync(f, contenido);
+    process.env.INCIDENTES_ESTADO = f;
+  };
+  afterEach(() => {
+    delete process.env.INCIDENTES_ESTADO;
+  });
+
+  it("lee la bitácora que deja el vigía", async () => {
+    const inc = {
+      id: "20261025-1", inicio: "2026-10-25T19:00:00Z", fin: "2026-10-25T19:03:00Z", duracionSeg: 180,
+      sintomas: ["El sitio no carga", 5], causa: "MySQL se detuvo", solucion: "systemctl restart mysql",
+      accionAutomatica: "systemctl restart mysql (funcionó)", prueba: false, carpeta: "/no/se/expone",
+    };
+    archivo(JSON.stringify({ ultimaRevision: "2026-10-25T19:05:00Z", mantenimiento: true, enCurso: inc, incidentes: [inc, { id: 1 }, null] }));
+    const e = await estadoIncidentes();
+    expect(e).toMatchObject({ instalado: true, ultimaRevision: "2026-10-25T19:05:00Z", mantenimiento: true });
+    expect(e.incidentes).toHaveLength(1);
+    expect(e.incidentes[0]).toEqual({
+      id: "20261025-1", inicio: "2026-10-25T19:00:00Z", fin: "2026-10-25T19:03:00Z", duracionSeg: 180,
+      sintomas: ["El sitio no carga"], causa: "MySQL se detuvo", solucion: "systemctl restart mysql",
+      accionAutomatica: "systemctl restart mysql (funcionó)", prueba: false,
+    });
+    expect(e.enCurso?.id).toBe("20261025-1");
+  });
+
+  it("campos faltantes o con tipos raros", async () => {
+    archivo(JSON.stringify({ incidentes: [{ id: "a", inicio: "b", prueba: true }], enCurso: "x" }));
+    expect(await estadoIncidentes()).toEqual({
+      instalado: true, ultimaRevision: null, mantenimiento: false, enCurso: null,
+      incidentes: [{ id: "a", inicio: "b", fin: null, duracionSeg: null, sintomas: [], causa: "", solucion: "", accionAutomatica: null, prueba: true }],
+    });
+    archivo(JSON.stringify({ incidentes: "no" }));
+    expect((await estadoIncidentes()).incidentes).toEqual([]);
+  });
+
+  it("sin archivo → no instalado", async () => {
+    process.env.INCIDENTES_ESTADO = path.join(os.tmpdir(), "no-existe-incidentes.json");
+    expect((await estadoIncidentes()).instalado).toBe(false);
   });
 });

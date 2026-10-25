@@ -260,3 +260,64 @@ export async function estadoAlertas(): Promise<EstadoAlertas> {
     return { instaladas: false, ultimaRevision: null, destinatario: null, resumenDiario: false, ultimoCorreo: null };
   }
 }
+
+export interface Incidente {
+  id: string;
+  inicio: string;
+  fin: string | null;
+  duracionSeg: number | null;
+  sintomas: string[];
+  causa: string;
+  solucion: string;
+  accionAutomatica: string | null;
+  prueba: boolean;
+}
+
+export interface EstadoIncidentes {
+  instalado: boolean;
+  ultimaRevision: string | null;
+  mantenimiento: boolean;
+  enCurso: Incidente | null;
+  incidentes: Incidente[];
+}
+
+function leerIncidente(x: unknown): Incidente | null {
+  if (!x || typeof x !== "object") return null;
+  const o = x as Record<string, unknown>;
+  if (typeof o.id !== "string" || typeof o.inicio !== "string") return null;
+  const textoONulo = (v: unknown) => (typeof v === "string" ? v : null);
+  return {
+    id: o.id,
+    inicio: o.inicio,
+    fin: textoONulo(o.fin),
+    duracionSeg: typeof o.duracionSeg === "number" ? o.duracionSeg : null,
+    sintomas: Array.isArray(o.sintomas) ? o.sintomas.filter((s): s is string => typeof s === "string") : [],
+    causa: textoONulo(o.causa) ?? "",
+    solucion: textoONulo(o.solucion) ?? "",
+    accionAutomatica: textoONulo(o.accionAutomatica),
+    prueba: o.prueba === true,
+  };
+}
+
+/**
+ * Bitácora de caídas que deja /root/vigia_sitecorpac.py (revisa cada minuto
+ * y guarda la evidencia de cada incidente en el servidor). Aquí llega solo
+ * el resumen: causa, duración y cómo se arregla, sin logs ni IPs.
+ */
+export async function estadoIncidentes(): Promise<EstadoIncidentes> {
+  const ruta = envODefecto("INCIDENTES_ESTADO", "/var/lib/sitecorpac-alertas/incidentes.json");
+  try {
+    const j = JSON.parse(await fs.readFile(/*turbopackIgnore: true*/ ruta, "utf8"));
+    return {
+      instalado: true,
+      ultimaRevision: typeof j.ultimaRevision === "string" ? j.ultimaRevision : null,
+      mantenimiento: j.mantenimiento === true,
+      enCurso: leerIncidente(j.enCurso),
+      incidentes: Array.isArray(j.incidentes)
+        ? j.incidentes.map(leerIncidente).filter((i: Incidente | null): i is Incidente => i !== null)
+        : [],
+    };
+  } catch {
+    return { instalado: false, ultimaRevision: null, mantenimiento: false, enCurso: null, incidentes: [] };
+  }
+}

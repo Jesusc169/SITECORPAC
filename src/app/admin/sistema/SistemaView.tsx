@@ -130,6 +130,12 @@ function fecha(valor: string | null | undefined): string {
   return formatearFechaHoraPeru(valor, { dateStyle: "short", timeStyle: "short" });
 }
 
+function textoIncidentes(i: Estado["incidentes"]): string {
+  if (i.mantenimiento) return "En mantenimiento (despliegue)";
+  if (i.enCurso) return `Con problemas desde ${fecha(i.enCurso.inicio)}`;
+  return "Todo funcionando";
+}
+
 function hace(valor: string | null | undefined): string {
   if (!valor) return "nunca";
   const min = Math.round((Date.now() - new Date(valor).getTime()) / 60000);
@@ -348,6 +354,50 @@ function Resumen({ e, irARegistro }: Readonly<{ e: Estado; irARegistro: (f: Reco
           )}
           <p className={styles.nota}>
             Revisa cada 10 minutos: errores, ataques a contraseñas, cuentas desactivadas, respaldo y certificado.
+          </p>
+        </Tarjeta>
+
+        <Tarjeta titulo="Caídas e incidentes">
+          {e.incidentes.instalado ? (
+            <>
+              <dl>
+                <Dato
+                  k="Ahora"
+                  v={textoIncidentes(e.incidentes)}
+                />
+                <Dato k="Última revisión" v={hace(e.incidentes.ultimaRevision)} />
+              </dl>
+              {e.incidentes.incidentes.length === 0 ? (
+                <p className={styles.nota}>Sin caídas registradas.</p>
+              ) : (
+                <ul className={styles.listaErrores}>
+                  {e.incidentes.incidentes.slice(0, 8).map((x) => (
+                    <li key={x.id}>
+                      <span className={styles.fechaChica}>
+                        {fecha(x.inicio)}
+                        {x.duracionSeg != null && ` · duró ${x.duracionSeg < 60 ? `${x.duracionSeg} s` : duracion(x.duracionSeg)}`}
+                        {x.prueba && " · prueba"}
+                      </span>
+                      <strong>{x.causa}</strong>
+                      <br />
+                      Cómo se arregla: {x.solucion}
+                      {x.accionAutomatica && (
+                        <>
+                          <br />
+                          Arreglo automático: {x.accionAutomatica}
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ) : (
+            <p className={styles.nota}>No instalada en este servidor.</p>
+          )}
+          <p className={styles.nota}>
+            Revisa el sitio cada minuto. Si algo falla, guarda en el servidor la evidencia de ese momento (logs,
+            memoria, disco) y avisa por correo cuando empieza y cuando se resuelve.
           </p>
         </Tarjeta>
 

@@ -6,6 +6,7 @@ import {
   estadoRespaldos,
   estadoCertificado,
   estadoAlertas,
+  estadoIncidentes,
 } from "@/lib/estadoServidor";
 import { depurarPapelera, DIAS_PAPELERA } from "@/lib/papelera";
 import prisma from "@/lib/prisma";
@@ -48,6 +49,10 @@ export interface DatosAlertas {
   ipsBloqueadas: number;
   alertasInstaladas?: boolean;
   alertasUltimaRevision?: string | null;
+  vigiaInstalado?: boolean;
+  vigiaUltimaRevision?: string | null;
+  incidenteEnCurso?: string | null;
+  caidasUltimos7Dias?: number;
   ahora?: number;
 }
 
@@ -116,6 +121,27 @@ const revisarMemoria: Revision = (d) =>
     ? { gravedad: "aviso", texto: "Queda menos del 10% de memoria libre en el servidor." }
     : null;
 
+// El vigía revisa cada minuto: más de 10 min sin revisar = dejó de funcionar.
+const revisarVigia: Revision = (d, ahora) => {
+  if (d.incidenteEnCurso) {
+    return { gravedad: "error", texto: `Hay un problema en curso en el servidor: ${d.incidenteEnCurso}` };
+  }
+  if (d.vigiaInstalado === false) {
+    return { gravedad: "aviso", texto: "La bitácora de caídas no está instalada en el servidor." };
+  }
+  const ultima = d.vigiaUltimaRevision;
+  if (ultima && ahora - new Date(ultima).getTime() > 10 * 60 * 1000) {
+    return { gravedad: "error", texto: "La bitácora de caídas dejó de ejecutarse (más de 10 minutos sin revisar)." };
+  }
+  if (d.caidasUltimos7Dias) {
+    return {
+      gravedad: "aviso",
+      texto: `${d.caidasUltimos7Dias} caída(s) o falla(s) en los últimos 7 días. Revisa «Caídas e incidentes».`,
+    };
+  }
+  return null;
+};
+
 const REVISIONES: Revision[] = [
   revisarDisco,
   revisarCertificado,
@@ -124,6 +150,7 @@ const REVISIONES: Revision[] = [
   revisarBloqueos,
   revisarAlertasCorreo,
   revisarMemoria,
+  revisarVigia,
 ];
 
 /** Lista las alertas activas, en el orden de REVISIONES. */
@@ -186,7 +213,7 @@ export const SistemaController = {
   async estado() {
     const desde24h = new Date(Date.now() - DIA);
     await depurarPapelera().catch(() => 0);
-    const [version, maquina, archivos, respaldos, certificado, totales, bytesBD, pingMs, intentos, errores24h, errores, actividad24h, alertasCorreo, enPapelera] =
+    const [version, maquina, archivos, respaldos, certificado, totales, bytesBD, pingMs, intentos, errores24h, errores, actividad24h, alertasCorreo, enPapelera, incidentes] =
       await Promise.all([
         leerVersion(),
         estadoMaquina(),
@@ -202,6 +229,7 @@ export const SistemaController = {
         RegistroModel.contarDesde(desde24h, { accion: { in: ["crear", "editar", "eliminar", "duplicar"] } }),
         estadoAlertas(),
         prisma.papelera.count(),
+        estadoIncidentes(),
       ]);
 
     const ahora = Date.now();
@@ -220,6 +248,11 @@ export const SistemaController = {
       ipsBloqueadas: bloqueadas.length,
       alertasInstaladas: alertasCorreo.instaladas,
       alertasUltimaRevision: alertasCorreo.ultimaRevision,
+      vigiaInstalado: incidentes.instalado,
+      vigiaUltimaRevision: incidentes.ultimaRevision,
+      incidenteEnCurso: incidentes.enCurso?.causa ?? null,
+      caidasUltimos7Dias: incidentes.incidentes.filter((i) => !i.prueba && ahora - new Date(i.inicio).getTime() < 7 * DIA)
+        .length,
     });
 
     return {
@@ -237,6 +270,7 @@ export const SistemaController = {
       retencionDias: RETENCION_REGISTRO_DIAS,
       alertasCorreo,
       papelera: { cantidad: enPapelera, dias: DIAS_PAPELERA },
+      incidentes,
     };
   },
 
