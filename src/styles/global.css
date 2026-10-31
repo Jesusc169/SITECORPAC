@@ -177,8 +177,10 @@ button {
 
 /* Enlace "Saltar al contenido principal": invisible hasta que recibe foco
    con Tab; permite a quien usa teclado o lector de pantalla no recorrer
-   todo el menú en cada página. */
-.saltar-contenido {
+   todo el menú en cada página. ":root a" sube la especificidad: los
+   estilos de enlace del sitio público (.sitio a) le ponían texto oscuro
+   sobre el fondo oscuro y no se leía al recibir el foco. */
+:root a.saltar-contenido {
   position: absolute;
   left: 12px;
   top: -100px;
@@ -191,7 +193,7 @@ button {
   text-decoration: none;
 }
 
-.saltar-contenido:focus {
+:root a.saltar-contenido:focus {
   top: 12px;
   outline: 3px solid #f2b705;
   outline-offset: 2px;
