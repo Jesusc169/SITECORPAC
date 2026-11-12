@@ -17,7 +17,7 @@ export const INSTITUCION = {
 } as const;
 
 /** Fecha de la última revisión de los textos legales (mostrar en cada página). */
-export const FECHA_POLITICAS = "8 de octubre de 2026";
+export const FECHA_POLITICAS = "12 de noviembre de 2026";
 
 const WHATSAPP = "https://wa.me/51950215616?text=";
 

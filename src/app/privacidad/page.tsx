@@ -137,7 +137,7 @@ export default function PrivacidadPage() {
               <th scope="row">Contenido eliminado desde el panel</th>
               <td>
                 Noticias, ferias, sorteos y miembros del Directorio que se
-                eliminan, con sus fotos y documentos.
+                eliminan, con sus fotos, videos y documentos.
               </td>
               <td>
                 Poder recuperar algo que se eliminó por error. Solo lo ve el
@@ -161,8 +161,12 @@ export default function PrivacidadPage() {
               </td>
             </tr>
             <tr>
-              <th scope="row">Personas en fotos de actividades</th>
-              <td>Imagen en fotografías de noticias, ferias y sorteos.</td>
+              <th scope="row">Personas en fotos y videos de actividades</th>
+              <td>
+                Imagen (y voz, en los videos) en fotografías y videos de
+                noticias, ferias y sorteos. Los videos se publican sin los
+                datos ocultos del celular, como el lugar donde se grabaron.
+              </td>
               <td>Informar sobre las actividades del sindicato.</td>
               <td>
                 Mientras la publicación siga en el sitio, o hasta que la
@@ -204,10 +208,11 @@ export default function PrivacidadPage() {
           quite o cambie algún dato (por ejemplo, tu teléfono), escríbenos.
         </li>
         <li>
-          <strong>Fotos de actividades:</strong> se publican fotos de eventos
-          públicos del sindicato, de acuerdo con el artículo 15 del Código
-          Civil. Si apareces en una foto y no quieres que siga publicada,
-          escríbenos indicando cuál es y la retiraremos.
+          <strong>Fotos y videos de actividades:</strong> se publican fotos y
+          videos de eventos públicos del sindicato (por ejemplo, un sorteo),
+          de acuerdo con el artículo 15 del Código Civil. Si apareces en una
+          foto o un video y no quieres que siga publicado, escríbenos
+          indicando cuál es y lo retiraremos.
         </li>
         <li>
           Este sitio <strong>no</strong> publica el padrón de afiliados ni
