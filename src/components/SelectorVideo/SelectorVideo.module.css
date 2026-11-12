@@ -1,0 +1,130 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.caja {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--borde-campo);
+  border-radius: 10px;
+  background: var(--superficie);
+}
+
+.cajaError {
+  border-color: var(--rojo-borde);
+  background: var(--rojo-claro);
+}
+
+.cajaError .estado {
+  color: var(--rojo);
+}
+
+.vista {
+  width: 100%;
+  max-width: 360px;
+  max-height: 240px;
+  border-radius: 8px;
+  background: #000;
+}
+
+.estado {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.ahorro {
+  color: var(--ink2);
+}
+
+.nota {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ink2);
+}
+
+.barra {
+  width: 100%;
+  max-width: 360px;
+  height: 12px;
+  accent-color: var(--teal);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.elegir {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px dashed var(--borde-campo);
+  background: var(--tint);
+  color: var(--teal);
+  font: 600 0.9rem var(--font-titulos), Arial, sans-serif;
+  cursor: pointer;
+}
+
+.elegir:hover {
+  border-color: var(--teal-claro);
+}
+
+.elegir:focus-within {
+  outline: 3px solid var(--teal-claro);
+  outline-offset: 2px;
+}
+
+/* Oculto a la vista pero enfocable con el teclado (Tab) */
+.elegir input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.secundario,
+.quitar {
+  align-self: flex-start;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.secundario {
+  border: 1px solid var(--borde-campo);
+  background: var(--superficie);
+  color: var(--ink);
+}
+
+.quitar {
+  border: none;
+  background: var(--rojo-fondo);
+  color: #fff;
+}
+
+.error {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--rojo-claro);
+  color: var(--rojo);
+  font-size: 0.88rem;
+}
+
+.hint {
+  font-size: 0.84rem;
+  color: var(--ink2);
+}

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import { useSelectorVideo } from "@/hooks/useSelectorVideo";
+import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
@@ -20,6 +22,9 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
   const [activo, setActivo] = useState(true);
 
   const selectorImagenes = useSelectorImagenes();
+  const selectorVideo = useSelectorVideo();
+  const { resetear: resetearVideo } = selectorVideo;
+  useEffect(() => resetearVideo(null), [resetearVideo]);
 
   const [pdfs, setPdfs] = useState<File[]>([]);
 
@@ -46,6 +51,7 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
 
   const crearNoticia = async () => {
     if (!titulo.trim()) return alert("El título es obligatorio");
+    if (selectorVideo.ocupado) return alert("Espera a que termine de subir el video");
 
     setLoading(true);
 
@@ -63,6 +69,7 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
       });
 
       pdfs.forEach((file) => formData.append("pdfs", file));
+      selectorVideo.aplicarAFormData(formData);
 
       const res = await fetch("/api/administrador/noticias", {
         method: "POST",
@@ -161,6 +168,11 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             </div>
 
             <div className="mb-3">
+              <label htmlFor="crear-noticia-video" className="form-label fw-semibold">Video (opcional)</label>
+              <SelectorVideo selector={selectorVideo} idEntrada="crear-noticia-video" />
+            </div>
+
+            <div className="mb-3">
               <label htmlFor="crear-noticia-documentos" className="form-label fw-semibold">
                 Documentos adjuntos (opcional, máximo 5)
               </label>
@@ -212,9 +224,9 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             <button
               className="btn btn-success"
               onClick={crearNoticia}
-              disabled={loading}
+              disabled={loading || selectorVideo.ocupado}
             >
-              {loading ? "Publicando..." : "Publicar noticia"}
+              {loading ? "Publicando..." : selectorVideo.ocupado ? "Subiendo video…" : "Publicar noticia"}
             </button>
           </div>
 

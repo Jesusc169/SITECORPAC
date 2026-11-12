@@ -29,6 +29,9 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// La subida de videos queda fuera: con middleware, Next.js copia el cuerpo de
+// la petición en memoria y lo CORTA a los 10 MB (proxyClientMaxBodySize). Esa
+// ruta hace su propio control de sesión (api/administrador/videos/route.ts).
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/administrador/videos).*)"],
 };

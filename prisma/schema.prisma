@@ -45,11 +45,15 @@ model noticia {
   activo         Boolean          @default(true)
   noticia_pdf    noticia_pdf[]
   noticia_imagen noticia_imagen[]
+  // Video opcional (ver model video). SetNull: si el video se borra, el registro queda sin video.
+  video_id       Int?
+  video          video?           @relation(fields: [video_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_noticia_video")
 
   // Listados públicos (home, /noticias, sitemap) ordenan por fecha; el panel
   // admin ordena por createdAt.
   @@index([fecha], map: "idx_noticia_fecha")
   @@index([createdAt], map: "idx_noticia_created")
+  @@index([video_id], map: "fk_noticia_video")
 }
 
 model noticia_pdf {
@@ -160,11 +164,15 @@ model evento_feria {
   evento_feria_empresa evento_feria_empresa[]
   evento_feria_fecha   evento_feria_fecha[]
   evento_feria_imagen  evento_feria_imagen[]
+  // Video opcional (ver model video). SetNull: si el video se borra, el registro queda sin video.
+  video_id             Int?
+  video                video?                 @relation(fields: [video_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_evento_feria_video")
 
   @@index([anio, estado], map: "idx_evento_feria_anio_estado")
   @@index([created_at], map: "idx_evento_feria_created")
   @@index([id, estado], map: "idx_evento_feria_id_estado")
   @@index([estado, anio, created_at(sort: Desc)], map: "idx_evento_feria_listado")
+  @@index([video_id], map: "fk_evento_feria_video")
 }
 
 // Galería de hasta 5 fotos por feria (misma idea que noticia_imagen).
@@ -217,11 +225,15 @@ model sorteo {
   actualizado_en  DateTime?         @default(now()) @db.Timestamp(0)
   sorteo_producto sorteo_producto[]
   sorteo_imagen   sorteo_imagen[]
+  // Video opcional (ver model video). SetNull: si el video se borra, el registro queda sin video.
+  video_id        Int?
+  video           video?            @relation(fields: [video_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_sorteo_video")
 
   // Página pública: WHERE estado = 'ACTIVO' ORDER BY fecha_hora DESC.
   @@index([estado, fecha_hora], map: "idx_sorteo_estado_fecha")
   // Panel admin: ORDER BY fecha_hora DESC sin filtro.
   @@index([fecha_hora], map: "idx_sorteo_fecha")
+  @@index([video_id], map: "fk_sorteo_video")
 }
 
 // Galería de hasta 5 fotos por sorteo (misma idea que noticia_imagen).
@@ -366,4 +378,47 @@ model papelera {
 
   @@index([expiraEn], map: "idx_papelera_expira")
   @@index([modulo, entidadId], map: "idx_papelera_entidad")
+}
+
+// Videos subidos desde el panel (uno por noticia, feria o sorteo).
+// El original del celular se guarda fuera de public/ mientras el servidor lo
+// comprime (H.264 720p, ver lib/videos/ffmpeg.ts); después se borra y queda
+// solo el MP4 liviano + su imagen de portada. Una noticia/feria/sorteo apunta
+// al video con video_id (una copia duplicada comparte el mismo video). Los
+// videos que nadie usa (ni la papelera) se borran solos, ver lib/videos/limpieza.ts.
+model video {
+  id              Int            @id @default(autoincrement())
+  estado          video_estado   @default(PENDIENTE)
+  // 0-100 mientras se comprime
+  progreso        Int            @default(0)
+  intentos        Int            @default(0)
+  nombre_original String         @db.VarChar(255)
+  // Ruta del archivo original (relativa a la carpeta temporal); null al terminar
+  original        String?        @db.VarChar(255)
+  // Int alcanza: el máximo permitido es 1 GB (lib/constantesArchivos.ts)
+  bytes_original  Int
+  url             String?        @db.VarChar(255)
+  poster          String?        @db.VarChar(255)
+  bytes           Int?
+  duracion        Int?
+  ancho           Int?
+  alto            Int?
+  error           String?        @db.VarChar(255)
+  // Último aviso de vida del proceso que lo está comprimiendo
+  latido          DateTime?
+  subido_por_id   Int?
+  creado_en       DateTime       @default(now())
+  procesado_en    DateTime?
+  noticia         noticia[]
+  evento_feria    evento_feria[]
+  sorteo          sorteo[]
+
+  @@index([estado, creado_en], map: "idx_video_estado")
+}
+
+enum video_estado {
+  PENDIENTE
+  PROCESANDO
+  LISTO
+  ERROR
 }

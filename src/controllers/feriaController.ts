@@ -9,6 +9,7 @@ import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 import { limpiarTextoRico } from "@/lib/htmlSeguro";
 import { htmlATexto } from "@/lib/textoRico";
+import { validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
 
 export class FeriaValidationError extends Error {}
 
@@ -38,6 +39,7 @@ const obtenerFeriasPublicasCacheadas = unstable_cache(
     (await FeriaModel.obtenerPublicas({ anio, skip, take })).map((f) => ({
       ...f,
       descripcion: limpiarTextoRico(f.descripcion),
+      video: videoPublico(f.video),
     })),
   ["ferias-publicas"],
   { revalidate: 60, tags: ["ferias"] }
@@ -70,6 +72,7 @@ export const FeriaController = {
     empresas: number[];
     fechas: FechaInput[];
     estado: boolean;
+    video?: CambioVideo;
   }) => {
     const titulo = input.titulo?.trim();
     const descripcion = limpiarTextoRico(input.descripcion?.trim() ?? "");
@@ -78,6 +81,7 @@ export const FeriaController = {
     if (!titulo || !htmlATexto(descripcion) || !input.anio) {
       throw new FeriaValidationError("Datos incompletos");
     }
+    const video_id = await validarCambioVideo(input.video, (m) => new FeriaValidationError(m));
 
     const imagenesValidas = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenesValidas.length > MAX_IMAGENES_GALERIA) {
@@ -111,6 +115,7 @@ export const FeriaController = {
       fechas: normalizarFechas(input.fechas),
       empresas: input.empresas,
       imagenes: imagenesData,
+      video_id,
     });
 
     invalidarCache("ferias");
@@ -131,6 +136,7 @@ export const FeriaController = {
       estado: boolean;
       /** Año con el que se filtra la feria en el sitio; si no llega o es inválido se conserva el actual. */
       anio?: number | null;
+      video?: CambioVideo;
     }
   ) => {
     if (input.anio != null && !(Number.isInteger(input.anio) && input.anio >= 2000 && input.anio <= 2100)) {
@@ -142,6 +148,7 @@ export const FeriaController = {
     if (!input.titulo.trim() || !htmlATexto(input.descripcion)) {
       throw new FeriaValidationError("Datos incompletos");
     }
+    const video_id = await validarCambioVideo(input.video, (m) => new FeriaValidationError(m));
 
     const imagen_portada = await actualizarGaleria(
       {
@@ -173,6 +180,7 @@ export const FeriaController = {
       imagen_portada,
       estado: input.estado,
       ...(input.anio != null ? { anio: input.anio } : {}),
+      video_id,
     });
 
     await FeriaModel.reemplazarEmpresas(id, input.empresas);

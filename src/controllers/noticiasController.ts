@@ -18,6 +18,7 @@ import { actualizarGaleria } from "@/lib/galeria";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 import { limpiarResumen, limpiarTextoRico } from "@/lib/htmlSeguro";
+import { SELECT_VIDEO, validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
 
 export class NoticiaValidationError extends Error {}
 
@@ -30,6 +31,7 @@ interface DatosNoticia {
   imagenPrincipalIndex: number;
   pdfFiles: File[];
   activo: boolean;
+  video?: CambioVideo;
 }
 
 interface DatosNoticiaActualizacion {
@@ -44,6 +46,7 @@ interface DatosNoticiaActualizacion {
   imagenPrincipalNuevaIndex: number | null;
   pdfFilesNuevos: File[];
   pdfsEliminar: number[];
+  video?: CambioVideo;
 }
 
 // Lecturas públicas: cacheadas 60s y con el tag "noticias" para poder
@@ -77,14 +80,17 @@ const obtenerUltimasNoticiasCacheadas = unstable_cache(
 );
 
 const obtenerNoticiaPorIdCacheada = unstable_cache(
-  async (id: number) =>
-    prisma.noticia.findFirst({
+  async (id: number) => {
+    const n = await prisma.noticia.findFirst({
       where: { id, activo: true },
       include: {
         noticia_pdf: { orderBy: { orden: "asc" } },
         noticia_imagen: { orderBy: { orden: "asc" } },
+        video: SELECT_VIDEO,
       },
-    }),
+    });
+    return n && { ...n, video: videoPublico(n.video) };
+  },
   ["noticia-detalle"],
   { revalidate: 60, tags: ["noticias"] }
 );
@@ -139,6 +145,7 @@ export class NoticiasController {
       throw new NoticiaValidationError(`Máximo ${MAX_DOCUMENTOS} documentos por noticia`);
     }
     const documentos = documentosValidos(input.pdfFiles);
+    const video_id = await validarCambioVideo(input.video, (m) => new NoticiaValidationError(m));
 
     const imagenFilesValidos = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenFilesValidos.length > MAX_IMAGENES_GALERIA) {
@@ -183,6 +190,7 @@ export class NoticiasController {
       activo: input.activo,
       pdfs: pdfsData,
       imagenes: imagenesData,
+      video_id,
     });
 
     invalidarCache("noticias");
@@ -200,6 +208,7 @@ export class NoticiasController {
     // Primero se valida y recién después se borra o guarda: un PDF inválido ya no
     // deja la noticia modificada a medias.
     const documentosNuevos = documentosValidos(input.pdfFilesNuevos);
+    const video_id = await validarCambioVideo(input.video, (m) => new NoticiaValidationError(m));
     const pdfsAEliminar = noticiaActual.noticia_pdf.filter((p) => input.pdfsEliminar.includes(p.id));
     const pdfsQueQuedan = noticiaActual.noticia_pdf.filter((p) => !input.pdfsEliminar.includes(p.id));
     if (pdfsQueQuedan.length + documentosNuevos.length > MAX_DOCUMENTOS) {
@@ -253,6 +262,7 @@ export class NoticiasController {
       imagen: imagenPath,
       activo: input.activo,
       updatedAt: new Date(),
+      video_id,
     });
 
     invalidarCache("noticias");

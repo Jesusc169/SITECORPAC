@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./AdminFeriaModal.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import { useSelectorVideo } from "@/hooks/useSelectorVideo";
+import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
@@ -56,6 +58,7 @@ export default function AdminFeriaModal({
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [estado, setEstado] = useState(true);
   const selectorImagenes = useSelectorImagenes();
+  const selectorVideo = useSelectorVideo();
 
   const [empresas, setEmpresas] = useState<number[]>([]);
   const [empresaQuery, setEmpresaQuery] = useState("");
@@ -75,6 +78,7 @@ export default function AdminFeriaModal({
       setAnio(new Date().getFullYear());
       setEstado(true);
       selectorImagenes.resetear([]);
+      selectorVideo.resetear(null);
       setEmpresas([]);
       setFechas([]);
       return;
@@ -89,6 +93,7 @@ export default function AdminFeriaModal({
         ? feriaData.evento_feria_imagen.map((img: any) => ({ id: img.id, url: img.url }))
         : []
     );
+    selectorVideo.resetear(feriaData.video);
 
     setEmpresas(
       Array.isArray(feriaData.evento_feria_empresa)
@@ -170,6 +175,10 @@ export default function AdminFeriaModal({
      GUARDAR
      ========================= */
   const handleSubmit = () => {
+    if (selectorVideo.ocupado) {
+      alert("Espera a que termine de subir el video");
+      return;
+    }
     if (!titulo.trim() || !descripcion.trim() || !anio || anio < 2000 || anio > 2100) {
       alert("Completa los campos obligatorios");
       return;
@@ -190,6 +199,8 @@ export default function AdminFeriaModal({
         principalIndex: "imagenPrincipalIndex",
       });
     }
+
+    selectorVideo.aplicarAFormData(formData);
 
     onSave({
       formData,
@@ -234,6 +245,9 @@ export default function AdminFeriaModal({
 
           <label htmlFor="feria-fotos">Fotos de la feria (hasta 5)</label>
           <SelectorImagenes selector={selectorImagenes} idEntrada="feria-fotos" />
+
+          <label htmlFor="feria-video">Video de la feria (opcional)</label>
+          <SelectorVideo selector={selectorVideo} idEntrada="feria-video" />
 
           {/* EMPRESAS */}
           <label htmlFor="feria-empresas">Empresas participantes</label>
@@ -338,7 +352,9 @@ export default function AdminFeriaModal({
 
         <div className={styles.modalActions}>
           <button type="button" className={styles.botonCancelar} onClick={onClose}>Cancelar</button>
-          <button type="button" className={styles.botonGuardar} onClick={handleSubmit}>Guardar cambios</button>
+          <button type="button" className={styles.botonGuardar} onClick={handleSubmit} disabled={selectorVideo.ocupado}>
+            {selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
+          </button>
         </div>
       </div>
     </div>

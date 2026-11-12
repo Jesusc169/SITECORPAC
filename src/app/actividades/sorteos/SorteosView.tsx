@@ -4,6 +4,8 @@ import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
 import TextoRico from "@/components/Sitio/TextoRico";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import VideoBoton from "@/components/Video/VideoBoton";
+import type { VideoPublico } from "@/lib/videos/vincular";
 import { fechaCorta, formatearFechaHoraPeru } from "@/lib/fechas";
 import s from "@/styles/Sitio.module.css";
 
@@ -33,6 +35,7 @@ export interface Sorteo {
   sorteo_producto?: SorteoProducto[];
   premios?: SorteoProducto[];
   sorteo_imagen?: SorteoImagen[];
+  video?: VideoPublico | null;
 }
 
 export interface NoticiaMini {
@@ -63,6 +66,7 @@ function TarjetaSorteo({ sorteo }: Readonly<{ sorteo: Sorteo }>) {
       <div>
         <Afiche src={sorteo.imagen} alt={sorteo.nombre} />
         <div className={s.galeria}>
+          <VideoBoton video={sorteo.video} titulo={sorteo.nombre} className={s.chip} />
           <GaleriaBoton imagenes={fotos} titulo={sorteo.nombre} className={s.chip} />
         </div>
       </div>

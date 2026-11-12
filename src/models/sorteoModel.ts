@@ -1,8 +1,10 @@
 import prisma from "@/lib/prisma";
+import { SELECT_VIDEO } from "@/lib/videos/vincular";
 
 const CON_IMAGENES = {
   sorteo_producto: true,
   sorteo_imagen: { orderBy: { orden: "asc" as const } },
+  video: SELECT_VIDEO,
 };
 
 export const SorteoModel = {
@@ -41,6 +43,7 @@ export const SorteoModel = {
     imagen: string | null;
     premios: { nombre: string; descripcion: string; cantidad: number }[];
     imagenes?: { url: string; orden: number; principal: boolean }[];
+    video_id?: number | null;
   }) => {
     return prisma.sorteo.create({
       data: {
@@ -51,6 +54,7 @@ export const SorteoModel = {
         estado: data.estado,
         fecha_hora: data.fecha_hora,
         imagen: data.imagen,
+        video_id: data.video_id ?? null,
         sorteo_producto: { create: data.premios },
         sorteo_imagen: { create: data.imagenes ?? [] },
       },
@@ -68,6 +72,7 @@ export const SorteoModel = {
       estado: "ACTIVO" | "INACTIVO";
       fecha_hora: Date;
       imagen?: string | null;
+      video_id?: number | null;
       premios: { nombre: string; descripcion: string; cantidad: number }[];
     }
   ) => {

@@ -6,6 +6,7 @@ import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, nombreONumero, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
 import { campoTexto, campoTextoODefecto, campoOpcional, campoLista } from "@/lib/formulario";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 
 export const runtime = "nodejs";
 
@@ -51,6 +52,7 @@ export async function PUT(
         : null,
       pdfFilesNuevos: formData.getAll("pdfs") as File[],
       pdfsEliminar,
+      video: cambioVideoDeFormulario(formData),
     });
 
     if (!noticiaActualizada) {

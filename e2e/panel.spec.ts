@@ -159,3 +159,51 @@ test("al crear una feria, las empresas se eligen con el teclado", async ({ page 
   // queda elegida: aparece como etiqueta con su botón × para quitarla
   await expect(page.locator("span", { hasText: "Empresa E2E" }).getByRole("button", { name: "×" })).toBeVisible();
 });
+
+/**
+ * Video de un sorteo: se sube con barra de avance y el servidor lo comprime.
+ * Con ffmpeg instalado (CI y servidor) se prueba hasta verlo en el sitio;
+ * sin ffmpeg (una PC sin el programa), que el aviso sea claro.
+ */
+test("video de un sorteo: subir, comprimir y verlo en el sitio", async ({ page }, testInfo) => {
+  test.setTimeout(180_000);
+  const { execSync } = await import("child_process");
+  const { writeFileSync } = await import("fs");
+  const video = testInfo.outputPath("sorteo.mp4");
+  let hayFfmpeg = true;
+  try {
+    execSync(
+      `ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc2=duration=3:size=1280x720:rate=30 -f lavfi -i sine=duration=3 -c:v libx264 -c:a aac -shortest "${video}"`
+    );
+  } catch {
+    hayFfmpeg = false;
+    // Cabecera MP4 válida (pasa el control de la subida; sin ffprobe no se puede comprimir)
+    writeFileSync(video, Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from("ftypisom"), Buffer.alloc(4000, 1)]));
+  }
+
+  page.on("dialog", (d) => d.accept());
+  await entrar(page, "admin@e2e.test");
+  await page.goto("/admin/sorteos");
+  await page.getByRole("button", { name: "Editar Sorteo E2E" }).click();
+  await page.getByLabel("Video del sorteo (opcional)").setInputFiles(video);
+
+  if (!hayFfmpeg) {
+    await expect(page.getByText(/no tiene instalado el programa de video/)).toBeVisible({ timeout: 30_000 });
+    return;
+  }
+  await expect(page.getByText(/Video listo/)).toBeVisible({ timeout: 90_000 });
+  await page.getByRole("button", { name: "Guardar Sorteo" }).click();
+  await expect(page.getByRole("button", { name: "Guardar Sorteo" })).toHaveCount(0);
+  // al volver a abrirlo, el formulario muestra el video que ya tiene
+  await page.getByRole("button", { name: "Editar Sorteo E2E" }).click();
+  await expect(page.getByText(/Video listo/)).toBeVisible();
+  await page.getByRole("button", { name: "Cancelar" }).click();
+
+  await page.goto("/actividades/sorteos");
+  await page.getByRole("button", { name: /Ver video/ }).first().click();
+  const reproductor = page.getByRole("dialog").locator("video");
+  await expect(reproductor).toBeVisible();
+  await expect(reproductor).toHaveAttribute("src", /^\/uploads\/videos\/\d+-[0-9a-f]+\.mp4$/);
+  await page.getByRole("button", { name: "Cerrar video" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});

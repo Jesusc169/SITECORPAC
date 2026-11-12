@@ -33,6 +33,8 @@ export default defineConfig({
       DATABASE_URL: urlBasePrueba(),
       JWT_SECRET: "secreto-solo-para-e2e",
       NEXT_PUBLIC_BASE_URL: `http://localhost:${PUERTO}`,
+      // El procesador de videos avisa al sitio en este puerto (lib/videos/procesador.ts)
+      PORT: String(PUERTO),
     },
   },
 });

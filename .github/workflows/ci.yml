@@ -52,6 +52,10 @@ jobs:
       - name: Pruebas y cobertura (minimo 100%)
         run: npm run test:coverage
 
+      # El sitio comprime los videos subidos con ffmpeg (igual que en el servidor)
+      - name: Instalar ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
       # Pantallas de punta a punta con Chrome (ya viene en el runner)
       - name: Pruebas E2E (Playwright)
         run: npm run test:e2e

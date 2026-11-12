@@ -1,9 +1,11 @@
 import prisma from "@/lib/prisma";
 import type { noticia } from "@prisma/client";
+import { SELECT_VIDEO } from "@/lib/videos/vincular";
 
 const CON_PDFS = {
   noticia_pdf: { orderBy: { orden: "asc" as const } },
   noticia_imagen: { orderBy: { orden: "asc" as const } },
+  video: SELECT_VIDEO,
 };
 
 export const NoticiaModel = {
@@ -32,6 +34,7 @@ export const NoticiaModel = {
     activo: boolean;
     pdfs: { url: string; nombre: string; orden: number }[];
     imagenes: { url: string; orden: number; principal: boolean }[];
+    video_id?: number | null;
   }) => {
     const { pdfs, imagenes, ...resto } = data;
     return prisma.noticia.create({
@@ -46,7 +49,7 @@ export const NoticiaModel = {
 
   actualizar: async (
     id: number,
-    data: Partial<Pick<noticia, "titulo" | "descripcion" | "contenido" | "autor" | "imagen" | "updatedAt" | "activo">>
+    data: Partial<Pick<noticia, "titulo" | "descripcion" | "contenido" | "autor" | "imagen" | "updatedAt" | "activo" | "video_id">>
   ) => {
     return prisma.noticia.update({
       where: { id },

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { SELECT_VIDEO } from "@/lib/videos/vincular";
 
 const CON_RELACIONES = {
   evento_feria_fecha: true,
@@ -6,6 +7,7 @@ const CON_RELACIONES = {
     include: { empresa: true },
   },
   evento_feria_imagen: { orderBy: { orden: "asc" as const } },
+  video: SELECT_VIDEO,
 };
 
 export const FeriaModel = {
@@ -45,6 +47,7 @@ export const FeriaModel = {
     fechas: { fecha: Date; hora_inicio: string; hora_fin: string; ubicacion: string; zona: string | null }[];
     empresas: number[];
     imagenes?: { url: string; orden: number; principal: boolean }[];
+    video_id?: number | null;
   }) => {
     return prisma.evento_feria.create({
       data: {
@@ -53,6 +56,7 @@ export const FeriaModel = {
         anio: data.anio,
         imagen_portada: data.imagen_portada,
         estado: data.estado ?? true,
+        video_id: data.video_id ?? null,
         evento_feria_fecha: { create: data.fechas },
         evento_feria_empresa: { create: data.empresas.map((empresa_id) => ({ empresa_id })) },
         evento_feria_imagen: { create: data.imagenes ?? [] },
@@ -63,7 +67,7 @@ export const FeriaModel = {
 
   actualizar: async (
     id: number,
-    data: { titulo: string; descripcion: string; imagen_portada?: string | null; estado?: boolean; anio?: number }
+    data: { titulo: string; descripcion: string; imagen_portada?: string | null; estado?: boolean; anio?: number; video_id?: number | null }
   ) => {
     return prisma.evento_feria.update({
       where: { id },

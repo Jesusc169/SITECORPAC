@@ -7,6 +7,7 @@ import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, nombreEntidad, nombreONumero, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
 import { campoTexto, campoLista } from "@/lib/formulario";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 
 /* =========================
    GET – Feria por ID
@@ -71,6 +72,7 @@ export async function PUT(
       fechas: fechasRaw ? JSON.parse(fechasRaw) : [],
       estado: leerVisible(formData, "estado"),
       anio: formData.get("anio") ? Number(formData.get("anio")) : null,
+      video: cambioVideoDeFormulario(formData),
     });
 
     if (!feria) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SorteoController, SorteoValidationError, type DatosSorteo, type Premio } from "@/controllers/sorteoController";
 import { campoTexto, campoLista } from "@/lib/formulario";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 import { ArchivoInvalidoError } from "@/lib/validacionArchivos";
 import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
@@ -50,6 +51,7 @@ async function leerFormulario(req: Request): Promise<DatosSorteo> {
     imagenFiles: fd.getAll("imagenes") as File[],
     imagenPrincipalIndex: indice ? Number(indice) : 0,
     imagenUrl: null,
+    video: cambioVideoDeFormulario(fd),
   };
 }
 

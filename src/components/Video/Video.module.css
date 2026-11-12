@@ -1,0 +1,79 @@
+.reproductor {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border-radius: 14px;
+  background: #000;
+}
+
+/* Videos grabados con el celular en vertical: no ocupan todo el ancho */
+.vertical {
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.seccion {
+  margin: 28px 0;
+}
+
+.seccion h2 {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+}
+
+/* <dialog> nativo a pantalla completa (mismo criterio que el visor de fotos) */
+.ventana {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: #fff;
+  background: rgba(15, 15, 15, 0.94);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 12px 24px;
+}
+
+.marco {
+  width: min(96vw, 1100px);
+}
+
+.marco .reproductor {
+  max-height: 78vh;
+}
+
+.titulo {
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cerrar {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cerrar:hover,
+.cerrar:focus-visible {
+  background: rgba(255, 255, 255, 0.3);
+}

@@ -5,6 +5,7 @@ import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
 import { campoTexto, campoTextoODefecto, campoOpcional } from "@/lib/formulario";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       imagenPrincipalIndex: imagenPrincipalIndexRaw ? Number(imagenPrincipalIndexRaw) : 0,
       pdfFiles: formData.getAll("pdfs") as File[],
       activo: leerVisible(formData),
+      video: cambioVideoDeFormulario(formData),
     });
 
     await registrarActividad({

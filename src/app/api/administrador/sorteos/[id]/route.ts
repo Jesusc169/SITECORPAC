@@ -6,6 +6,7 @@ import { tienePermiso } from "@/lib/permisos";
 import { registrarActividad, registrarError, nombreEntidad, nombreONumero, textoVisible } from "@/lib/registro";
 import { instantanea } from "@/lib/historial";
 import { campoTexto, campoLista } from "@/lib/formulario";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 
 export const runtime = "nodejs";
 
@@ -112,6 +113,7 @@ export async function PUT(
       imagenPrincipalNuevaIndex: imagenPrincipalNuevaIndexRaw
         ? Number(imagenPrincipalNuevaIndexRaw)
         : null,
+      video: cambioVideoDeFormulario(formData),
     });
 
     if (!actualizado) {

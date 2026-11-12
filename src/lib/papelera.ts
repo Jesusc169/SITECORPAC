@@ -137,6 +137,12 @@ async function yaExiste(modulo: ModuloPapelera, id: number): Promise<boolean> {
   }
 }
 
+/** El video de un registro restaurado, si todavía existe (si no, vuelve sin video). */
+async function videoQueExiste(tx: Prisma.TransactionClient, id: unknown): Promise<number | null> {
+  if (typeof id !== "number") return null;
+  return (await tx.video.findUnique({ where: { id }, select: { id: true } }))?.id ?? null;
+}
+
 async function recrear(tx: Prisma.TransactionClient, modulo: ModuloPapelera, d: Fila) {
   switch (modulo) {
     case "noticias":
@@ -152,6 +158,7 @@ async function recrear(tx: Prisma.TransactionClient, modulo: ModuloPapelera, d: 
           updatedAt: new Date(),
           autor: d.autor as string,
           activo: d.activo !== false,
+          video_id: await videoQueExiste(tx, d.video_id),
           noticia_imagen: {
             create: lista(d.noticia_imagen).map((i) => ({
               id: i.id as number,
@@ -186,6 +193,7 @@ async function recrear(tx: Prisma.TransactionClient, modulo: ModuloPapelera, d: 
           imagen_portada: (d.imagen_portada as string | null) ?? null,
           estado: d.estado !== false,
           created_at: fechaONull(d.created_at),
+          video_id: await videoQueExiste(tx, d.video_id),
           evento_feria_imagen: {
             create: lista(d.evento_feria_imagen).map((i) => ({
               id: i.id as number,
@@ -227,6 +235,7 @@ async function recrear(tx: Prisma.TransactionClient, modulo: ModuloPapelera, d: 
           estado: d.estado === "INACTIVO" ? "INACTIVO" : "ACTIVO",
           creado_en: fechaONull(d.creado_en),
           actualizado_en: new Date(),
+          video_id: await videoQueExiste(tx, d.video_id),
           sorteo_imagen: {
             create: lista(d.sorteo_imagen).map((i) => ({
               id: i.id as number,

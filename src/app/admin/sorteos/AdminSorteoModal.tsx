@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import styles from "./sorteos.admin.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import { useSelectorVideo } from "@/hooks/useSelectorVideo";
+import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
 import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
@@ -45,6 +47,7 @@ export default function AdminSorteoModal({
 
   const [form, setForm] = useState(emptyForm);
   const selectorImagenes = useSelectorImagenes();
+  const selectorVideo = useSelectorVideo();
 
   /* =========================================================
      CARGAR DATOS PARA EDITAR
@@ -80,9 +83,11 @@ export default function AdminSorteoModal({
           ? initialData.sorteo_imagen.map((img: any) => ({ id: img.id, url: img.url }))
           : []
       );
+      selectorVideo.resetear(initialData.video);
     } else {
       setForm(emptyForm);
       selectorImagenes.resetear([]);
+      selectorVideo.resetear(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]);
@@ -128,6 +133,10 @@ export default function AdminSorteoModal({
   ========================================================= */
   const handleSave = async () => {
     try {
+      if (selectorVideo.ocupado) {
+        alert("Espera a que termine de subir el video");
+        return;
+      }
       if (!form.titulo || !form.descripcion || !form.lugar.trim() || !form.fecha || !form.hora) {
         alert("Completa todos los campos obligatorios");
         return;
@@ -156,6 +165,8 @@ export default function AdminSorteoModal({
           principalIndex: "imagenPrincipalIndex",
         });
       }
+
+      selectorVideo.aplicarAFormData(formData);
 
       // 🔥 CORRECCIÓN CLAVE
       await onSave(form.id, formData);
@@ -242,6 +253,11 @@ export default function AdminSorteoModal({
               <SelectorImagenes selector={selectorImagenes} idEntrada="sorteo-fotos" />
             </div>
 
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label htmlFor="sorteo-video">Video del sorteo (opcional)</label>
+              <SelectorVideo selector={selectorVideo} idEntrada="sorteo-video" />
+            </div>
+
             {/* Grupo de varios campos: fieldset + legend (sin borde, como antes) */}
             <fieldset className={`${styles.formGroup} ${styles.fullWidth} ${styles.grupo}`}>
               <legend>Premios</legend>
@@ -296,8 +312,8 @@ export default function AdminSorteoModal({
           <button className={styles.secondaryBtn} onClick={onClose}>
             Cancelar
           </button>
-          <button className={styles.primaryBtn} onClick={handleSave}>
-            Guardar Sorteo
+          <button className={styles.primaryBtn} onClick={handleSave} disabled={selectorVideo.ocupado}>
+            {selectorVideo.ocupado ? "Subiendo video…" : "Guardar Sorteo"}
           </button>
         </div>
       </div>

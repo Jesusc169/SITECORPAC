@@ -11,6 +11,8 @@ import BloquesTexto from "@/components/Sitio/BloquesTexto";
 import Compartir from "@/components/Sitio/Compartir";
 import Icono from "@/components/Icono/Icono";
 import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
+import ReproductorVideo from "@/components/Video/ReproductorVideo";
+import video from "@/components/Video/Video.module.css";
 import { fechaCorta } from "@/lib/fechas";
 import { esHtml, htmlATexto, textoABloques } from "@/lib/textoRico";
 import { limpiarHtml } from "@/lib/htmlSeguro";
@@ -110,6 +112,13 @@ export default async function NoticiaPage({
                 <BloquesTexto bloques={bloques} />
               ) : (
                 <div className={s.rico} dangerouslySetInnerHTML={{ __html: html }} />
+              )}
+
+              {noticia.video && (
+                <section className={video.seccion} aria-labelledby="titulo-video">
+                  <h2 id="titulo-video">Video</h2>
+                  <ReproductorVideo video={noticia.video} titulo={noticia.titulo} />
+                </section>
               )}
 
               <GaleriaFotos

@@ -659,7 +659,7 @@
 .premios { display: grid; gap: 6px; margin-top: 8px; }
 .premios li { display: flex; gap: 8px; align-items: center; font-weight: 600; color: var(--navy); }
 .premios svg { color: var(--teal); }
-.galeria { margin-top: 10px; display: flex; justify-content: flex-end; }
+.galeria { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .estado { color: var(--ink2); padding: 24px 0; }
 
 .empty {

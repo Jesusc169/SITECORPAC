@@ -8,6 +8,7 @@ import { MAX_IMAGEN_BYTES } from "@/lib/archivosNoticia";
 import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 import { limpiarTextoRico } from "@/lib/htmlSeguro";
+import { validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
 
 export class SorteoValidationError extends Error {}
 
@@ -41,6 +42,8 @@ export interface DatosSorteo {
   imagenFiles: File[];
   imagenPrincipalIndex: number;
   imagenUrl: string | null;
+  /** Video ya subido (ver lib/videos/vincular.ts) */
+  video?: CambioVideo;
 }
 
 function normalizarPremios(premios: unknown): Premio[] {
@@ -61,7 +64,11 @@ function fechaValida(fecha: Date): Date {
 // instante desde crear/editar/duplicar/eliminar (invalidarCache más abajo).
 const obtenerSorteosPublicosCacheados = unstable_cache(
   async (anio: number | null) =>
-    (await SorteoModel.obtenerActivos(anio)).map((s) => ({ ...s, descripcion: limpiarTextoRico(s.descripcion) })),
+    (await SorteoModel.obtenerActivos(anio)).map((s) => ({
+      ...s,
+      descripcion: limpiarTextoRico(s.descripcion),
+      video: videoPublico(s.video),
+    })),
   ["sorteos-publicos"],
   { revalidate: 60, tags: ["sorteos"] }
 );
@@ -78,6 +85,7 @@ export const SorteoController = {
 
   crearSorteo: async (input: DatosSorteo) => {
     const lugar = normalizarLugar(input.lugar);
+    const video_id = await validarCambioVideo(input.video, (m) => new SorteoValidationError(m));
     const imagenesValidas = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenesValidas.length > MAX_IMAGENES_GALERIA) {
       throw new SorteoValidationError(`Máximo ${MAX_IMAGENES_GALERIA} fotos por sorteo`);
@@ -116,6 +124,7 @@ export const SorteoController = {
       imagen,
       premios: normalizarPremios(input.premios),
       imagenes: imagenesData,
+      video_id,
     });
 
     invalidarCache("sorteos");
@@ -136,9 +145,11 @@ export const SorteoController = {
       imagenesEliminar: number[];
       imagenPrincipalId: number | null;
       imagenPrincipalNuevaIndex: number | null;
+      video?: CambioVideo;
     }
   ) => {
     const lugar = normalizarLugar(input.lugar);
+    const video_id = await validarCambioVideo(input.video, (m) => new SorteoValidationError(m));
     const sorteoActual = await SorteoModel.obtenerPorId(id);
     if (!sorteoActual) return null;
 
@@ -175,6 +186,7 @@ export const SorteoController = {
       fecha_hora: input.fecha_hora,
       premios: normalizarPremios(input.premios),
       imagen,
+      video_id,
     });
 
     invalidarCache("sorteos");

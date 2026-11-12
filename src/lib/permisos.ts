@@ -31,3 +31,8 @@ export function tienePermiso(
 
   return permisos.includes(clave);
 }
+
+/** Pueden subir videos quienes administran noticias, ferias o sorteos. */
+export function puedeUsarVideos(usuario: UsuarioConPermisos | null | undefined): boolean {
+  return tienePermiso(usuario, "noticias") || tienePermiso(usuario, "ferias") || tienePermiso(usuario, "sorteos");
+}

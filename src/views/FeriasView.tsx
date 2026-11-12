@@ -5,6 +5,8 @@ import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
 import TextoRico from "@/components/Sitio/TextoRico";
 import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import VideoBoton from "@/components/Video/VideoBoton";
+import type { VideoPublico } from "@/lib/videos/vincular";
 import { diaConSemana, feriaFinalizada, rangoDias } from "@/lib/fechas";
 import { rutaPublica } from "@/lib/rutas";
 import s from "@/styles/Sitio.module.css";
@@ -46,6 +48,7 @@ export interface EventoFeria {
   evento_feria_empresa: EventoFeriaEmpresa[];
   evento_feria_fecha: EventoFeriaFecha[];
   evento_feria_imagen?: EventoFeriaImagen[];
+  video?: VideoPublico | null;
 }
 
 export interface FeriasViewProps {
@@ -89,6 +92,7 @@ function TarjetaFeria({ feria }: Readonly<{ feria: EventoFeria }>) {
       <div>
         <Afiche src={feria.imagen_portada} alt={feria.titulo} />
         <div className={s.galeria}>
+          <VideoBoton video={feria.video} titulo={feria.titulo} className={s.chip} />
           <GaleriaBoton imagenes={fotos} titulo={feria.titulo} className={s.chip} />
         </div>
       </div>

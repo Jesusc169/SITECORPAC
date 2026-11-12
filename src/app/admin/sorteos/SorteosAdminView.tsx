@@ -1,6 +1,7 @@
 "use client";
 
 import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
+import type { InfoVideo } from "@/hooks/useSelectorVideo";
 import Icono from "@/components/Icono/Icono";
 import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
@@ -28,6 +29,8 @@ export interface Sorteo {
   estado?: "ACTIVO" | "INACTIVO";
   premios?: Premio[];
   sorteo_imagen?: { id: number; url: string; principal: boolean }[];
+  /** Video ya subido (estado, avance, URL...): lo usa el formulario de edición */
+  video?: InfoVideo | null;
 }
 
 interface SorteosAdminViewProps {

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
+import { useSelectorVideo, type InfoVideo } from "@/hooks/useSelectorVideo";
+import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
 
@@ -28,6 +30,7 @@ interface Noticia {
   imagen?: string | null;
   noticia_pdf?: NoticiaPdf[];
   noticia_imagen?: NoticiaImagen[];
+  video?: InfoVideo | null;
 }
 
 interface Props {
@@ -50,6 +53,7 @@ export default function ModalEditarNoticia({
   const [activo, setActivo] = useState(true);
 
   const selectorImagenes = useSelectorImagenes();
+  const selectorVideo = useSelectorVideo();
 
   const [pdfsExistentes, setPdfsExistentes] = useState<NoticiaPdf[]>([]);
   const [pdfsAEliminar, setPdfsAEliminar] = useState<number[]>([]);
@@ -70,6 +74,7 @@ export default function ModalEditarNoticia({
     selectorImagenes.resetear(
       (noticia.noticia_imagen || []).map((img) => ({ id: img.id, url: img.url }))
     );
+    selectorVideo.resetear(noticia.video);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noticia]);
 
@@ -104,6 +109,7 @@ export default function ModalEditarNoticia({
 
   const actualizarNoticia = async () => {
     if (!titulo.trim()) return alert("El título es obligatorio");
+    if (selectorVideo.ocupado) return alert("Espera a que termine de subir el video");
 
     setLoading(true);
 
@@ -119,6 +125,7 @@ export default function ModalEditarNoticia({
 
       formData.append("pdfsEliminar", JSON.stringify(pdfsAEliminar));
       pdfsNuevos.forEach((file) => formData.append("pdfs", file));
+      selectorVideo.aplicarAFormData(formData);
 
       const res = await fetch(`/api/administrador/noticias/${noticia.id}`, {
         method: "PUT",
@@ -211,6 +218,11 @@ export default function ModalEditarNoticia({
             </div>
 
             <div className="mb-3">
+              <label htmlFor="editar-noticia-video" className="form-label fw-semibold">Video (opcional)</label>
+              <SelectorVideo selector={selectorVideo} idEntrada="editar-noticia-video" />
+            </div>
+
+            <div className="mb-3">
               <label htmlFor="editar-noticia-documentos" className="form-label fw-semibold">
                 Documentos adjuntos (opcional, máximo 5)
               </label>
@@ -297,9 +309,9 @@ export default function ModalEditarNoticia({
             <button
               className="btn btn-primary"
               onClick={actualizarNoticia}
-              disabled={loading}
+              disabled={loading || selectorVideo.ocupado}
             >
-              {loading ? "Guardando..." : "Guardar cambios"}
+              {loading ? "Guardando..." : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
             </button>
           </div>
 

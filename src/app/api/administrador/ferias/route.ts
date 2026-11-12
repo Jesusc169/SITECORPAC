@@ -5,6 +5,7 @@ import { obtenerUsuarioActual } from "@/lib/auth";
 import { tienePermiso } from "@/lib/permisos";
 import { leerVisible } from "@/lib/visibilidad";
 import { registrarActividad, registrarError, idDe, textoVisible } from "@/lib/registro";
+import { cambioVideoDeFormulario } from "@/lib/videos/vincular";
 
 /* =========================
    GET – LISTAR FERIAS
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
       empresas: JSON.parse((formData.get("empresas") as string) || "[]"),
       fechas: JSON.parse((formData.get("fechas") as string) || "[]"),
       estado: leerVisible(formData, "estado"),
+      video: cambioVideoDeFormulario(formData),
     });
 
     await registrarActividad({

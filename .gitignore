@@ -77,6 +77,9 @@ public/images/noticias/
 public/images/ferias/
 public/images/uploads/
 
+# Videos originales esperando ser comprimidos (lib/videos/almacen.ts)
+almacen/
+
 # opcional: cualquier imagen generada en prod
 public/images/temp/
 

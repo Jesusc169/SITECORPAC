@@ -34,6 +34,7 @@ const mapSorteoToFrontend = (s: any): Sorteo => ({
       cantidad: p.cantidad ?? 1,
     })) ?? [],
   sorteo_imagen: s.sorteo_imagen ?? [],
+  video: s.video ?? null,
 });
 
 /* =========================================
