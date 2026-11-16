@@ -46,6 +46,8 @@ export default function AdminSorteoModal({
   };
 
   const [form, setForm] = useState(emptyForm);
+  // Bloquea el botón mientras se envía (evita subidas repetidas por varios clics).
+  const [guardando, setGuardando] = useState(false);
   const selectorImagenes = useSelectorImagenes();
   const selectorVideo = useSelectorVideo();
 
@@ -132,6 +134,7 @@ export default function AdminSorteoModal({
      GUARDAR
   ========================================================= */
   const handleSave = async () => {
+    if (guardando) return;
     try {
       if (selectorVideo.ocupado) {
         alert("Espera a que termine de subir el video");
@@ -169,12 +172,15 @@ export default function AdminSorteoModal({
       selectorVideo.aplicarAFormData(formData);
 
       // 🔥 CORRECCIÓN CLAVE
+      setGuardando(true);
       await onSave(form.id, formData);
 
       onClose();
     } catch (error) {
       console.error(error);
       alert("Error guardando sorteo");
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -312,8 +318,8 @@ export default function AdminSorteoModal({
           <button className={styles.secondaryBtn} onClick={onClose}>
             Cancelar
           </button>
-          <button className={styles.primaryBtn} onClick={handleSave} disabled={selectorVideo.ocupado}>
-            {selectorVideo.ocupado ? "Subiendo video…" : "Guardar Sorteo"}
+          <button className={styles.primaryBtn} onClick={handleSave} disabled={guardando || selectorVideo.ocupado}>
+            {guardando ? "Guardando…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar Sorteo"}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { enviarConLimite } from "@/lib/enviarConLimite";
 import { useEffect, useState } from "react";
 import SorteosAdminView, { Sorteo } from "./SorteosAdminView";
 import AdminSorteoModal from "./AdminSorteoModal";
@@ -76,7 +77,7 @@ export default function SorteosAdminClient() {
 
       const method = isEdit ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const res = await enviarConLimite(url, {
         method,
         body: formData,
       });

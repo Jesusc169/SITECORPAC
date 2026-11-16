@@ -1,3 +1,4 @@
+import { enviarConLimite } from "@/lib/enviarConLimite";
 export const fetchFerias = async () => {
   const res = await fetch("/api/administrador/ferias", { cache: "no-store" });
   if (!res.ok) throw new Error("Error al cargar ferias");
@@ -17,7 +18,7 @@ export const fetchFeriaPorId = async (id: number) => {
 };
 
 export const guardarFeria = async (isEdit: boolean, id: number | undefined, formData: FormData) => {
-  const res = await fetch(
+  const res = await enviarConLimite(
     isEdit ? `/api/administrador/ferias/${id}` : "/api/administrador/ferias",
     {
       method: isEdit ? "PUT" : "POST",

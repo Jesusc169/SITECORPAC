@@ -1,5 +1,6 @@
 "use client";
 
+import { enviarConLimite } from "@/lib/enviarConLimite";
 import { useEffect, useState } from "react";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
@@ -127,7 +128,7 @@ export default function ModalEditarNoticia({
       pdfsNuevos.forEach((file) => formData.append("pdfs", file));
       selectorVideo.aplicarAFormData(formData);
 
-      const res = await fetch(`/api/administrador/noticias/${noticia.id}`, {
+      const res = await enviarConLimite(`/api/administrador/noticias/${noticia.id}`, {
         method: "PUT",
         body: formData,
       });

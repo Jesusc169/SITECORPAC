@@ -35,7 +35,7 @@ interface Props {
     formData: FormData;
     empresas: number[];
     fechas: FechaFeria[];
-  }) => void;
+  }) => Promise<void>;
   feriaData?: any;
   empresasDisponibles?: Empresa[];
 }
@@ -57,6 +57,9 @@ export default function AdminFeriaModal({
   const [descripcion, setDescripcion] = useState("");
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [estado, setEstado] = useState(true);
+  // Bloquea el botón mientras se envía: sin esto cada clic mandaba otra
+  // subida completa (y otra feria duplicada si el servidor sí respondía).
+  const [guardando, setGuardando] = useState(false);
   const selectorImagenes = useSelectorImagenes();
   const selectorVideo = useSelectorVideo();
 
@@ -174,7 +177,8 @@ export default function AdminFeriaModal({
   /* =========================
      GUARDAR
      ========================= */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (guardando) return;
     if (selectorVideo.ocupado) {
       alert("Espera a que termine de subir el video");
       return;
@@ -202,11 +206,16 @@ export default function AdminFeriaModal({
 
     selectorVideo.aplicarAFormData(formData);
 
-    onSave({
-      formData,
-      empresas,
-      fechas,
-    });
+    setGuardando(true);
+    try {
+      await onSave({
+        formData,
+        empresas,
+        fechas,
+      });
+    } finally {
+      setGuardando(false);
+    }
   };
 
   /* =========================
@@ -351,9 +360,9 @@ export default function AdminFeriaModal({
         </div>
 
         <div className={styles.modalActions}>
-          <button type="button" className={styles.botonCancelar} onClick={onClose}>Cancelar</button>
-          <button type="button" className={styles.botonGuardar} onClick={handleSubmit} disabled={selectorVideo.ocupado}>
-            {selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
+          <button type="button" className={styles.botonCancelar} onClick={onClose} disabled={guardando}>Cancelar</button>
+          <button type="button" className={styles.botonGuardar} onClick={handleSubmit} disabled={guardando || selectorVideo.ocupado}>
+            {guardando ? "Guardando…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
           </button>
         </div>
       </div>
