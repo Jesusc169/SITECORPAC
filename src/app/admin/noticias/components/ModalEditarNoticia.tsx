@@ -310,9 +310,9 @@ export default function ModalEditarNoticia({
             <button
               className="btn btn-primary"
               onClick={actualizarNoticia}
-              disabled={loading || selectorVideo.ocupado}
+              disabled={loading || selectorVideo.ocupado || selectorImagenes.procesando}
             >
-              {loading ? "Guardando..." : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
+              {loading ? "Guardando..." : selectorImagenes.procesando ? "Preparando fotos…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
             </button>
           </div>
 

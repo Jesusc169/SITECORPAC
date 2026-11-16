@@ -787,6 +787,9 @@
 .marco img { width: 100%; height: 100%; object-fit: cover; }
 .marcoIcono img { object-fit: contain; padding: 22px; }
 .marcoHero { max-width: 420px; justify-self: end; }
+/* Ferias: foto apaisada (737×382) junto a la presentación de la página. */
+.marcoFeria { aspect-ratio: 737 / 382; max-width: 480px; }
+.feriaIntro { display: grid; gap: 12px; margin-top: 16px; max-width: 64ch; color: var(--ink2); }
 .split { align-items: center; }
 .bloqueConImg { display: grid; grid-template-columns: 1fr 240px; gap: 28px; align-items: start; }
 .bloqueTexto { display: grid; gap: 14px; align-content: start; min-width: 0; }
@@ -856,6 +859,7 @@
   .att .cta { margin-left: 0; width: 100%; justify-content: center; }
   .lnav { position: static; }
   .marcoHero { max-width: none; justify-self: stretch; aspect-ratio: 16 / 9; }
+  .marcoFeria { aspect-ratio: 737 / 382; }
   .bloqueConImg, .navyboxConImg { grid-template-columns: 1fr; }
   .bloqueConImg .marco, .navyboxConImg .marco { max-width: 320px; }
   .ctaband { padding: 24px; }

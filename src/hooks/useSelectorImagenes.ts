@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { MAX_IMAGEN_BYTES } from "@/lib/constantesArchivos";
+import { comprimirImagen } from "@/components/SelectorImagenes/comprimirImagen";
 
 export const MAX_FOTOS = 5;
 export const MAX_IMAGEN_MB = Math.round(MAX_IMAGEN_BYTES / (1024 * 1024));
@@ -22,6 +23,8 @@ export function useSelectorImagenes(imagenesIniciales: ImagenExistente[] = []) {
   const [eliminarIds, setEliminarIds] = useState<number[]>([]);
   const [nuevas, setNuevas] = useState<File[]>([]);
   const [principal, setPrincipal] = useState<PrincipalRef | null>(null);
+  // true mientras se achican las fotos recién elegidas (ver comprimirImagen).
+  const [procesando, setProcesando] = useState(false);
 
   const activas = useMemo(
     () => existentes.filter((e) => !eliminarIds.includes(e.id)),
@@ -51,9 +54,19 @@ export function useSelectorImagenes(imagenesIniciales: ImagenExistente[] = []) {
     setPrincipal(null);
   }
 
-  function agregar(files: FileList | File[]) {
-    const arr = Array.from(files);
-    if (arr.length === 0) return;
+  async function agregar(files: FileList | File[]) {
+    const originales = Array.from(files);
+    if (originales.length === 0) return;
+
+    // Primero se achican en el navegador: así una foto de celular de 12MB
+    // también entra (queda en unos cientos de KB) y la subida es rápida.
+    setProcesando(true);
+    let arr: File[];
+    try {
+      arr = await Promise.all(originales.map(comprimirImagen));
+    } finally {
+      setProcesando(false);
+    }
 
     // Las fotos que pesan más de lo que el servidor acepta ni siquiera se
     // agregan a la lista: si se dejaran pasar, recién al guardar el
@@ -141,6 +154,7 @@ export function useSelectorImagenes(imagenesIniciales: ImagenExistente[] = []) {
     eliminarIds,
     nuevas,
     total,
+    procesando,
     principal: principalEfectivo,
     resetear,
     agregar,

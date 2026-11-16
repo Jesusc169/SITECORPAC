@@ -171,11 +171,10 @@ export default function AdminSorteoModal({
 
       selectorVideo.aplicarAFormData(formData);
 
-      // 🔥 CORRECCIÓN CLAVE
+      // onSave (SorteosAdminClient) cierra el modal solo si se guardó bien;
+      // si falla muestra el aviso y el formulario queda abierto con lo escrito.
       setGuardando(true);
       await onSave(form.id, formData);
-
-      onClose();
     } catch (error) {
       console.error(error);
       alert("Error guardando sorteo");
@@ -315,11 +314,11 @@ export default function AdminSorteoModal({
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.secondaryBtn} onClick={onClose}>
+          <button className={styles.secondaryBtn} onClick={onClose} disabled={guardando}>
             Cancelar
           </button>
-          <button className={styles.primaryBtn} onClick={handleSave} disabled={guardando || selectorVideo.ocupado}>
-            {guardando ? "Guardando…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar Sorteo"}
+          <button className={styles.primaryBtn} onClick={handleSave} disabled={guardando || selectorVideo.ocupado || selectorImagenes.procesando}>
+            {guardando ? "Guardando…" : selectorImagenes.procesando ? "Preparando fotos…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar Sorteo"}
           </button>
         </div>
       </div>

@@ -225,9 +225,9 @@ export default function ModalCrearNoticia({ onClose, onSuccess, mostrarToast }: 
             <button
               className="btn btn-success"
               onClick={crearNoticia}
-              disabled={loading || selectorVideo.ocupado}
+              disabled={loading || selectorVideo.ocupado || selectorImagenes.procesando}
             >
-              {loading ? "Publicando..." : selectorVideo.ocupado ? "Subiendo video…" : "Publicar noticia"}
+              {loading ? "Publicando..." : selectorImagenes.procesando ? "Preparando fotos…" : selectorVideo.ocupado ? "Subiendo video…" : "Publicar noticia"}
             </button>
           </div>
 

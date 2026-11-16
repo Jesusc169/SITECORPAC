@@ -169,8 +169,29 @@ export default function FeriasView({
         migas={[{ texto: "Actividades" }, { texto: "Ferias" }]}
         rotulo="Actividades"
         titulo="Ferias"
-        entrada="Productos de calidad a precios accesibles para los afiliados, en tu sede."
+        entrada="Un espacio para compartir, disfrutar y acceder a beneficios"
+        lateral={
+          <figure className={`${s.marco} ${s.marcoHero} ${s.marcoFeria}`}>
+            <img
+              src="/images/actividades/ferias-productos-frescos.webp"
+              alt="Frutas, verduras, pescado, huevos y otros productos frescos alrededor de una tabla de madera en forma de corazón"
+              width={737}
+              height={382}
+            />
+          </figure>
+        }
       >
+        <div className={s.feriaIntro}>
+          <p>
+            Cada mes, el SITE-CORPAC organiza ferias especiales para sus afiliados, acercándoles
+            productos de calidad, emprendimientos y alternativas de compra a precios accesibles,
+            directamente en sus centros de trabajo.
+          </p>
+          <p>
+            Además, cada jornada culmina con sorteos especiales para los compradores, como una manera
+            de agradecer su participación y preferencia.
+          </p>
+        </div>
         {onChangeAnio && aniosDisponibles.length > 0 && (
           <fieldset className={s.chips} aria-label="Filtrar ferias por año">
             {aniosDisponibles.map((anio) => (

@@ -49,7 +49,7 @@ describe("formularios incompletos → 400 (no 500)", () => {
   it("premios 'null' o sin nombre", async () => {
     const s = await (await sorteoPOST(peticion("/x", "POST", { form: { nombre: "S", lugar: "L", premios: "null" } }))).json();
     expect(s.sorteo_producto).toEqual([]);
-    const s2 = await (await sorteoPOST(peticion("/x", "POST", { form: { nombre: "S", lugar: "L", premios: JSON.stringify([{ cantidad: 0 }]) } }))).json();
+    const s2 = await (await sorteoPOST(peticion("/x", "POST", { form: { nombre: "S2", lugar: "L", premios: JSON.stringify([{ cantidad: 0 }]) } }))).json();
     expect(s2.sorteo_producto[0]).toMatchObject({ nombre: "", cantidad: 1 });
   });
 });
@@ -103,5 +103,24 @@ describe("premios que no son una lista", () => {
   it("por JSON con premios en texto se ignoran", async () => {
     const s = await (await sorteoPOST(peticion("/x", "POST", { json: { nombre: "S", lugar: "L", premios: "TV" } }))).json();
     expect(s.sorteo_producto).toEqual([]);
+  });
+});
+
+describe("doble clic en Guardar (incidente 13-nov-2026)", () => {
+  it("la segunda feria, noticia o sorteo igual seguido → 400 con aviso, sin duplicar", async () => {
+    const { POST: noticiaPOST } = await import("@/app/api/administrador/noticias/route");
+    const feria = () => feriaPOST(peticion("/x", "POST", { form: { titulo: "Feria Colinda", descripcion: "d", anio: "2026" } }));
+    const noticia = () => noticiaPOST(peticion("/x", "POST", { form: { titulo: "Aviso", descripcion: "d", autor: "a" } }));
+    const sorteo = () => sorteoPOST(peticion("/x", "POST", { json: { nombre: "Sorteo", lugar: "L" } }));
+
+    for (const [enviar, campo] of [[feria, "error"], [noticia, "message"], [sorteo, "error"]] as const) {
+      expect((await enviar()).ok).toBe(true);
+      const repetido = await enviar();
+      expect(repetido.status).toBe(400);
+      expect((await repetido.json())[campo]).toMatch(/^Ya se guardó .* con este mismo título hace un momento/);
+    }
+    expect(await prisma.evento_feria.count()).toBe(1);
+    expect(await prisma.noticia.count()).toBe(1);
+    expect(await prisma.sorteo.count()).toBe(1);
   });
 });

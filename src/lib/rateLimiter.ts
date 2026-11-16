@@ -57,7 +57,7 @@ export async function estaBloqueado(ip: string): Promise<number | null> {
 
   const bloqueadoHastaMs = registro.bloqueadoHasta.getTime();
   if (Date.now() >= bloqueadoHastaMs) {
-    await prisma.login_intento.delete({ where: { ip } }).catch(() => {});
+    await prisma.login_intento.deleteMany({ where: { ip } }).catch(() => {});
     return null;
   }
 
@@ -88,5 +88,5 @@ export async function registrarFallo(ip: string): Promise<void> {
 }
 
 export async function registrarExito(ip: string): Promise<void> {
-  await prisma.login_intento.delete({ where: { ip } }).catch(() => {});
+  await prisma.login_intento.deleteMany({ where: { ip } }).catch(() => {});
 }

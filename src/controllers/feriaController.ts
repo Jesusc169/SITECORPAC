@@ -10,6 +10,7 @@ import type { ActorRegistro } from "@/lib/registro";
 import { limpiarTextoRico } from "@/lib/htmlSeguro";
 import { htmlATexto } from "@/lib/textoRico";
 import { validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
+import { hayDuplicadoReciente, mensajeDuplicado } from "@/lib/duplicados";
 
 export class FeriaValidationError extends Error {}
 
@@ -80,6 +81,9 @@ export const FeriaController = {
     // "<p></p>" del editor cuenta como vacío
     if (!titulo || !htmlATexto(descripcion) || !input.anio) {
       throw new FeriaValidationError("Datos incompletos");
+    }
+    if (await hayDuplicadoReciente("feria", titulo)) {
+      throw new FeriaValidationError(mensajeDuplicado("feria"));
     }
     const video_id = await validarCambioVideo(input.video, (m) => new FeriaValidationError(m));
 

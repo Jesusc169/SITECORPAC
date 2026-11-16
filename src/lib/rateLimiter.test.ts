@@ -79,12 +79,12 @@ describe("estaBloqueado", () => {
 
     const resultado = await estaBloqueado("1.2.3.4");
     expect(resultado).toBeNull();
-    expect(prismaMock.login_intento.delete).toHaveBeenCalledWith({ where: { ip: "1.2.3.4" } });
+    expect(prismaMock.login_intento.deleteMany).toHaveBeenCalledWith({ where: { ip: "1.2.3.4" } });
   });
 
-  it("si el registro vencido ya no existe al borrarlo, igual deja intentar", async () => {
+  it("si falla el borrado del registro vencido, igual deja intentar", async () => {
     prismaMock.login_intento.findUnique.mockResolvedValue({ bloqueadoHasta: new Date(Date.now() - 1000) });
-    prismaMock.login_intento.delete.mockRejectedValue(new Error("P2025"));
+    prismaMock.login_intento.deleteMany.mockResolvedValueOnce({ count: 0 }).mockRejectedValueOnce(new Error("DB caída"));
     expect(await estaBloqueado("1.2.3.4")).toBeNull();
   });
 });
@@ -161,6 +161,11 @@ describe("depurarIntentosAntiguos", () => {
 describe("registrarExito", () => {
   it("borra cualquier registro de intentos fallidos para esa IP", async () => {
     await registrarExito("1.2.3.4");
-    expect(prismaMock.login_intento.delete).toHaveBeenCalledWith({ where: { ip: "1.2.3.4" } });
+    expect(prismaMock.login_intento.deleteMany).toHaveBeenCalledWith({ where: { ip: "1.2.3.4" } });
+  });
+
+  it("si la base falla al borrar, el login exitoso igual sigue", async () => {
+    prismaMock.login_intento.deleteMany.mockRejectedValueOnce(new Error("DB caída"));
+    await expect(registrarExito("1.2.3.4")).resolves.toBeUndefined();
   });
 });

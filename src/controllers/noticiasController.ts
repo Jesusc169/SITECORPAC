@@ -19,6 +19,7 @@ import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 import { limpiarResumen, limpiarTextoRico } from "@/lib/htmlSeguro";
 import { SELECT_VIDEO, validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
+import { hayDuplicadoReciente, mensajeDuplicado } from "@/lib/duplicados";
 
 export class NoticiaValidationError extends Error {}
 
@@ -139,6 +140,9 @@ export class NoticiasController {
     const titulo = input.titulo.trim();
     if (!titulo) {
       throw new NoticiaValidationError("El título es obligatorio");
+    }
+    if (await hayDuplicadoReciente("noticia", titulo)) {
+      throw new NoticiaValidationError(mensajeDuplicado("noticia"));
     }
 
     if (input.pdfFiles.length > MAX_DOCUMENTOS) {

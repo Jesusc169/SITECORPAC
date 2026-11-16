@@ -9,6 +9,7 @@ import { moverAPapelera } from "@/lib/papelera";
 import type { ActorRegistro } from "@/lib/registro";
 import { limpiarTextoRico } from "@/lib/htmlSeguro";
 import { validarCambioVideo, videoPublico, type CambioVideo } from "@/lib/videos/vincular";
+import { hayDuplicadoReciente, mensajeDuplicado } from "@/lib/duplicados";
 
 export class SorteoValidationError extends Error {}
 
@@ -85,6 +86,9 @@ export const SorteoController = {
 
   crearSorteo: async (input: DatosSorteo) => {
     const lugar = normalizarLugar(input.lugar);
+    if (await hayDuplicadoReciente("sorteo", input.nombre)) {
+      throw new SorteoValidationError(mensajeDuplicado("sorteo"));
+    }
     const video_id = await validarCambioVideo(input.video, (m) => new SorteoValidationError(m));
     const imagenesValidas = input.imagenFiles.filter((f) => f && f.size > 0);
     if (imagenesValidas.length > MAX_IMAGENES_GALERIA) {

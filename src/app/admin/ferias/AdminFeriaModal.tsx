@@ -361,8 +361,8 @@ export default function AdminFeriaModal({
 
         <div className={styles.modalActions}>
           <button type="button" className={styles.botonCancelar} onClick={onClose} disabled={guardando}>Cancelar</button>
-          <button type="button" className={styles.botonGuardar} onClick={handleSubmit} disabled={guardando || selectorVideo.ocupado}>
-            {guardando ? "Guardando…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
+          <button type="button" className={styles.botonGuardar} onClick={handleSubmit} disabled={guardando || selectorVideo.ocupado || selectorImagenes.procesando}>
+            {guardando ? "Guardando…" : selectorImagenes.procesando ? "Preparando fotos…" : selectorVideo.ocupado ? "Subiendo video…" : "Guardar cambios"}
           </button>
         </div>
       </div>

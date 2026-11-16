@@ -562,9 +562,9 @@ describe("unir el video a noticias, ferias y sorteos", () => {
     const put = (form: Record<string, string>) => editarSorteo(new NextRequest(peticion("/x", "PUT", { form: { ...base, ...form } })), params(s.id));
     expect((await (await put({ quitarVideo: "1" })).json()).video_id).toBeNull();
     expect((await put({ videoId: "999999" })).status).toBe(400);
-    expect((await crearSorteo(peticion("/x", "POST", { form: { ...base, videoId: "999999" } }))).status).toBe(400);
+    expect((await crearSorteo(peticion("/x", "POST", { form: { ...base, nombre: "Sorteo 2", videoId: "999999" } }))).status).toBe(400);
     // JSON: sin video
-    const j = await (await crearSorteo(peticion("/x", "POST", { json: { ...base } }))).json();
+    const j = await (await crearSorteo(peticion("/x", "POST", { json: { ...base, nombre: "Sorteo 3" } }))).json();
     expect(j.video_id).toBeNull();
   });
 

@@ -38,8 +38,9 @@ const nextConfig: NextConfig = {
     // Formatos modernos automáticos
     formats: ["image/avif", "image/webp"],
 
-    // Si usas dominio propio (aunque sea mismo host)
-    domains: ["sitecorpac.com"],
+    // Imágenes remotas permitidas (reemplaza a `domains`, que Next marca
+    // como obsoleto y avisaba en cada arranque).
+    remotePatterns: [{ protocol: "https", hostname: "sitecorpac.com" }],
 
     // Mejora cache de imágenes optimizadas
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 año

@@ -118,13 +118,17 @@ export default function SelectorImagenes({ selector, idEntrada }: Readonly<Props
               accept="image/*"
               multiple
               onChange={(e) => {
-                if (e.target.files) agregar(e.target.files);
+                if (e.target.files) void agregar(e.target.files);
                 e.target.value = "";
               }}
             />
           </label>
         )}
       </div>
+
+      {selector.procesando && (
+        <p className={styles.hint} role="status">⏳ Preparando las fotos para subirlas…</p>
+      )}
 
       <div className={styles.hint}>
         💡 Puedes subir hasta {MAX_FOTOS} fotos ({total}/{MAX_FOTOS}), cada una de máximo{" "}
