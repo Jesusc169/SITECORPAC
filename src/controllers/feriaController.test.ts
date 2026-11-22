@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 
 vi.mock("@/models/feriaModel", () => ({
   FeriaModel: {
@@ -18,17 +18,20 @@ vi.mock("@/models/feriaModel", () => ({
 }));
 
 vi.mock("@/lib/archivosFeria", () => ({
-  guardarImagenFeria: vi.fn(async (_file: any, i: number) => `/images/uploads/ferias/foto-${i}.jpg`),
+  guardarImagenFeria: vi.fn(async (_file: unknown, i: number) => `/images/uploads/ferias/foto-${i}.jpg`),
   borrarImagenFeria: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T,>(fn: T) => fn,
   revalidateTag: vi.fn(),
 }));
 
 import { FeriaModel } from "@/models/feriaModel";
 import { FeriaController, FeriaValidationError } from "./feriaController";
+
+/** Fecha de feria tal como la recibe el controlador */
+type FechaInput = Parameters<typeof FeriaController.crearFeria>[0]["fechas"][number];
 
 function fakeFile(size: number, type = "image/jpeg", name = "foto.jpg") {
   return { size, type, name } as unknown as File;
@@ -41,13 +44,13 @@ const inputBase = {
   imagenFiles: [] as File[],
   imagenPrincipalIndex: 0,
   empresas: [] as number[],
-  fechas: [] as any[],
+  fechas: [] as FechaInput[],
   estado: true,
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (FeriaModel.crear as any).mockResolvedValue({ id: 1 });
+  (FeriaModel.crear as Mock).mockResolvedValue({ id: 1 });
 });
 
 describe("FeriaController.crearFeria", () => {
@@ -100,12 +103,12 @@ describe("FeriaController.actualizarFeria – año", () => {
     imagenPrincipalId: null,
     imagenPrincipalNuevaIndex: null,
     empresas: [] as number[],
-    fechas: [] as any[],
+    fechas: [] as FechaInput[],
     estado: true,
   };
 
   beforeEach(() => {
-    (FeriaModel.obtenerPorId as any).mockResolvedValue({ id: 5, evento_feria_imagen: [] });
+    (FeriaModel.obtenerPorId as Mock).mockResolvedValue({ id: 5, evento_feria_imagen: [] });
   });
 
   it("guarda el año editado", async () => {
@@ -115,7 +118,7 @@ describe("FeriaController.actualizarFeria – año", () => {
 
   it("conserva el año actual si no llega", async () => {
     await FeriaController.actualizarFeria(5, edicionBase);
-    expect((FeriaModel.actualizar as any).mock.calls[0][1]).not.toHaveProperty("anio");
+    expect((FeriaModel.actualizar as Mock).mock.calls[0][1]).not.toHaveProperty("anio");
   });
 
   it("rechaza un año inválido", async () => {
@@ -128,7 +131,7 @@ describe("FeriaController.actualizarFeria – año", () => {
 
 describe("Visibilidad de la feria (interruptor del panel)", () => {
   it("guarda la feria como oculta cuando estado es false", async () => {
-    (FeriaModel.crear as any).mockResolvedValue({ id: 3 });
+    (FeriaModel.crear as Mock).mockResolvedValue({ id: 3 });
     await FeriaController.crearFeria({ ...inputBase, estado: false });
     expect(FeriaModel.crear).toHaveBeenCalledWith(expect.objectContaining({ estado: false }));
   });

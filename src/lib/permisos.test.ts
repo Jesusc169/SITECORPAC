@@ -19,7 +19,7 @@ describe("tienePermiso", () => {
   });
 
   it("si permisos no es un arreglo (dato corrupto), no revienta: simplemente no da acceso", () => {
-    expect(tienePermiso({ rol: "secretaria", permisos: "noticias" as any }, "noticias")).toBe(
+    expect(tienePermiso({ rol: "secretaria", permisos: "noticias" }, "noticias")).toBe(
       false
     );
   });

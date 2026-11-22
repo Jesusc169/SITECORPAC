@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 
 vi.mock("@/models/noticiaModel", () => ({
   NoticiaModel: {
@@ -19,16 +19,16 @@ vi.mock("@/models/noticiaModel", () => ({
 vi.mock("@/lib/archivosNoticia", () => ({
   esImagenValida: vi.fn(() => true),
   esDocumentoPermitido: vi.fn(() => true),
-  guardarImagenNoticia: vi.fn(async (_file: any, i: number) => `/images/uploads/noticias/foto-${i}.jpg`),
+  guardarImagenNoticia: vi.fn(async (_file: unknown, i: number) => `/images/uploads/noticias/foto-${i}.jpg`),
   borrarImagenNoticia: vi.fn(),
-  guardarDocumentoNoticia: vi.fn(async (_file: any, i: number) => `/uploads/noticias/doc-${i}.pdf`),
+  guardarDocumentoNoticia: vi.fn(async (_file: unknown, i: number) => `/uploads/noticias/doc-${i}.pdf`),
   borrarDocumentoNoticia: vi.fn(),
   MAX_IMAGEN_BYTES: 10 * 1024 * 1024,
   MAX_DOCUMENTO_BYTES: 15 * 1024 * 1024,
 }));
 
 vi.mock("next/cache", () => ({
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T,>(fn: T) => fn,
   revalidateTag: vi.fn(),
 }));
 
@@ -53,9 +53,9 @@ const inputBase = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (esImagenValida as any).mockReturnValue(true);
-  (esDocumentoPermitido as any).mockReturnValue(true);
-  (NoticiaModel.crear as any).mockResolvedValue({ id: 1 });
+  (esImagenValida as Mock).mockReturnValue(true);
+  (esDocumentoPermitido as Mock).mockReturnValue(true);
+  (NoticiaModel.crear as Mock).mockResolvedValue({ id: 1 });
 });
 
 describe("NoticiasController.crearNoticiaCompleta", () => {
@@ -80,7 +80,7 @@ describe("NoticiasController.crearNoticiaCompleta", () => {
   });
 
   it("rechaza un archivo de imagen que no es una imagen válida", async () => {
-    (esImagenValida as any).mockReturnValue(false);
+    (esImagenValida as Mock).mockReturnValue(false);
     await expect(
       NoticiasController.crearNoticiaCompleta({ ...inputBase, imagenFiles: [fakeFile(1024)] })
     ).rejects.toThrow(NoticiaValidationError);
@@ -96,7 +96,7 @@ describe("NoticiasController.crearNoticiaCompleta", () => {
   });
 
   it("rechaza un documento con tipo no permitido", async () => {
-    (esDocumentoPermitido as any).mockReturnValue(false);
+    (esDocumentoPermitido as Mock).mockReturnValue(false);
     await expect(
       NoticiasController.crearNoticiaCompleta({
         ...inputBase,
@@ -132,8 +132,8 @@ describe("Visibilidad de la noticia (interruptor del panel)", () => {
   });
 
   it("al editar, guarda el nuevo estado de visibilidad", async () => {
-    (NoticiaModel.obtenerPorId as any).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
-    (NoticiaModel.actualizar as any).mockResolvedValue({ id: 7 });
+    (NoticiaModel.obtenerPorId as Mock).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
+    (NoticiaModel.actualizar as Mock).mockResolvedValue({ id: 7 });
     await NoticiasController.actualizarNoticiaCompleta(7, {
       titulo: "Asamblea",
       descripcion: "resumen",
@@ -163,7 +163,7 @@ describe("Descripción breve con formato", () => {
   });
 
   it("al editar, también la limpia; el texto plano queda igual", async () => {
-    (NoticiaModel.obtenerPorId as any).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
+    (NoticiaModel.obtenerPorId as Mock).mockResolvedValue({ id: 7, noticia_imagen: [], noticia_pdf: [] });
     const datos = {
       titulo: "Asamblea",
       contenido: null,

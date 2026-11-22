@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 
 vi.mock("@/models/sorteoModel", () => ({
   SorteoModel: {
@@ -16,12 +16,12 @@ vi.mock("@/models/sorteoModel", () => ({
 }));
 
 vi.mock("@/lib/archivosSorteo", () => ({
-  guardarImagenSorteo: vi.fn(async (_file: any, i: number) => `/images/uploads/sorteos/foto-${i}.jpg`),
+  guardarImagenSorteo: vi.fn(async (_file: unknown, i: number) => `/images/uploads/sorteos/foto-${i}.jpg`),
   borrarImagenSorteo: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T,>(fn: T) => fn,
   revalidateTag: vi.fn(),
 }));
 
@@ -47,7 +47,7 @@ const inputBase = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (SorteoModel.crear as any).mockResolvedValue({ id: 1 });
+  (SorteoModel.crear as Mock).mockResolvedValue({ id: 1 });
 });
 
 describe("SorteoController.crearSorteo", () => {
