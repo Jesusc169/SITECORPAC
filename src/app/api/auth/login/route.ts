@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     response.cookies.set("token", token, opcionesCookieSesion());
 
     return response;
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof CuentaDesactivadaError) {
       // La contraseña era correcta: no cuenta como intento de adivinarla.
       await registrarActividad({
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
       request: req,
     });
     return NextResponse.json(
-      { error: err.message || "Credenciales inválidas" },
+      { error: (err instanceof Error && err.message) || "Credenciales inválidas" },
       { status: 401 }
     );
   }

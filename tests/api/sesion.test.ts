@@ -145,4 +145,14 @@ describe("login: error sin mensaje", () => {
     expect((await res.json()).error).toBe("Credenciales inválidas");
     espia.mockRestore();
   });
+
+  it("si lo lanzado no es un Error, también responde 'Credenciales inválidas'", async () => {
+    const { AuthController } = await import("@/controllers/AuthController");
+    const { vi } = await import("vitest");
+    const espia = vi.spyOn(AuthController, "login").mockRejectedValueOnce("falla rara");
+    const res = await login(peticion("/api/auth/login", "POST", { json: { email: "a@b.c", password: "x" } }));
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("Credenciales inválidas");
+    espia.mockRestore();
+  });
 });
