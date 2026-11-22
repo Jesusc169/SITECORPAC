@@ -1,9 +1,18 @@
+import { errorDe, leerJson } from "@/lib/mensajes";
+
 // ===============================
 // GET
 // ===============================
+// Lanza un Error con texto para la persona si la API falla o no devuelve una
+// lista (p. ej. una página HTML de error): así la pantalla no confunde un
+// fallo con "no hay sorteos".
 export const fetchSorteos = async () => {
   const res = await fetch("/api/administrador/sorteos");
-  return res.json();
+  const datos = await leerJson(res);
+  if (!res.ok || !Array.isArray(datos)) {
+    throw new Error(errorDe(datos) ?? "No se pudo cargar la lista de sorteos");
+  }
+  return datos;
 };
 
 // ===============================

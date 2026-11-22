@@ -100,6 +100,15 @@ describe("sorteo.service (panel)", () => {
     expect(await sorteos.fetchSorteos()).toEqual([{ id: 1 }]);
   });
 
+  it("listar: si falla o no llega una lista, lanza un texto claro", async () => {
+    responder(500, { error: "No autorizado" });
+    await expect(sorteos.fetchSorteos()).rejects.toThrow("No autorizado");
+    responder(500, "<html>Error</html>", true);
+    await expect(sorteos.fetchSorteos()).rejects.toThrow("No se pudo cargar la lista de sorteos");
+    responder(200, {});
+    await expect(sorteos.fetchSorteos()).rejects.toThrow("No se pudo cargar la lista de sorteos");
+  });
+
   it("eliminar y duplicar: ok y errores con o sin motivo", async () => {
     responder(200, { id: 2 });
     await sorteos.eliminarSorteo(1);
