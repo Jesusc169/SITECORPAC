@@ -35,6 +35,8 @@ export interface Sorteo {
 
 interface SorteosAdminViewProps {
   sorteos: Sorteo[];
+  /** Texto del aviso si la lista no se pudo cargar ("" si todo bien). */
+  errorCarga: string;
   onNuevo: () => void;
   onEditar: (s: Sorteo) => void;
   onEliminar: (id: number) => Promise<void>;
@@ -46,6 +48,7 @@ COMPONENTE
 ========================= */
 export default function SorteosAdminView({
   sorteos,
+  errorCarga,
   onNuevo,
   onEditar,
   onEliminar,
@@ -61,6 +64,12 @@ export default function SorteosAdminView({
           + Nuevo Sorteo
         </button>
       </EncabezadoPanel>
+
+      {errorCarga && (
+        <div role="alert" className={panel.errorBanner}>
+          {errorCarga}
+        </div>
+      )}
 
       {/* ================= TABLA ================= */}
       <div className={panel.contenedorTabla}>
@@ -133,11 +142,14 @@ export default function SorteosAdminView({
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={6} className={panel.vacio}>
-                    No hay sorteos registrados
-                  </td>
-                </tr>
+                // Si la lista no se pudo cargar no se dice "no hay": el aviso ya lo explica.
+                !errorCarga && (
+                  <tr>
+                    <td colSpan={6} className={panel.vacio}>
+                      No hay sorteos registrados
+                    </td>
+                  </tr>
+                )
               )}
             </tbody>
           </table>

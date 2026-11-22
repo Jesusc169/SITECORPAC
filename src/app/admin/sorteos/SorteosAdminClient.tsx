@@ -64,6 +64,7 @@ COMPONENT
 ========================================= */
 export default function SorteosAdminClient() {
   const [sorteos, setSorteos] = useState<Sorteo[]>([]);
+  const [errorCarga, setErrorCarga] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Sorteo | null>(null);
   const [loadingSave, setLoadingSave] = useState(false);
@@ -73,11 +74,19 @@ export default function SorteosAdminClient() {
   CARGAR
   ========================================= */
   // El estado se guarda en el .then (al llegar la respuesta), no de forma
-  // síncrona dentro del efecto.
+  // síncrona dentro del efecto. Si falla se muestra un aviso y no se toca la
+  // lista que ya hubiera (nunca se confunde un fallo con "no hay sorteos").
   useEffect(() => {
-    fetchSorteos().then((data: SorteoBackend[] | null) =>
-      setSorteos((data || []).map(mapSorteoToFrontend))
-    );
+    fetchSorteos()
+      .then((data: SorteoBackend[]) => {
+        setSorteos(data.map(mapSorteoToFrontend));
+        setErrorCarga("");
+      })
+      .catch(() =>
+        setErrorCarga(
+          "No se pudo cargar la lista de sorteos. Recarga la página o inténtalo en unos minutos."
+        )
+      );
   }, []);
 
   /* =========================================
@@ -170,6 +179,7 @@ export default function SorteosAdminClient() {
 
       <SorteosAdminView
         sorteos={sorteos}
+        errorCarga={errorCarga}
         onNuevo={() => {
           setSelected(null);
           setModalOpen(true);
