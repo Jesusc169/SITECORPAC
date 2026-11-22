@@ -66,4 +66,8 @@ Escribe en español sencillo. Sé honesto: si algo falla o se salta, dilo.
 16. Entrega a Jesús:
     - **Para el cliente** (copiable, 3-6 líneas, sin jerga): qué cambió y cómo usarlo.
     - **Técnico**: commits, pruebas, hallazgos, docs actualizados, pendientes.
-17. Actualiza la memoria del proyecto (archivos de memoria de SITECORPAC) con lo hecho y los pendientes.
+17. Llama a `cronista` con lo hecho (commits, qué está en producción, hallazgos) y los pendientes
+    nuevos para que actualice `.claude/local/bitacora.md`. Haz lo mismo después de cualquier
+    trabajo en el servidor fuera de /requerimiento.
+18. Actualiza la memoria del proyecto (archivos de memoria de SITECORPAC) solo con lo que no
+    quepa en la bitácora (preferencias o correcciones de Jesús).
