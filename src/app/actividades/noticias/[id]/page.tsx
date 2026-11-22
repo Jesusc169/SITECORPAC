@@ -14,6 +14,7 @@ import CarruselFotos from "@/components/GaleriaFotos/CarruselFotos";
 import ReproductorVideo from "@/components/Video/ReproductorVideo";
 import video from "@/components/Video/Video.module.css";
 import { fechaCorta } from "@/lib/fechas";
+import { fotosPrincipalPrimero } from "@/lib/fotosGaleria";
 import { esHtml, htmlATexto, textoABloques } from "@/lib/textoRico";
 import { limpiarHtml } from "@/lib/htmlSeguro";
 import { INSTITUCION } from "@/lib/datosInstitucionales";
@@ -87,10 +88,7 @@ export default async function NoticiaPage({
   const bloques = html === null ? textoABloques(cuerpo) : [];
   // Fotos de la noticia, la principal primero. Con 2 o más se muestran en un
   // carrusel que gira solo; con una, como siempre (afiche fijo).
-  const galeria = [...noticia.noticia_imagen]
-    .sort((a, b) => Number(b.principal) - Number(a.principal))
-    .map((img) => img.url);
-  const fotos = galeria.length > 0 ? galeria : noticia.imagen ? [noticia.imagen] : [];
+  const fotos = fotosPrincipalPrimero(noticia.noticia_imagen, noticia.imagen);
   const url = `${process.env.NEXT_PUBLIC_BASE_URL ?? INSTITUCION.sitio}/actividades/noticias/${noticia.id}`;
 
   return (
