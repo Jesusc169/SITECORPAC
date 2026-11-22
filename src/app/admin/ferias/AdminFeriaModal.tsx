@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./AdminFeriaModal.module.css";
 import { useSelectorImagenes } from "@/hooks/useSelectorImagenes";
 import SelectorImagenes from "@/components/SelectorImagenes/SelectorImagenes";
-import { useSelectorVideo } from "@/hooks/useSelectorVideo";
+import { useSelectorVideo, type InfoVideo } from "@/hooks/useSelectorVideo";
 import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
@@ -28,6 +28,26 @@ export interface FechaFeria {
   zona?: string;
 }
 
+/** Feria tal como la devuelve la API del panel (con fotos, empresas y fechas). */
+export interface FeriaAdmin {
+  id: number;
+  titulo?: string | null;
+  descripcion?: string | null;
+  anio?: number | null;
+  estado?: boolean | null;
+  evento_feria_imagen?: { id: number; url: string }[];
+  evento_feria_empresa?: { id: number; empresa_id: number; empresa?: { nombre: string } | null }[];
+  evento_feria_fecha?: {
+    id: number;
+    fecha: string;
+    hora_inicio: string;
+    hora_fin: string;
+    ubicacion: string;
+    zona?: string | null;
+  }[];
+  video?: InfoVideo | null;
+}
+
 interface Props {
   show: boolean;
   onClose: () => void;
@@ -36,8 +56,36 @@ interface Props {
     empresas: number[];
     fechas: FechaFeria[];
   }) => Promise<void>;
-  feriaData?: any;
+  feriaData?: FeriaAdmin | null;
   empresasDisponibles?: Empresa[];
+}
+
+/** Valores del formulario a partir de la feria a editar (o vacíos al crear). */
+function formularioDesde(feriaData: FeriaAdmin | null) {
+  const anioActual = new Date().getFullYear();
+  if (!feriaData) {
+    return { titulo: "", descripcion: "", anio: anioActual, estado: true, empresas: [], fechas: [] };
+  }
+  return {
+    titulo: feriaData.titulo ?? "",
+    descripcion: feriaData.descripcion ?? "",
+    anio: feriaData.anio ?? anioActual,
+    estado: feriaData.estado ?? true,
+    empresas: Array.isArray(feriaData.evento_feria_empresa)
+      ? feriaData.evento_feria_empresa.map((e) => e.empresa_id)
+      : [],
+    fechas: Array.isArray(feriaData.evento_feria_fecha)
+      ? feriaData.evento_feria_fecha.map((f) => ({
+          id: f.id,
+          clave: crypto.randomUUID(),
+          fecha: String(f.fecha).substring(0, 10),
+          hora_inicio: f.hora_inicio,
+          hora_fin: f.hora_fin,
+          ubicacion: f.ubicacion,
+          zona: f.zona ?? "",
+        }))
+      : [],
+  };
 }
 
 /* =========================
@@ -73,50 +121,32 @@ export default function AdminFeriaModal({
 
   /* =========================
      CARGA DATA (EDITAR)
+     Si cambia la feria elegida, los campos se rellenan durante el render
+     (patrón de React para "ajustar el estado cuando cambia una prop"), sin
+     un efecto que provoque un render de más.
      ========================= */
+  const [feriaCargada, setFeriaCargada] = useState<FeriaAdmin | null | undefined>(undefined);
+  if (feriaCargada !== feriaData) {
+    setFeriaCargada(feriaData);
+    const inicial = formularioDesde(feriaData);
+    setTitulo(inicial.titulo);
+    setDescripcion(inicial.descripcion);
+    setAnio(inicial.anio);
+    setEstado(inicial.estado);
+    setEmpresas(inicial.empresas);
+    setFechas(inicial.fechas);
+  }
+
+  // Fotos y video sí van en un efecto: reiniciarlos cancela la subida en
+  // curso y consulta el espacio libre en el servidor.
   useEffect(() => {
-    if (!feriaData) {
-      setTitulo("");
-      setDescripcion("");
-      setAnio(new Date().getFullYear());
-      setEstado(true);
-      selectorImagenes.resetear([]);
-      selectorVideo.resetear(null);
-      setEmpresas([]);
-      setFechas([]);
-      return;
-    }
-
-    setTitulo(feriaData.titulo ?? "");
-    setDescripcion(feriaData.descripcion ?? "");
-    setAnio(feriaData.anio ?? new Date().getFullYear());
-    setEstado(feriaData.estado ?? true);
     selectorImagenes.resetear(
-      Array.isArray(feriaData.evento_feria_imagen)
-        ? feriaData.evento_feria_imagen.map((img: any) => ({ id: img.id, url: img.url }))
+      Array.isArray(feriaData?.evento_feria_imagen)
+        ? feriaData.evento_feria_imagen.map((img) => ({ id: img.id, url: img.url }))
         : []
     );
-    selectorVideo.resetear(feriaData.video);
-
-    setEmpresas(
-      Array.isArray(feriaData.evento_feria_empresa)
-        ? feriaData.evento_feria_empresa.map((e: any) => e.empresa_id)
-        : []
-    );
-
-    setFechas(
-      Array.isArray(feriaData.evento_feria_fecha)
-        ? feriaData.evento_feria_fecha.map((f: any) => ({
-            id: f.id,
-            clave: crypto.randomUUID(),
-            fecha: String(f.fecha).substring(0, 10),
-            hora_inicio: f.hora_inicio,
-            hora_fin: f.hora_fin,
-            ubicacion: f.ubicacion,
-            zona: f.zona ?? "",
-          }))
-        : []
-    );
+    selectorVideo.resetear(feriaData?.video ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la feria; los selectores cambian en cada render
   }, [feriaData]);
 
   /* =========================

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import styles from "./ferias.admin.module.css";
-import AdminFeriaModal from "./AdminFeriaModal";
+import AdminFeriaModal, { type FeriaAdmin, type FechaFeria } from "./AdminFeriaModal";
 import * as feriaService from "@/services/feria.admin.service";
 import Toast from "@/components/Toast/Toast";
 import { useToast } from "@/components/Toast/useToast";
@@ -14,46 +14,46 @@ import Icono from "@/components/Icono/Icono";
 import { htmlATexto } from "@/lib/textoRico";
 
 export default function FeriasView() {
-  const [ferias, setFerias] = useState<any[]>([]);
-  const [empresasDisponibles, setEmpresasDisponibles] = useState<any[]>([]);
+  const [ferias, setFerias] = useState<FeriaAdmin[]>([]);
+  const [empresasDisponibles, setEmpresasDisponibles] = useState<{ id: number; nombre: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
-  const [feriaSeleccionada, setFeriaSeleccionada] = useState<any>(null);
+  const [feriaSeleccionada, setFeriaSeleccionada] = useState<FeriaAdmin | null>(null);
 
   const { toast, mostrarToast, cerrarToast } = useToast();
 
   /* =========================
      CARGAR FERIAS
   ========================= */
+  const aplicarFerias = (data: unknown) => setFerias(Array.isArray(data) ? data : []);
+  const avisarErrorFerias = (err: unknown) => {
+    console.error(err);
+    setError((err instanceof Error && err.message) || "Error inesperado");
+  };
+
   const fetchFerias = async () => {
     try {
-      const data = await feriaService.fetchFerias();
-      setFerias(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Error inesperado");
+      aplicarFerias(await feriaService.fetchFerias());
+    } catch (err) {
+      avisarErrorFerias(err);
     }
   };
 
   /* =========================
      CARGAR EMPRESAS
   ========================= */
-  const fetchEmpresas = async () => {
-    try {
-      const data = await feriaService.fetchEmpresasDisponibles();
-      setEmpresasDisponibles(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Error cargando empresas", err);
-    }
-  };
-
+  // Primera carga: "loading" ya empieza en true y el estado se guarda al
+  // llegar cada respuesta (en el .then), no de forma síncrona en el efecto.
   useEffect(() => {
-    setLoading(true);
-    Promise.all([fetchFerias(), fetchEmpresas()]).finally(() =>
-      setLoading(false)
-    );
+    Promise.all([
+      feriaService.fetchFerias().then(aplicarFerias, avisarErrorFerias),
+      feriaService
+        .fetchEmpresasDisponibles()
+        .then((data) => setEmpresasDisponibles(Array.isArray(data) ? data : []))
+        .catch((err) => console.error("Error cargando empresas", err)),
+    ]).finally(() => setLoading(false));
   }, []);
 
   /* =========================
@@ -130,7 +130,7 @@ export default function FeriasView() {
   }: {
     formData: FormData;
     empresas: number[];
-    fechas: any[];
+    fechas: FechaFeria[];
   }) => {
     try {
       const isEdit = Boolean(feriaSeleccionada?.id);
@@ -213,7 +213,7 @@ export default function FeriasView() {
                   <td>
                     {fechas.length > 0 ? (
                       <div className={styles.fechasStack}>
-                        {fechas.slice(0, 2).map((f: any, index: number) => (
+                        {fechas.slice(0, 2).map((f, index) => (
                           <div key={f.id} className={styles.fechaItem}>
                             <strong>Fecha {index + 1}:</strong>{" "}
                             {formatearFechaSola(f.fecha)}
@@ -232,7 +232,7 @@ export default function FeriasView() {
                   <td>
                     {feria.evento_feria_empresa?.length ? (
                       <ul className={styles.empresasList}>
-                        {feria.evento_feria_empresa.map((e: any) => (
+                        {feria.evento_feria_empresa.map((e) => (
                           <li key={e.id}>{e.empresa?.nombre}</li>
                         ))}
                       </ul>
