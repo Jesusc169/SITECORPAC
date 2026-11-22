@@ -96,3 +96,8 @@ public/images/temp/
 # resultados de Playwright
 /test-results/
 /playwright-report/
+
+# Claude Code: datos privados del servidor y reglas locales (no versionar)
+/.claude/local/
+/.claude/*.local.md
+/.claude/settings.local.json
