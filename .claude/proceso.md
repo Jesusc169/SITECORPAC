@@ -26,9 +26,12 @@ Lo usa el comando `/requerimiento`. Todos los agentes leen este archivo primero.
 10. Ser honesto: si una prueba falla o un paso se salta, se dice.
 
 ## Flujo
+Orden general: **contexto** (bitácora, se carga sola) → **actualizaciones** (`centinela`) →
+**requerimiento**. Revisión completa de parches: `/actualizaciones`.
+
 | Fase | Quién | Entrega |
 |---|---|---|
-| 0. Entender | orquestador (+ `analista`) | Ficha del requerimiento; preguntas si hay dudas |
+| 0. Entender | orquestador (+ `analista`, `centinela` rápido) | Ficha del requerimiento; aviso de parches urgentes; preguntas si hay dudas |
 | 1. Diseñar | `feature-dev:code-explorer` + `feature-dev:code-architect` | Plan: archivos, BD, riesgos |
 | ⏸ OK 1 | Jesús | Aprueba el plan |
 | 2. Construir | orquestador (desarrollo) | Código en rama `feat/…` |

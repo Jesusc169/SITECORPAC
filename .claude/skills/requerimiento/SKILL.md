@@ -18,7 +18,11 @@ Mantén a Jesús al tanto con una línea al empezar cada fase ("Fase 3/8: prueba
 Escribe en español sencillo. Sé honesto: si algo falla o se salta, dilo.
 
 ## Fase 0 — Entender
-1. Llama a `analista` con el pedido literal. Recibe la ficha.
+El contexto (`.claude/local/bitacora.md`) ya está cargado: úsalo para saber en qué se quedó.
+1. En paralelo: `analista` con el pedido literal (recibe la ficha) y `centinela` en **modo
+   rápido** (¿hay parches de seguridad urgentes?). Si el centinela trae algo crítico o alto y
+   alcanzable, díselo a Jesús y propón resolverlo antes (con `/actualizaciones`) o junto al
+   requerimiento; si no, solo menciónalo en una línea y sigue.
 2. Si hay **preguntas abiertas que bloquean**, pregúntalas a Jesús con AskUserQuestion
    (máx. 4, cada una con opción recomendada) y espera. Si no hay, sigue.
 
