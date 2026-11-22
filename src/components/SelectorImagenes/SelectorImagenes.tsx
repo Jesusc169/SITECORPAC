@@ -28,11 +28,11 @@ export default function SelectorImagenes({ selector, idEntrada }: Readonly<Props
 
   useEffect(() => {
     const urls = nuevas.map((f) => URL.createObjectURL(f));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- las URLs son un recurso del navegador que se crea y libera aquí; con useMemo, StrictMode las revocaría y las vistas previas se romperían
     setPreviews(urls);
     return () => {
       urls.forEach((u) => URL.revokeObjectURL(u));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nuevas]);
 
   const espacioLibre = MAX_FOTOS - total;

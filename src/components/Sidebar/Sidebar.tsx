@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Sidebar.module.css";
@@ -34,8 +34,13 @@ export default function Sidebar({ usuario }: Readonly<{ usuario: UsuarioPanel }>
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Al cambiar de pantalla se cierra el menú del celular.
-  useEffect(() => setOpen(false), [pathname]);
+  // Al cambiar de pantalla se cierra el menú del celular (se ajusta durante
+  // el render, como recomienda React, en vez de en un efecto).
+  const [rutaAnterior, setRutaAnterior] = useState(pathname);
+  if (rutaAnterior !== pathname) {
+    setRutaAnterior(pathname);
+    setOpen(false);
+  }
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 

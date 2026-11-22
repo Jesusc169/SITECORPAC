@@ -18,11 +18,14 @@ export default function Cabecera() {
   const [movil, setMovil] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
-  // Al navegar se cierran los menús.
-  useEffect(() => {
+  // Al navegar se cierran los menús (se ajusta durante el render, como
+  // recomienda React, en vez de en un efecto que provoque un render de más).
+  const [rutaAnterior, setRutaAnterior] = useState(ruta);
+  if (rutaAnterior !== ruta) {
+    setRutaAnterior(ruta);
     setAbierto(null);
     setMovil(false);
-  }, [ruta]);
+  }
 
   // Clic fuera o Escape cierran el submenú abierto.
   useEffect(() => {
