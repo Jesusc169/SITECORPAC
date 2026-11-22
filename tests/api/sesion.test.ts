@@ -1,4 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { AuthController } from "@/controllers/AuthController";
+import { ERROR_SISTEMA_LOGIN } from "@/lib/mensajes";
 import { NextRequest } from "next/server";
 import * as auth from "@/lib/auth";
 import { POST as login } from "@/app/api/auth/login/route";
@@ -33,6 +35,7 @@ describe("POST /api/auth/login", () => {
     await crearUsuario({ email: "ana@test.local" });
     const res = await login(peticion("/api/auth/login", "POST", { json: { email: "ana@test.local", password: "mala" } }));
     expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("Correo o contraseña incorrectos");
     expect((await prisma.login_intento.findUnique({ where: { ip: "10.0.0.1" } }))?.fallos).toBe(1);
     expect((await ultimoRegistro())?.detalle).toContain("ana@test.local");
   });
@@ -51,11 +54,18 @@ describe("POST /api/auth/login", () => {
     expect(await prisma.login_intento.count()).toBe(0);
   });
 
-  it("error sin mensaje → 'Credenciales inválidas'", async () => {
-    // correo que no es texto: AuthController falla al buscarlo
-    const res = await login(peticion("/api/auth/login", "POST", { json: { email: { $ne: 1 }, password: "x" } }));
+  it("correo inexistente → mismo 401 y mismo texto (no delata qué cuentas existen)", async () => {
+    const res = await login(peticion("/api/auth/login", "POST", { json: { email: "nadie@test.local", password: "x" } }));
     expect(res.status).toBe(401);
-    expect((await res.json()).error).toBeTruthy();
+    expect((await res.json()).error).toBe("Correo o contraseña incorrectos");
+    expect((await prisma.login_intento.findUnique({ where: { ip: "10.0.0.1" } }))?.fallos).toBe(1);
+  });
+
+  it("correo o contraseña que no son texto → 400, sin consultar la BD ni contar intento", async () => {
+    const r1 = await login(peticion("/api/auth/login", "POST", { json: { email: { $ne: 1 }, password: "x" } }));
+    const r2 = await login(peticion("/api/auth/login", "POST", { json: { email: "a@b.c", password: 123 } }));
+    expect([r1.status, r2.status]).toEqual([400, 400]);
+    expect(await prisma.login_intento.count()).toBe(0);
   });
 
   it("cuenta desactivada con la contraseña correcta → 403, sin contar como fallo", async () => {
@@ -136,23 +146,66 @@ describe("middleware", () => {
   });
 });
 
-describe("login: error sin mensaje", () => {
-  it("responde 'Credenciales inválidas'", async () => {
-    const { AuthController } = await import("@/controllers/AuthController");
-    const { vi } = await import("vitest");
-    const espia = vi.spyOn(AuthController, "login").mockRejectedValueOnce(new Error(""));
-    const res = await login(peticion("/api/auth/login", "POST", { json: { email: "a@b.c", password: "x" } }));
-    expect((await res.json()).error).toBe("Credenciales inválidas");
-    espia.mockRestore();
+describe("login: fallos del sistema (no son culpa de quien entra)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
-  it("si lo lanzado no es un Error, también responde 'Credenciales inválidas'", async () => {
-    const { AuthController } = await import("@/controllers/AuthController");
-    const { vi } = await import("vitest");
-    const espia = vi.spyOn(AuthController, "login").mockRejectedValueOnce("falla rara");
-    const res = await login(peticion("/api/auth/login", "POST", { json: { email: "a@b.c", password: "x" } }));
-    expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe("Credenciales inválidas");
+  const entrar = (email = "ana@test.local", password = CLAVE) =>
+    login(peticion("/api/auth/login", "POST", { json: { email, password } }));
+
+  async function esErrorDelSistema(res: Response) {
+    expect(res.status).toBe(500);
+    expect(res.headers.get("content-type")).toMatch(/json/);
+    const cuerpo = await res.text();
+    expect(JSON.parse(cuerpo).error).toBe(ERROR_SISTEMA_LOGIN);
+    expect(cuerpo).not.toMatch(/database|prisma|secretOrPrivateKey/i);
+  }
+
+  it("BD caída al buscar el usuario → 500 claro, registrado como error, sin contar intento", async () => {
+    vi.spyOn(prisma.user, "findUnique").mockRejectedValueOnce(new Error("Can't reach database server"));
+    await esErrorDelSistema(await entrar());
+    expect(await prisma.login_intento.count()).toBe(0);
+    expect(await ultimoRegistro()).toMatchObject({ accion: "error", modulo: "sesion", nivel: "error" });
+    expect((await ultimoRegistro())?.detalle).toContain("Can't reach database server");
+  });
+
+  it("falta JWT_SECRET con credenciales correctas → 500 claro y sin cookie", async () => {
+    await crearUsuario({ email: "ana@test.local" });
+    vi.stubEnv("JWT_SECRET", "");
+    const res = await entrar();
+    expect(res.headers.get("set-cookie")).toBeNull();
+    await esErrorDelSistema(res);
+    expect(await prisma.login_intento.count()).toBe(0);
+  });
+
+  it("10 fallos del sistema seguidos no bloquean la IP", async () => {
+    await crearUsuario({ email: "ana@test.local" });
+    const espia = vi.spyOn(prisma.user, "findUnique").mockRejectedValue(new Error("BD caída"));
+    for (let i = 0; i < 10; i++) expect((await entrar()).status).toBe(500);
     espia.mockRestore();
+    expect((await entrar()).status).toBe(200);
+    expect(await prisma.login_intento.count()).toBe(0);
+  });
+
+  it("BD caída al revisar el bloqueo → 500 claro (nunca una página HTML)", async () => {
+    vi.spyOn(prisma.login_intento, "findUnique").mockRejectedValueOnce(new Error("BD caída"));
+    await esErrorDelSistema(await entrar());
+  });
+
+  it("BD caída al contar el fallo → 500 claro", async () => {
+    await crearUsuario({ email: "ana@test.local" });
+    vi.spyOn(prisma.login_intento, "upsert").mockRejectedValueOnce(new Error("BD caída"));
+    await esErrorDelSistema(await entrar("ana@test.local", "mala"));
+  });
+
+  it("errores raros (sin mensaje o que no son Error) también son del sistema", async () => {
+    vi.spyOn(AuthController, "login").mockRejectedValueOnce(new Error(""));
+    await esErrorDelSistema(await entrar("a@b.c", "x"));
+    vi.spyOn(AuthController, "login").mockRejectedValueOnce("falla rara");
+    await esErrorDelSistema(await entrar("a@b.c", "x"));
+    expect((await ultimoRegistro())?.detalle).toContain("falla rara");
+    expect(await prisma.login_intento.count()).toBe(0);
   });
 });

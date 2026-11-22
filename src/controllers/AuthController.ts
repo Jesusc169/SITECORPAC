@@ -9,6 +9,13 @@ export class CuentaDesactivadaError extends Error {
   }
 }
 
+/** Correo o contraseña incorrectos: el ÚNICO error que cuenta como intento fallido. */
+export class CredencialesInvalidasError extends Error {
+  constructor() {
+    super("Correo o contraseña incorrectos");
+  }
+}
+
 // Hash "señuelo" para comparar contra él cuando el correo no existe, así el
 // tiempo de respuesta no delata si la cuenta existe o no.
 const HASH_SENUELO = "$2a$10$CwTycUXWue0Thq9StjUM0uJ8Q0BUqR8Jy2/PS.zRfhbW.gKAeGmXm";
@@ -23,7 +30,7 @@ export class AuthController {
     // cuenta, para no dejar adivinar por el error ni por el tiempo de
     // respuesta qué correos tienen cuenta en el sitio.
     const isValid = await bcrypt.compare(password, user?.password ?? HASH_SENUELO);
-    if (!user || !isValid) throw new Error("Credenciales inválidas");
+    if (!user || !isValid) throw new CredencialesInvalidasError();
     // Solo se avisa DESPUÉS de validar la contraseña: así no se puede usar
     // este mensaje para averiguar qué correos tienen cuenta.
     if (!user.activo) throw new CuentaDesactivadaError();

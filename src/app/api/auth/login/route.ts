@@ -1,9 +1,14 @@
 // src/app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
-import { AuthController, CuentaDesactivadaError } from "../../../../controllers/AuthController";
+import {
+  AuthController,
+  CredencialesInvalidasError,
+  CuentaDesactivadaError,
+} from "../../../../controllers/AuthController";
 import { opcionesCookieSesion } from "@/lib/auth";
 import { estaBloqueado, registrarFallo, registrarExito, obtenerIp } from "@/lib/rateLimiter";
-import { registrarActividad } from "@/lib/registro";
+import { registrarActividad, registrarError } from "@/lib/registro";
+import { ERROR_SISTEMA_LOGIN } from "@/lib/mensajes";
 
 // Solo se guarda lo que parece un correo: si alguien escribió su contraseña
 // en el campo equivocado, no debe quedar en el registro.
@@ -12,7 +17,22 @@ function correoParaRegistro(valor: unknown): string {
   return /^[^\s@]+@[^\s@]+$/.test(texto) ? texto.slice(0, 120) : "(no es un correo válido)";
 }
 
+/**
+ * Un fallo del SISTEMA (base de datos caída, falta JWT_SECRET…) no es culpa
+ * de quien entra: responde 500 con un texto claro, queda en el registro como
+ * error y NO cuenta como intento fallido (no bloquea a nadie). Tampoco se
+ * muestra el mensaje técnico.
+ */
 export async function POST(req: Request) {
+  try {
+    return await iniciarSesion(req);
+  } catch (err) {
+    await registrarError("sesion", "Inicio de sesión", err, req);
+    return NextResponse.json({ error: ERROR_SISTEMA_LOGIN }, { status: 500 });
+  }
+}
+
+async function iniciarSesion(req: Request) {
   const ip = obtenerIp(req);
 
   // ===============================
@@ -34,29 +54,19 @@ export async function POST(req: Request) {
     );
   }
 
-  // Un cuerpo que no es JSON se trata como credenciales faltantes (400)
+  // ===============================
+  // Validación básica: correo y contraseña deben ser texto no vacío.
+  // Un cuerpo que no es JSON (o con otros tipos) es 400 y no llega a la BD.
+  // ===============================
   const body = await req.json().catch(() => null);
-  const correoIntentado: unknown = body?.email;
+  const email: unknown = body?.email;
+  const password: unknown = body?.password;
+  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
+    return NextResponse.json({ error: "Faltan credenciales" }, { status: 400 });
+  }
 
   try {
-
-    // ===============================
-    // Validación básica
-    // ===============================
-    if (!body?.email || !body?.password) {
-      return NextResponse.json(
-        { error: "Faltan credenciales" },
-        { status: 400 }
-      );
-    }
-
-    // ===============================
-    // Login (AuthController)
-    // ===============================
-    const { token, user } = await AuthController.login({
-      email: body.email,
-      password: body.password,
-    });
+    const { token, user } = await AuthController.login({ email, password });
 
     await registrarExito(ip);
     await registrarActividad({
@@ -67,18 +77,10 @@ export async function POST(req: Request) {
       request: req,
     });
 
-    // ===============================
-    // RESPUESTA + COOKIE httpOnly
-    // ===============================
-    const response = NextResponse.json({
-      message: "Login exitoso",
-      user, // 👈 NO es necesario enviar el token al cliente
-    });
-
-    // 🔐 Cookie segura para middleware
-    // httpOnly (JS no puede leerla), 8 horas, igual que el JWT
+    // Cookie httpOnly (JS no puede leerla), 8 horas, igual que el JWT.
+    // El token no se envía en el cuerpo.
+    const response = NextResponse.json({ message: "Login exitoso", user });
     response.cookies.set("token", token, opcionesCookieSesion());
-
     return response;
   } catch (err) {
     if (err instanceof CuentaDesactivadaError) {
@@ -87,23 +89,25 @@ export async function POST(req: Request) {
         accion: "login_fallido",
         modulo: "sesion",
         nivel: "aviso",
-        detalle: `Intento de entrar con una cuenta desactivada. Correo: ${correoParaRegistro(correoIntentado)}`,
+        detalle: `Intento de entrar con una cuenta desactivada. Correo: ${correoParaRegistro(email)}`,
         request: req,
       });
       return NextResponse.json({ error: err.message }, { status: 403 });
     }
 
-    await registrarFallo(ip);
-    await registrarActividad({
-      accion: "login_fallido",
-      modulo: "sesion",
-      nivel: "aviso",
-      detalle: `Correo o contraseña incorrectos. Correo: ${correoParaRegistro(correoIntentado)}`,
-      request: req,
-    });
-    return NextResponse.json(
-      { error: (err instanceof Error && err.message) || "Credenciales inválidas" },
-      { status: 401 }
-    );
+    if (err instanceof CredencialesInvalidasError) {
+      await registrarFallo(ip);
+      await registrarActividad({
+        accion: "login_fallido",
+        modulo: "sesion",
+        nivel: "aviso",
+        detalle: `Correo o contraseña incorrectos. Correo: ${correoParaRegistro(email)}`,
+        request: req,
+      });
+      return NextResponse.json({ error: err.message }, { status: 401 });
+    }
+
+    // Cualquier otra cosa es un fallo del sistema: lo maneja POST.
+    throw err;
   }
 }

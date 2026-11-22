@@ -19,8 +19,29 @@ test("contraseña equivocada muestra el error y no entra", async ({ page }) => {
   await page.getByPlaceholder("Correo").fill("admin@e2e.test");
   await page.getByPlaceholder("Contraseña").fill("mala");
   await page.getByRole("button", { name: "Ingresar" }).click();
-  await expect(page.locator("#login-error")).toBeVisible();
+  await expect(page.locator("#login-error")).toHaveText("Correo o contraseña incorrectos");
   await expect(page).toHaveURL(/\/login/);
+});
+
+test("login: si el servidor responde una página de error, muestra un aviso claro", async ({ page }) => {
+  await page.route("**/api/auth/login", (r) =>
+    r.fulfill({ status: 502, contentType: "text/html", body: "<html>Bad Gateway</html>" })
+  );
+  await page.goto("/login");
+  await page.getByPlaceholder("Correo").fill("admin@e2e.test");
+  await page.getByPlaceholder("Contraseña").fill(CLAVE);
+  await page.getByRole("button", { name: "Ingresar" }).click();
+  await expect(page.locator("#login-error")).toContainText("problema del sistema");
+  await expect(page.locator("#login-error")).not.toContainText(/Unexpected|JSON|Bad Gateway/);
+});
+
+test("login: sin conexión, pide revisar internet", async ({ page }) => {
+  await page.route("**/api/auth/login", (r) => r.abort());
+  await page.goto("/login");
+  await page.getByPlaceholder("Correo").fill("admin@e2e.test");
+  await page.getByPlaceholder("Contraseña").fill(CLAVE);
+  await page.getByRole("button", { name: "Ingresar" }).click();
+  await expect(page.locator("#login-error")).toContainText("Revisa tu internet");
 });
 
 test("sin sesión el panel manda al login", async ({ page }) => {

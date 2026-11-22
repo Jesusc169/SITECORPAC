@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/Login.module.css";
+import { ERROR_CONEXION, ERROR_SISTEMA_LOGIN, errorDe, leerJson } from "@/lib/mensajes";
 
 export default function LoginView() {
   const router = useRouter();
@@ -14,27 +15,29 @@ export default function LoginView() {
     e.preventDefault();
     setEnviando(true);
 
+    let res: Response;
     try {
-      const res = await fetch("/api/auth/login", {
+      res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Error en login");
-        setEnviando(false);
-        return;
-      }
-
-      // ✅ Redirigir al dashboard o página principal
-      router.push("/dashboard");
     } catch {
-      setError("Error en el servidor");
+      // Sin internet o el servidor no responde.
+      setError(ERROR_CONEXION);
       setEnviando(false);
+      return;
     }
+
+    if (!res.ok) {
+      // Si llega una página de error (p. ej. HTML de nginx), no hay {error}:
+      // se muestra el aviso de problema del sistema, nunca texto técnico.
+      setError(errorDe(await leerJson(res)) ?? ERROR_SISTEMA_LOGIN);
+      setEnviando(false);
+      return;
+    }
+
+    router.push("/dashboard");
   };
 
   return (
