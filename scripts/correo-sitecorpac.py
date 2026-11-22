@@ -40,8 +40,25 @@ import sys
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 
-DESTINO = "jesuscondor837@gmail.com"
-REMITENTE = "jesuscondor837@gmail.com"
+# Datos privados (correo) en un archivo SOLO del servidor, fuera del repo
+# público: /etc/sitecorpac/alertas.conf (root, 600), líneas CLAVE="valor".
+def _leer_conf(ruta="/etc/sitecorpac/alertas.conf"):
+    datos = {}
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            for linea in f:
+                linea = linea.strip()
+                if linea and not linea.startswith("#") and "=" in linea:
+                    clave, valor = linea.split("=", 1)
+                    datos[clave.strip()] = valor.strip().strip('"').strip("'")
+    except OSError:
+        pass
+    return datos
+
+
+_CONF = _leer_conf()
+DESTINO = _CONF.get("DESTINO", "")
+REMITENTE = _CONF.get("REMITENTE", "") or DESTINO
 NOMBRE_REMITENTE = "Alertas SITECORPAC"
 PANEL = "https://sitecorpac.com/admin/sistema"
 

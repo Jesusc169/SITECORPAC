@@ -101,3 +101,6 @@ public/images/temp/
 /.claude/local/
 /.claude/*.local.md
 /.claude/settings.local.json
+
+# Worktrees temporales de Claude Code
+/.claude/worktrees/

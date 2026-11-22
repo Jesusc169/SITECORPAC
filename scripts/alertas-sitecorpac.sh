@@ -14,6 +14,8 @@
 #   - muchos intentos fallidos de inicio de sesión (posible ataque)
 #   - intentos de entrar con una cuenta desactivada
 #   - respaldo de la base de datos con más de 36 horas
+#   - copia off-site (paquete cifrado) sin línea OK en 26 horas
+#     (se salta en mantenimiento; prueba sin correos: --probar-offsite)
 #   - certificado HTTPS con menos de 15 días
 #   - resumen diario a las 8:00 a. m. (hora de Perú)
 # CPU, RAM, disco, sitio caído y PM2 ya los vigila /root/monitor.sh.
@@ -23,7 +25,14 @@
 # =====================================================================
 set -uo pipefail
 
-DESTINO="jesuscondor837@gmail.com"
+# Datos privados (correo de destino, rutas de la copia off-site) en un archivo
+# SOLO del servidor, fuera del repo público: /etc/sitecorpac/alertas.conf
+# (root, 600). Formato bash: DESTINO="..."  LOG_OFFSITE="..."  DIR_OFFSITE="..."
+CONF_PRIVADA="/etc/sitecorpac/alertas.conf"
+DESTINO=""; LOG_OFFSITE=""; DIR_OFFSITE=""
+# shellcheck source=/dev/null
+[ -r "$CONF_PRIVADA" ] && . "$CONF_PRIVADA"
+if [ -z "$DESTINO" ]; then echo "Falta DESTINO en $CONF_PRIVADA" >&2; exit 1; fi
 APP="/home/sitecorpac/SITECORPAC"
 RESPALDOS="/home/sitecorpac/backups"
 DOMINIO="sitecorpac.com"
@@ -55,6 +64,15 @@ PLANTILLA="$(dirname "$(readlink -f "$0")")/correo_sitecorpac.py"
 enviar() {
   local clave="$1" espera="$2" nivel="$3" asunto="$4" resumen="$5" cuerpo="$6"
   local marca="$DIR/enviado_$clave"
+  if [ "${SIMULAR:-0}" = 1 ]; then   # modo prueba: no envía ni marca nada
+    if [ -f "$marca" ] && [ $((AHORA - $(cat "$marca"))) -lt "$espera" ]; then
+      echo "SIMULADO: NO enviaría (antispam: ya se avisó hace menos de ${espera} s) [$clave] $asunto"
+    else
+      echo "SIMULADO: ENVIARÍA [$nivel] SITECORPAC: $asunto"; echo "  resumen: $resumen"
+      printf '%s\n' "$cuerpo" | sed 's/^/  | /'
+    fi
+    return
+  fi
   if [ -f "$marca" ] && [ $((AHORA - $(cat "$marca"))) -lt "$espera" ]; then return; fi
   if [ -f "$PLANTILLA" ]; then
     printf '%s' "$cuerpo" | python3 "$PLANTILLA" --nivel "$nivel" --asunto "$asunto" \
@@ -67,6 +85,54 @@ enviar() {
   CORREOS_ENVIADOS=$((CORREOS_ENVIADOS + 1))
   ULTIMO_ASUNTO="$asunto"
 }
+
+# ---------- respaldo off-site (paquete cifrado que se baja a la PC) ----------
+# Avisa si el log de /root/respaldo_offsite.sh no tiene una línea OK en las
+# últimas HORAS_OFFSITE horas. Respeta el modo mantenimiento (archivo
+# $DIR/mantenimiento de menos de 1 hora, igual que el vigía).
+# Probar sin mandar correos ni cambiar estado:
+#   /root/alertas_sitecorpac.sh --probar-offsite [log_de_prueba] [archivo_mantenimiento]
+MANT="$DIR/mantenimiento"
+HORAS_OFFSITE=26
+revisar_offsite() {
+  # Sin LOG_OFFSITE configurado no hay copia off-site que vigilar.
+  [ -n "$LOG_OFFSITE" ] || return 0
+  if [ -f "$MANT" ] && [ $((AHORA - $(stat -c %Y "$MANT"))) -lt 3600 ]; then
+    [ "${SIMULAR:-0}" = 1 ] && echo "offsite: modo mantenimiento activo -> no se revisa"
+    return
+  fi
+  local linea ok_ts="" edad_h="" ult_fallo
+  linea=$(grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} OK: ' "$LOG_OFFSITE" 2>/dev/null | tail -1)
+  [ -n "$linea" ] && ok_ts=$(date -u -d "${linea:0:19}" +%s 2>/dev/null)
+  [ -n "$ok_ts" ] && edad_h=$(( (AHORA - ok_ts) / 3600 ))
+  if [ -n "$ok_ts" ] && [ $((AHORA - ok_ts)) -le $((HORAS_OFFSITE * 3600)) ]; then
+    [ "${SIMULAR:-0}" = 1 ] && echo "offsite: último OK hace ${edad_h} h (límite ${HORAS_OFFSITE} h) -> sin alerta"
+    return
+  fi
+  ult_fallo=$(grep -E ' FALLO: ' "$LOG_OFFSITE" 2>/dev/null | tail -1)
+  enviar "offsite" 86400 critico "la copia de respaldo fuera del servidor no se genera hace más de $HORAS_OFFSITE horas" \
+"El paquete cifrado de respaldo (el que se descarga a la PC) no se generó bien en las últimas $HORAS_OFFSITE horas. Si se perdiera el servidor, la copia fuera de él estaría desactualizada." \
+"## Último paquete correcto
+${linea:-• Ninguno registrado}
+Antigüedad :: ${edad_h:-?} horas
+
+## Último fallo registrado
+${ult_fallo:-• Ninguno}
+
+## Cómo se revisa
+$ tail $LOG_OFFSITE
+$ ls -la ${DIR_OFFSITE:-<carpeta de paquetes>}
+$ /root/respaldo_offsite.sh"
+}
+if [ "${1:-}" = "--probar-offsite" ]; then
+  SIMULAR=1
+  [ -n "${2:-}" ] && LOG_OFFSITE="$2"
+  [ -n "${3:-}" ] && MANT="$3"
+  echo "MODO PRUEBA (no envía correos ni cambia estado): log=$LOG_OFFSITE mant=$MANT"
+  revisar_offsite
+  rm -f "$CNF"
+  exit 0
+fi
 
 FMT="DATE_FORMAT(DATE_SUB(fecha, INTERVAL 5 HOUR), '%d/%m %H:%i')"
 
@@ -145,6 +211,9 @@ $ tail /home/sitecorpac/backups/backup.log
 $ /root/backup_sitecorpac.sh"
   fi
 fi
+
+# ---------- 3b. copia off-site ----------
+revisar_offsite
 
 # ---------- 4. certificado HTTPS ----------
 VENCE=$(echo | timeout 10 openssl s_client -connect "$DOMINIO:443" -servername "$DOMINIO" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
