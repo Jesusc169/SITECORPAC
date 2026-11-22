@@ -9,6 +9,7 @@ import SelectorVideo from "@/components/SelectorVideo/SelectorVideo";
 import InterruptorVisible from "@/components/InterruptorVisible/InterruptorVisible";
 import EditorTexto from "@/components/EditorTexto/EditorTexto";
 import { fechaHoraPeru, partesPeru } from "@/lib/fechas";
+import type { Sorteo, Premio as PremioSorteo } from "./SorteosAdminView";
 
 /** Valor que se usaba fijo antes de existir el campo; se propone al crear. */
 const LUGAR_POR_DEFECTO = "Sede principal SITECORPAC";
@@ -21,11 +22,53 @@ interface Premio {
   cantidad: number;
 }
 
+/** Sorteo a editar; el backend viejo mandaba los premios como sorteo_producto. */
+type DatosSorteo = Sorteo & { sorteo_producto?: PremioSorteo[] };
+
 interface Props {
   open: boolean;
   onClose: () => void;
   onSave: (id: number | null, formData: FormData) => Promise<void>;
-  initialData?: any;
+  initialData?: DatosSorteo | null;
+}
+
+/** Arma el formulario a partir del sorteo a editar (o vacío al crear). */
+function formularioDesde(initialData: DatosSorteo | null | undefined) {
+  if (!initialData) {
+    return {
+      id: null as number | null,
+      titulo: "",
+      descripcion: "",
+      lugar: LUGAR_POR_DEFECTO,
+      fecha: "",
+      hora: "",
+      premios: [] as Premio[],
+      visible: true,
+    };
+  }
+
+  // En hora de Perú: antes se leía en UTC (toISOString) y cada edición
+  // corría la hora del sorteo.
+  const { fecha, hora } = initialData.fecha_hora
+    ? partesPeru(initialData.fecha_hora)
+    : { fecha: "", hora: "" };
+
+  return {
+    id: initialData.id ?? null,
+    titulo: initialData.nombre ?? "",
+    descripcion: initialData.descripcion ?? "",
+    lugar: initialData.lugar?.trim() || LUGAR_POR_DEFECTO,
+    fecha,
+    hora,
+    premios:
+      (initialData.premios ?? initialData.sorteo_producto)?.map((p) => ({
+        clave: crypto.randomUUID(),
+        nombre: p.nombre ?? "",
+        descripcion: p.descripcion ?? "",
+        cantidad: p.cantidad ?? 1,
+      })) ?? [],
+    visible: initialData.estado !== "INACTIVO",
+  };
 }
 
 export default function AdminSorteoModal({
@@ -34,18 +77,7 @@ export default function AdminSorteoModal({
   onSave,
   initialData,
 }: Readonly<Props>) {
-  const emptyForm = {
-    id: null as number | null,
-    titulo: "",
-    descripcion: "",
-    lugar: LUGAR_POR_DEFECTO,
-    fecha: "",
-    hora: "",
-    premios: [] as Premio[],
-    visible: true,
-  };
-
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => formularioDesde(initialData));
   // Bloquea el botón mientras se envía (evita subidas repetidas por varios clics).
   const [guardando, setGuardando] = useState(false);
   const selectorImagenes = useSelectorImagenes();
@@ -53,45 +85,26 @@ export default function AdminSorteoModal({
 
   /* =========================================================
      CARGAR DATOS PARA EDITAR
+     Si cambia el sorteo elegido, el formulario se rellena durante el render
+     (patrón de React para "ajustar el estado cuando cambia una prop"), sin
+     un efecto que provoque un render de más.
   ========================================================= */
-  useEffect(() => {
-    if (initialData) {
-      // En hora de Perú: antes se leía en UTC (toISOString) y cada edición
-      // corría la hora del sorteo.
-      const { fecha, hora } = initialData.fecha_hora
-        ? partesPeru(initialData.fecha_hora)
-        : { fecha: "", hora: "" };
+  const [sorteoCargado, setSorteoCargado] = useState(initialData);
+  if (sorteoCargado !== initialData) {
+    setSorteoCargado(initialData);
+    setForm(formularioDesde(initialData));
+  }
 
-      setForm({
-        id: initialData.id ?? null,
-        titulo: initialData.nombre ?? "",
-        descripcion: initialData.descripcion ?? "",
-        lugar: initialData.lugar?.trim() || LUGAR_POR_DEFECTO,
-        fecha,
-        hora,
-        premios:
-          (initialData.premios ?? initialData.sorteo_producto)?.map(
-            (p: any) => ({
-              clave: crypto.randomUUID(),
-              nombre: p.nombre ?? "",
-              descripcion: p.descripcion ?? "",
-              cantidad: p.cantidad ?? 1,
-            })
-          ) ?? [],
-        visible: initialData.estado !== "INACTIVO",
-      });
-      selectorImagenes.resetear(
-        Array.isArray(initialData.sorteo_imagen)
-          ? initialData.sorteo_imagen.map((img: any) => ({ id: img.id, url: img.url }))
-          : []
-      );
-      selectorVideo.resetear(initialData.video);
-    } else {
-      setForm(emptyForm);
-      selectorImagenes.resetear([]);
-      selectorVideo.resetear(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Fotos y video sí van en un efecto: reiniciarlos cancela la subida en
+  // curso y consulta el espacio libre en el servidor.
+  useEffect(() => {
+    selectorImagenes.resetear(
+      Array.isArray(initialData?.sorteo_imagen)
+        ? initialData.sorteo_imagen.map((img) => ({ id: img.id, url: img.url }))
+        : []
+    );
+    selectorVideo.resetear(initialData?.video ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar el sorteo; los selectores cambian en cada render
   }, [initialData]);
 
   if (!open) return null;
@@ -115,7 +128,7 @@ export default function AdminSorteoModal({
       premios: [...prev.premios, { clave: crypto.randomUUID(), nombre: "", descripcion: "", cantidad: 1 }],
     }));
 
-  const updatePremio = (i: number, field: string, value: any) => {
+  const updatePremio = (i: number, field: "nombre" | "descripcion" | "cantidad", value: string) => {
     const nuevos = [...form.premios];
     nuevos[i] = {
       ...nuevos[i],

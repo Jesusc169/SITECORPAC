@@ -15,7 +15,28 @@ import { useToast } from "@/components/Toast/useToast";
 /* =========================================
 MAP BACKEND → FRONTEND
 ========================================= */
-const mapSorteoToFrontend = (s: any): Sorteo => ({
+/** Sorteo tal como lo devuelve la API (cualquier campo puede faltar). */
+interface SorteoBackend {
+  id?: number;
+  nombre?: string | null;
+  descripcion?: string | null;
+  lugar?: string | null;
+  imagen?: string | null;
+  anio?: number | null;
+  estado?: Sorteo["estado"] | null;
+  fecha_hora?: string | null;
+  sorteo_producto?: {
+    id?: number;
+    nombre?: string | null;
+    descripcion?: string | null;
+    sorteo_id?: number;
+    cantidad?: number | null;
+  }[];
+  sorteo_imagen?: Sorteo["sorteo_imagen"] | null;
+  video?: Sorteo["video"];
+}
+
+const mapSorteoToFrontend = (s: SorteoBackend): Sorteo => ({
   id: s.id,
   nombre: s.nombre ?? "",
   descripcion: s.descripcion ?? "",
@@ -27,7 +48,7 @@ const mapSorteoToFrontend = (s: any): Sorteo => ({
     ? new Date(s.fecha_hora).toISOString()
     : new Date().toISOString(),
   premios:
-    s.sorteo_producto?.map((p: any) => ({
+    s.sorteo_producto?.map((p) => ({
       id: p.id,
       nombre: p.nombre ?? "",
       descripcion: p.descripcion ?? "",
@@ -51,14 +72,12 @@ export default function SorteosAdminClient() {
   /* =========================================
   CARGAR
   ========================================= */
-  const cargar = async () => {
-    const data = await fetchSorteos();
-    const mapped = (data || []).map(mapSorteoToFrontend);
-    setSorteos(mapped);
-  };
-
+  // El estado se guarda en el .then (al llegar la respuesta), no de forma
+  // síncrona dentro del efecto.
   useEffect(() => {
-    cargar();
+    fetchSorteos().then((data: SorteoBackend[] | null) =>
+      setSorteos((data || []).map(mapSorteoToFrontend))
+    );
   }, []);
 
   /* =========================================
