@@ -31,7 +31,7 @@ export default function LoginView() {
 
       // ✅ Redirigir al dashboard o página principal
       router.push("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Error en el servidor");
       setEnviando(false);
     }
