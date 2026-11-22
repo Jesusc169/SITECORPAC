@@ -12,8 +12,8 @@ import { ERROR_SISTEMA_LOGIN } from "@/lib/mensajes";
 
 // Solo se guarda lo que parece un correo: si alguien escribió su contraseña
 // en el campo equivocado, no debe quedar en el registro.
-function correoParaRegistro(valor: unknown): string {
-  const texto = typeof valor === "string" ? valor.trim() : "";
+function correoParaRegistro(valor: string): string {
+  const texto = valor.trim();
   return /^[^\s@]+@[^\s@]+$/.test(texto) ? texto.slice(0, 120) : "(no es un correo válido)";
 }
 
