@@ -56,7 +56,7 @@ test("el contenido cargado en la base aparece en las páginas", async ({ page })
   await page.goto("/directorio");
   await expect(page.getByText("Dirigente E2E")).toBeVisible();
   await page.goto("/actividades/sorteos");
-  await expect(page.getByText("Sorteo E2E")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sorteo E2E" })).toBeVisible();
 });
 
 test("una página inexistente da 404", async ({ page }) => {
@@ -151,7 +151,7 @@ for (const [ruta, nombre] of [
   test(`${ruta}: la tarjeta muestra un carrusel que empieza por la foto principal`, async ({ page }) => {
     await page.goto(ruta);
     const tarjeta = page.locator("article", { hasText: nombre });
-    const carrusel = tarjeta.getByRole("region", { name: `Fotos de ${nombre}` });
+    const carrusel = tarjeta.getByRole("group", { name: `Fotos de ${nombre}` });
     const activa = () => carrusel.locator('[aria-roledescription="diapositiva"]:not([inert])');
     await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
     await expect(activa().locator("img").first()).toHaveAttribute("src", /logo_site\.jpg/);
@@ -159,6 +159,10 @@ for (const [ruta, nombre] of [
     await expect(tarjeta.getByRole("button", { name: /Ver \d+ fotos/ })).toHaveCount(0);
     // Gira solo (estando a la vista) y se puede pausar
     await carrusel.scrollIntoViewIfNeeded();
+    // La primera foto (carga diferida en tarjetas) se descarga de verdad
+    await expect
+      .poll(() => activa().locator("img").first().evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0))
+      .toBe(true);
     await page.mouse.move(0, 0);
     await expect(activa()).toHaveAttribute("aria-label", "2 de 2", { timeout: 8000 });
     await carrusel.getByRole("button", { name: /Pausar/ }).click();
@@ -174,7 +178,7 @@ for (const [ruta, nombre] of [
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(ruta);
     const tarjeta = page.locator("article", { hasText: nombre });
-    const carrusel = tarjeta.getByRole("region", { name: `Fotos de ${nombre}` });
+    const carrusel = tarjeta.getByRole("group", { name: `Fotos de ${nombre}` });
     await expect(carrusel).toBeVisible();
     const caja = (await tarjeta.boundingBox())!;
     for (const control of [carrusel.getByRole("button", { name: /Pausar/ }), carrusel.getByRole("button", { name: "Ir a la foto 2" })]) {
@@ -187,7 +191,7 @@ for (const [ruta, nombre] of [
 
 test("carrusel de una tarjeta: no gira mientras está fuera de la pantalla", async ({ page }) => {
   await page.goto("/actividades/sorteos");
-  const carrusel = page.getByRole("region", { name: "Fotos de Sorteo E2E" });
+  const carrusel = page.getByRole("group", { name: "Fotos de Sorteo E2E" });
   const activa = () => carrusel.locator('[aria-roledescription="diapositiva"]:not([inert])');
   await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
   // Se aleja el carrusel de la vista sin depender del alto de la página.
@@ -196,6 +200,8 @@ test("carrusel de una tarjeta: no gira mientras está fuera de la pantalla", asy
     el.style.top = "-5000px";
   });
   await page.mouse.move(0, 0);
+  // Salir de pantalla no enciende los anuncios del lector de pantalla
+  await expect(carrusel.locator("p.sr-only")).toHaveAttribute("aria-live", "off");
   await page.waitForTimeout(6500);
   await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
   // De vuelta en pantalla, sigue girando
@@ -217,7 +223,7 @@ for (const [ruta, nombre] of [
     await page.goto(ruta);
     const tarjeta = page.locator("article", { hasText: nombre });
     await expect(tarjeta.getByRole("img", { name: nombre })).toBeVisible();
-    await expect(tarjeta.getByRole("region", { name: /^Fotos/ })).toHaveCount(0);
+    await expect(tarjeta.getByRole("group", { name: /^Fotos/ })).toHaveCount(0);
     await expect(tarjeta.getByRole("button", { name: /Pausar|Ver \d+ fotos/ })).toHaveCount(0);
   });
 }

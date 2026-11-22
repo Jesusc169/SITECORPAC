@@ -23,6 +23,17 @@ describe("fotosPrincipalPrimero", () => {
     expect(fotosPrincipalPrimero([foto("/b.jpg"), foto("/a.jpg")])).toEqual(["/b.jpg", "/a.jpg"]);
   });
 
+  it("sin principal marcada, va primero la que coincide con la portada", () => {
+    const imgs = [foto("/a.jpg"), foto("/b.jpg"), foto("/c.jpg")];
+    expect(fotosPrincipalPrimero(imgs, "/c.jpg")).toEqual(["/c.jpg", "/a.jpg", "/b.jpg"]);
+  });
+
+  it("descarta las fotos en blanco y recorta espacios", () => {
+    expect(fotosPrincipalPrimero([foto("  ", true), foto(" /a.jpg ")])).toEqual(["/a.jpg"]);
+    // Solo fotos en blanco: se usa la portada (sin espacios)
+    expect(fotosPrincipalPrimero([foto("")], " /viejo.jpg ")).toEqual(["/viejo.jpg"]);
+  });
+
   it("no modifica la lista que recibe", () => {
     const imgs = [foto("/1.jpg"), foto("/2.jpg", true)];
     fotosPrincipalPrimero(imgs);

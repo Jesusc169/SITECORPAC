@@ -40,7 +40,9 @@ export default function CarruselFotos({
   intervalo = INTERVALO_MS,
   variante = "articulo",
 }: Readonly<Props>) {
-  const total = imagenes.length;
+  // Rutas ya normalizadas: las usan las diapositivas y el visor ampliado.
+  const rutas = imagenes.map(rutaPublica);
+  const total = rutas.length;
   const [actual, setActual] = useState(0);
   // null = la persona aún no tocó Pausar/Reanudar: se sigue la preferencia
   // del equipo (reducir movimiento => empieza en pausa).
@@ -87,6 +89,9 @@ export default function CarruselFotos({
   return (
     <section
       ref={raiz}
+      // En las tarjetas (varias por página) es un grupo y no una región, para
+      // no llenar la lista de regiones del lector de pantalla.
+      role={variante === "tarjeta" ? "group" : undefined}
       className={variante === "tarjeta" ? `${s.carrusel} ${s.tarjeta}` : s.carrusel}
       aria-roledescription="carrusel"
       aria-label={`Fotos${deTitulo}`}
@@ -117,12 +122,11 @@ export default function CarruselFotos({
           }
         }}
       >
-        {imagenes.map((url, i) => {
-          const src = rutaPublica(url);
+        {rutas.map((src, i) => {
           const visible = i === actual;
           return (
             <div
-              key={`${i}-${url}`}
+              key={`${i}-${src}`}
               className={`${s.diapositiva} ${visible ? s.activa : ""}`}
               role="group"
               aria-roledescription="diapositiva"
@@ -150,10 +154,10 @@ export default function CarruselFotos({
 
         {total > 1 && (
           <>
-            <button type="button" className={`${s.flecha} ${s.izq}`} onClick={() => ir(actual - 1)} aria-label="Foto anterior">
+            <button type="button" className={`${s.flecha} ${s.izq}`} onClick={() => ir(actual - 1)} aria-label={`Foto anterior${deTitulo}`}>
               <Icono nombre="flecha" />
             </button>
-            <button type="button" className={`${s.flecha} ${s.der}`} onClick={() => ir(actual + 1)} aria-label="Foto siguiente">
+            <button type="button" className={`${s.flecha} ${s.der}`} onClick={() => ir(actual + 1)} aria-label={`Foto siguiente${deTitulo}`}>
               <Icono nombre="flecha" />
             </button>
             <span className={s.contador} aria-hidden="true">
@@ -168,7 +172,7 @@ export default function CarruselFotos({
           <button type="button" className={s.pausa} onClick={() => setPausado(!pausado)}>
             <span aria-hidden="true">{pausado ? "▶" : "❚❚"}</span>
             {pausado ? "Reanudar" : "Pausar"}
-            <span className="sr-only"> el carrusel de fotos</span>
+            <span className="sr-only"> las fotos{deTitulo}</span>
           </button>
           <div className={s.puntos}>
             {imagenes.map((url, i) => (
@@ -177,7 +181,7 @@ export default function CarruselFotos({
                 type="button"
                 className={s.punto}
                 onClick={() => ir(i)}
-                aria-label={`Ir a la foto ${i + 1}`}
+                aria-label={`Ir a la foto ${i + 1}${deTitulo}`}
                 aria-current={i === actual ? "true" : undefined}
               />
             ))}
@@ -191,7 +195,7 @@ export default function CarruselFotos({
       </p>
 
       {abierta !== null && (
-        <Lightbox imagenes={imagenes} indiceInicial={abierta} titulo={titulo} onClose={() => setAbierta(null)} />
+        <Lightbox imagenes={rutas} indiceInicial={abierta} titulo={titulo} onClose={() => setAbierta(null)} />
       )}
     </section>
   );

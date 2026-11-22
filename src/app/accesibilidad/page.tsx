@@ -51,9 +51,10 @@ export default function AccesibilidadPage() {
           Los colores del texto cumplen el contraste mínimo de WCAG AA.
         </li>
         <li>
-          El carrusel de noticias se detiene al pasar el mouse o el foco del
-          teclado, y no se mueve solo si tu equipo tiene activada la opción de
-          reducir el movimiento.
+          Los carruseles de fotos (noticias, ferias y sorteos) tienen un botón
+          Pausar. Se detienen al pasar el mouse o el foco del teclado, cuando no
+          están en pantalla, y no se mueven solos si tu equipo tiene activada la
+          opción de reducir el movimiento.
         </li>
         <li>
           Revisamos las páginas públicas con la herramienta automática axe-core
