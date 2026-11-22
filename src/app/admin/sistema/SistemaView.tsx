@@ -9,6 +9,7 @@ import styles from "./sistema.module.css";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
 import { esHtml, htmlATexto } from "@/lib/textoRico";
 import type { SistemaController } from "@/controllers/sistemaController";
+import { ERROR_SISTEMA, jsonOError, mensajeDe } from "@/lib/mensajes";
 
 type Estado = Awaited<ReturnType<typeof SistemaController.estado>>;
 type Seguridad = Awaited<ReturnType<typeof SistemaController.seguridad>>;
@@ -483,16 +484,12 @@ function Registro({
     let cancelado = false;
     const terminar = (error: string) => !cancelado && setRespuesta({ query, pagina, recarga, error });
     fetch(`/api/administrador/sistema/registro?${query({ pagina: String(pagina) })}`)
-      .then(async (r) => {
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || "No se pudo cargar el registro");
-        return j as PaginaRegistro;
-      })
+      .then((r) => jsonOError<PaginaRegistro>(r, "No se pudo cargar el registro"))
       .then((j) => {
         if (!cancelado) setDatos(j);
         terminar("");
       })
-      .catch((e: Error) => terminar(e.message));
+      .catch((e: unknown) => terminar(mensajeDe(e, ERROR_SISTEMA)));
     return () => {
       cancelado = true;
     };
@@ -599,7 +596,11 @@ function Registro({
         </div>
       )}
 
-      {error && <div className={styles.alertaError + " " + styles.alerta}>{error}</div>}
+      {error && (
+        <div role="alert" className={`${styles.alerta} ${styles.alertaError}`}>
+          {error}
+        </div>
+      )}
 
       <div className={panel.contenedorTabla}>
         <table className={panel.tabla}>
@@ -703,12 +704,8 @@ function ModalCambios({
 
   useEffect(() => {
     fetch(`/api/administrador/sistema/historial/${id}`)
-      .then(async (r) => {
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || "No se pudo cargar");
-        setD(j);
-      })
-      .catch((e: Error) => setError(e.message));
+      .then(async (r) => setD(await jsonOError<DetalleCambios>(r, "No se pudo cargar")))
+      .catch((e: unknown) => setError(mensajeDe(e, ERROR_SISTEMA)));
   }, [id]);
 
   // <dialog> nativo abierto con showModal(): el navegador pone el fondo,
@@ -736,11 +733,10 @@ function ModalCambios({
     setError("");
     try {
       const r = await fetch(`/api/administrador/sistema/historial/${id}`, { method: "POST" });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "No se pudo restaurar");
+      await jsonOError(r, "No se pudo restaurar");
       alRestaurar();
-    } catch (e) {
-      setError((e as Error).message);
+    } catch (e: unknown) {
+      setError(mensajeDe(e, ERROR_SISTEMA));
     } finally {
       setRestaurando(false);
     }
@@ -755,7 +751,11 @@ function ModalCambios({
           </button>
         </div>
 
-        {error && <div className={`${styles.alerta} ${styles.alertaError}`}>{error}</div>}
+        {error && (
+          <div role="alert" className={`${styles.alerta} ${styles.alertaError}`}>
+            {error}
+          </div>
+        )}
         {!d && !error && <p>Cargando…</p>}
 
         {d && (
@@ -822,12 +822,8 @@ function PapeleraTab() {
 
   const cargar = useCallback(() => {
     fetch("/api/administrador/sistema/papelera")
-      .then(async (r) => {
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || "No se pudo cargar la papelera");
-        setItems(j);
-      })
-      .catch((e: Error) => setError(e.message));
+      .then(async (r) => setItems(await jsonOError<ItemPapelera[]>(r, "No se pudo cargar la papelera")))
+      .catch((e: unknown) => setError(mensajeDe(e, ERROR_SISTEMA)));
   }, []);
 
   useEffect(() => {
@@ -847,16 +843,15 @@ function PapeleraTab() {
       const r = await fetch(`/api/administrador/sistema/papelera/${it.id}`, {
         method: tipo === "restaurar" ? "POST" : "DELETE",
       });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "No se pudo completar");
+      await jsonOError(r, "No se pudo completar");
       setMensaje(
         tipo === "restaurar"
           ? `"${it.titulo}" se restauró y ya está de nuevo en ${NOMBRE_MODULO[it.modulo] ?? it.modulo}.`
           : `"${it.titulo}" se borró definitivamente.`
       );
       cargar();
-    } catch (e) {
-      setError((e as Error).message);
+    } catch (e: unknown) {
+      setError(mensajeDe(e, ERROR_SISTEMA));
     } finally {
       setTrabajando(null);
     }
@@ -873,7 +868,11 @@ function PapeleraTab() {
           {mensaje}
         </output>
       )}
-      {error && <div className={`${styles.alerta} ${styles.alertaError}`}>{error}</div>}
+      {error && (
+        <div role="alert" className={`${styles.alerta} ${styles.alertaError}`}>
+          {error}
+        </div>
+      )}
 
       <div className={panel.contenedorTabla}>
         <table className={panel.tabla}>
@@ -887,7 +886,8 @@ function PapeleraTab() {
             </tr>
           </thead>
           <tbody>
-            {items === null && <FilaMensaje columnas={5}>Cargando…</FilaMensaje>}
+            {/* Si la carga falló, el aviso de arriba lo explica (no "Cargando…" para siempre) */}
+            {items === null && !error && <FilaMensaje columnas={5}>Cargando…</FilaMensaje>}
             {items?.length === 0 && <FilaMensaje columnas={5}>La papelera está vacía.</FilaMensaje>}
             {items?.map((it) => (
                 <tr key={it.id}>
@@ -934,22 +934,24 @@ function PapeleraTab() {
 function SeguridadTab({ s, alCambiar }: Readonly<{ s: Seguridad; alCambiar: () => void }>) {
   const [trabajando, setTrabajando] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState("");
+  // El error va aparte: el aviso verde (alertaOk) es solo para lo que salió bien.
+  const [error, setError] = useState("");
 
   const desbloquear = async (ip: string) => {
     setTrabajando(ip);
     setMensaje("");
+    setError("");
     try {
       const r = await fetch("/api/administrador/sistema/bloqueos", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ip }),
       });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "No se pudo desbloquear");
+      await jsonOError(r, "No se pudo desbloquear");
       setMensaje(`La IP ${ip} ya puede volver a iniciar sesión.`);
       alCambiar();
-    } catch (e) {
-      setMensaje((e as Error).message);
+    } catch (e: unknown) {
+      setError(mensajeDe(e, ERROR_SISTEMA));
     } finally {
       setTrabajando(null);
     }
@@ -975,6 +977,11 @@ function SeguridadTab({ s, alCambiar }: Readonly<{ s: Seguridad; alCambiar: () =
       </div>
 
       {mensaje && <output className={`${styles.alerta} ${styles.alertaOk}`}>{mensaje}</output>}
+      {error && (
+        <div role="alert" className={`${styles.alerta} ${styles.alertaError}`}>
+          {error}
+        </div>
+      )}
 
       <h2 className={styles.subtitulo2}>IPs con intentos fallidos</h2>
       <div className={panel.contenedorTabla}>
