@@ -17,7 +17,10 @@ Español sencillo; sé honesto con lo que se revisó y lo que no.
    dónde se aplica) y tu recomendación. Descarta con razón los que no aplican.
 3. Si no hay nada que aplicar: llama a `cronista` para anotar la revisión y termina.
 4. **⏸ OK:** AskUserQuestion con los parches propuestos (multiSelect) + "No aplicar nada".
-5. Aplica SOLO lo aprobado:
+5. Aplica SOLO lo aprobado. **Regla de Jesús: todo parche de tecnología se aplica a los DOS
+   sitios: producción (`main`) y el demo (rama `poc-afiliados`, demo.sitecorpac.com).** El demo
+   se trabaja en un worktree aparte (`../sitecorpac-poc`) con su propia base de pruebas
+   `sitecorpac_poc_test` (su esquema es distinto: no compartas `sitecorpac_test`).
    - **app** (dependencias): rama `chore/parches-<fecha>` desde `main`; actualiza solo lo
      aprobado (nunca `npm audit fix --force`); luego sigue el flujo de `/requerimiento` desde la
      Fase 3 (qa-pruebas → revisión → OK 2 → deploy-seguro → infra-servidor post-deploy).

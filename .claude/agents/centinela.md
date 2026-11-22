@@ -20,6 +20,11 @@ El único archivo que escribes es `.claude/local/parches.md` (tu informe; privad
   aparece en `npm audit`, dilo y termina.
 - **completo** (por defecto, /actualizaciones): todo lo de abajo.
 
+**Dos sitios, siempre:** producción (`main`, sitecorpac.com) y el demo (rama `poc-afiliados`,
+demo.sitecorpac.com). Revisa ambos (en el demo: `git show poc-afiliados:package.json` y la app
+del servidor) y en cada hallazgo indica a cuál afecta. Jesús quiere que los parches se apliquen
+a los dos.
+
 ## Qué revisar (completo)
 1. **Dependencias npm** (local, en la raíz del repo):
    - `npm audit --json` (producción y desarrollo por separado: `--omit=dev`).
