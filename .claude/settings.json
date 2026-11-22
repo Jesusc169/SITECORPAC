@@ -15,8 +15,8 @@
   },
   "permissions": {
     "allow": [
-      "Bash(npx tsc --noEmit)",
-      "Bash(npx tsc --noEmit *)",
+      "Bash(npx --no-install tsc --noEmit)",
+      "Bash(npx --no-install tsc --noEmit -p .)",
       "Bash(git check-ignore *)",
       "PowerShell(Get-NetTCPConnection *)"
     ]
