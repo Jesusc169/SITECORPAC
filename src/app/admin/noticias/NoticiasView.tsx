@@ -39,6 +39,36 @@ function formatearFecha(fecha: string) {
 }
 
 /* ===============================
+   CARGA → lista del panel; null si falló (se deja la lista que había)
+================================ */
+async function pedirNoticias(): Promise<Noticia[] | null> {
+  try {
+    const res = await fetch("/api/administrador/noticias", {
+      method: "GET",
+      cache: "no-store", // importante en Next 16
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Error backend:", text);
+      return null;
+    }
+
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Respuesta inesperada:", data);
+      return [];
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error al cargar noticias:", error);
+    return null;
+  }
+}
+
+/* ===============================
    VIEW
 ================================ */
 export default function NoticiasView() {
@@ -52,36 +82,18 @@ export default function NoticiasView() {
 
   const { toast, mostrarToast, cerrarToast } = useToast();
 
-  const cargarNoticias = async () => {
-    try {
-      const res = await fetch("/api/administrador/noticias", {
-        method: "GET",
-        cache: "no-store", // importante en Next 16
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Error backend:", text);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!Array.isArray(data)) {
-        console.error("Respuesta inesperada:", data);
-        setNoticias([]);
-        return;
-      }
-
-      setNoticias(data);
-
-    } catch (error) {
-      console.error("Error al cargar noticias:", error);
-    }
+  const aplicarNoticias = (data: Noticia[] | null) => {
+    if (data) setNoticias(data);
   };
 
+  const cargarNoticias = async () => {
+    aplicarNoticias(await pedirNoticias());
+  };
+
+  // El estado se guarda al llegar la respuesta (en el .then), no de forma
+  // síncrona dentro del efecto.
   useEffect(() => {
-    cargarNoticias();
+    pedirNoticias().then(aplicarNoticias);
   }, []);
 
   return (

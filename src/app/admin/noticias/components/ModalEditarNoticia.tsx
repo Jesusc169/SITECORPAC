@@ -47,22 +47,27 @@ export default function ModalEditarNoticia({
   onSuccess,
   mostrarToast,
 }: Readonly<Props>) {
-  const [titulo, setTitulo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [contenido, setContenido] = useState("");
-  const [autor, setAutor] = useState("");
-  const [activo, setActivo] = useState(true);
+  const [titulo, setTitulo] = useState(noticia.titulo);
+  const [descripcion, setDescripcion] = useState(noticia.descripcion ?? "");
+  const [contenido, setContenido] = useState(noticia.contenido ?? "");
+  const [autor, setAutor] = useState(noticia.autor);
+  const [activo, setActivo] = useState(noticia.activo ?? true);
 
   const selectorImagenes = useSelectorImagenes();
   const selectorVideo = useSelectorVideo();
 
-  const [pdfsExistentes, setPdfsExistentes] = useState<NoticiaPdf[]>([]);
+  const [pdfsExistentes, setPdfsExistentes] = useState<NoticiaPdf[]>(noticia.noticia_pdf || []);
   const [pdfsAEliminar, setPdfsAEliminar] = useState<number[]>([]);
   const [pdfsNuevos, setPdfsNuevos] = useState<File[]>([]);
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // Si cambia la noticia con el modal abierto, los campos vuelven a sus datos
+  // durante el render (patrón de React para "ajustar el estado cuando cambia
+  // una prop"), sin un efecto que provoque un render de más.
+  const [noticiaCargada, setNoticiaCargada] = useState(noticia);
+  if (noticiaCargada !== noticia) {
+    setNoticiaCargada(noticia);
     setTitulo(noticia.titulo);
     setDescripcion(noticia.descripcion ?? "");
     setContenido(noticia.contenido ?? "");
@@ -71,12 +76,16 @@ export default function ModalEditarNoticia({
     setPdfsExistentes(noticia.noticia_pdf || []);
     setPdfsAEliminar([]);
     setPdfsNuevos([]);
+  }
 
+  // Fotos y video sí van en un efecto: reiniciarlos cancela la subida en
+  // curso y consulta el espacio libre en el servidor.
+  useEffect(() => {
     selectorImagenes.resetear(
       (noticia.noticia_imagen || []).map((img) => ({ id: img.id, url: img.url }))
     );
     selectorVideo.resetear(noticia.video);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la noticia; los selectores cambian en cada render
   }, [noticia]);
 
   const pdfsExistentesActivos = pdfsExistentes.filter(

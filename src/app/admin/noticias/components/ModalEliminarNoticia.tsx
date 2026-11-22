@@ -3,12 +3,19 @@
 import { useEffect, useRef } from "react";
 import styles from "../noticias.module.css";
 
+interface Props {
+  noticia: { id: number; titulo: string };
+  onClose: () => void;
+  onSuccess: () => void;
+  mostrarToast: (tipo: "exito" | "error", texto: string) => void;
+}
+
 export default function ModalEliminarNoticia({
   noticia,
   onClose,
   onSuccess,
   mostrarToast,
-}: any) {
+}: Readonly<Props>) {
   const handleDelete = async () => {
     try {
       const res = await fetch(`/api/administrador/noticias/${noticia.id}`, {
