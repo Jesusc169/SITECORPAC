@@ -12,5 +12,13 @@
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "hostinger@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(git check-ignore *)",
+      "PowerShell(Get-NetTCPConnection *)"
+    ]
   }
 }
