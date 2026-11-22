@@ -70,8 +70,9 @@ export default function CarruselFotos({
   // sin cambiar lo que anuncia el lector de pantalla.
   const autoGiro = total > 1 && !pausado && !encima && !conFoco && abierta === null;
   const girando = autoGiro && enPantalla;
+  const esTarjeta = variante === "tarjeta";
   // En las tarjetas (varias por página) ninguna foto se carga de inmediato.
-  const cargaPrimera = variante === "articulo" ? "eager" : "lazy";
+  const cargaPrimera = esTarjeta ? "lazy" : "eager";
 
   // "actual" en las dependencias: si la persona cambia de foto, el reloj
   // vuelve a empezar y no salta enseguida a la siguiente.
@@ -91,8 +92,8 @@ export default function CarruselFotos({
       ref={raiz}
       // En las tarjetas (varias por página) es un grupo y no una región, para
       // no llenar la lista de regiones del lector de pantalla.
-      role={variante === "tarjeta" ? "group" : undefined}
-      className={variante === "tarjeta" ? `${s.carrusel} ${s.tarjeta}` : s.carrusel}
+      role={esTarjeta ? "group" : undefined}
+      className={esTarjeta ? `${s.carrusel} ${s.tarjeta}` : s.carrusel}
       aria-roledescription="carrusel"
       aria-label={`Fotos${deTitulo}`}
       onMouseEnter={() => setEncima(true)}
@@ -175,9 +176,9 @@ export default function CarruselFotos({
             <span className="sr-only"> las fotos{deTitulo}</span>
           </button>
           <div className={s.puntos}>
-            {imagenes.map((url, i) => (
+            {rutas.map((src, i) => (
               <button
-                key={`p-${i}-${url}`}
+                key={`p-${i}-${src}`}
                 type="button"
                 className={s.punto}
                 onClick={() => ir(i)}
