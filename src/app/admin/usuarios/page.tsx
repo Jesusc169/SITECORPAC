@@ -48,6 +48,27 @@ function CeldaPrivilegios({ rol, permisos }: Readonly<{ rol: string; permisos: s
   );
 }
 
+/** Mensaje de un error atrapado, o el texto por defecto si no trae uno. */
+function mensajeDe(e: unknown, porDefecto: string) {
+  return (e instanceof Error && e.message) || porDefecto;
+}
+
+type ResultadoUsuarios = { usuarios: Usuario[] } | { error: string };
+
+// Pide la lista de cuentas del panel; nunca lanza: devuelve la lista o el error.
+async function pedirUsuarios(): Promise<ResultadoUsuarios> {
+  try {
+    const res = await fetch("/api/administrador/usuarios", { cache: "no-store" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "No se pudo cargar la lista de usuarios");
+    }
+    return { usuarios: await res.json() };
+  } catch (e) {
+    return { error: mensajeDe(e, "Error al cargar usuarios") };
+  }
+}
+
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -56,26 +77,25 @@ export default function UsuariosPage() {
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState<FormState>(FORM_VACIO);
 
-  const cargarUsuarios = async () => {
-    setCargando(true);
-    try {
-      const res = await fetch("/api/administrador/usuarios", { cache: "no-store" });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "No se pudo cargar la lista de usuarios");
-      }
-      const data = await res.json();
-      setUsuarios(data);
+  const aplicarResultado = (resultado: ResultadoUsuarios) => {
+    if ("usuarios" in resultado) {
+      setUsuarios(resultado.usuarios);
       setError("");
-    } catch (e: any) {
-      setError(e.message || "Error al cargar usuarios");
-    } finally {
-      setCargando(false);
+    } else {
+      setError(resultado.error);
     }
+    setCargando(false);
   };
 
+  const cargarUsuarios = async () => {
+    setCargando(true);
+    aplicarResultado(await pedirUsuarios());
+  };
+
+  // Primera carga: "cargando" ya empieza en true y el estado se guarda al
+  // llegar la respuesta (en el .then), no de forma síncrona en el efecto.
   useEffect(() => {
-    cargarUsuarios();
+    pedirUsuarios().then(aplicarResultado);
   }, []);
 
   const abrirCrear = () => {
@@ -142,8 +162,8 @@ export default function UsuariosPage() {
 
       setModalAbierto(false);
       await cargarUsuarios();
-    } catch (e: any) {
-      setError(e.message || "Error al guardar usuario");
+    } catch (e) {
+      setError(mensajeDe(e, "Error al guardar usuario"));
     } finally {
       setGuardando(false);
     }
@@ -170,8 +190,8 @@ export default function UsuariosPage() {
         throw new Error(data.error || "No se pudo completar la acción");
       }
       await cargarUsuarios();
-    } catch (e: any) {
-      alert(e.message || "No se pudo completar la acción");
+    } catch (e) {
+      alert(mensajeDe(e, "No se pudo completar la acción"));
     }
   };
 
@@ -188,8 +208,8 @@ export default function UsuariosPage() {
         throw new Error(data.error || "No se pudo eliminar el usuario");
       }
       await cargarUsuarios();
-    } catch (e: any) {
-      alert(e.message || "Error al eliminar usuario");
+    } catch (e) {
+      alert(mensajeDe(e, "Error al eliminar usuario"));
     }
   };
 

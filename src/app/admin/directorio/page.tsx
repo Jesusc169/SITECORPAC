@@ -39,6 +39,23 @@ function getFotoUrl(url?: string | null, refreshKey?: number) {
   return finalUrl;
 }
 
+// Pide el directorio al servidor; null si falló (se deja la lista que había).
+async function pedirMiembros(): Promise<Miembro[] | null> {
+  try {
+    const res = await fetch("/api/administrador/directorio", {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error("Error al obtener directorio");
+
+    return (await res.json()) as Miembro[];
+  } catch (error) {
+    console.error("Error cargando miembros:", error);
+    return null;
+  }
+}
+
 export default function AdminDirectorioPage() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [showAgregarModal, setShowAgregarModal] = useState(false);
@@ -46,28 +63,20 @@ export default function AdminDirectorioPage() {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const fetchMiembros = async () => {
-    try {
-      setLoading(true);
-
-      const res = await fetch("/api/administrador/directorio", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Error al obtener directorio");
-
-      const data: Miembro[] = await res.json();
-      setMiembros(data);
-    } catch (error) {
-      console.error("Error cargando miembros:", error);
-    } finally {
-      setLoading(false);
-    }
+  const aplicarMiembros = (data: Miembro[] | null) => {
+    if (data) setMiembros(data);
+    setLoading(false);
   };
 
+  const fetchMiembros = async () => {
+    setLoading(true);
+    aplicarMiembros(await pedirMiembros());
+  };
+
+  // Primera carga: "loading" ya empieza en true y el estado se guarda al
+  // llegar la respuesta (en el .then), no de forma síncrona en el efecto.
   useEffect(() => {
-    fetchMiembros();
+    pedirMiembros().then(aplicarMiembros);
   }, []);
 
   // 🔹 Agregar
