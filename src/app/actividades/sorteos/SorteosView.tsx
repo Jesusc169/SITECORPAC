@@ -50,13 +50,15 @@ interface Props {
   sorteos: Sorteo[];
   hayAnteriores: boolean;
   cargando: boolean;
+  /** Hora de referencia (ms) para marcar los sorteos ya realizados */
+  ahora: number;
   onChangeAnio: (anio: number | null) => void;
   aniosDisponibles: number[];
   anioSeleccionado: number | null;
   noticia: NoticiaMini | null;
 }
 
-function TarjetaSorteo({ sorteo }: Readonly<{ sorteo: Sorteo }>) {
+function TarjetaSorteo({ sorteo, ahora }: Readonly<{ sorteo: Sorteo; ahora: number }>) {
   const productos = sorteo.sorteo_producto ?? sorteo.premios ?? [];
   const fecha = new Date(sorteo.fecha_hora);
   const fechaValida = !isNaN(fecha.getTime());
@@ -77,7 +79,7 @@ function TarjetaSorteo({ sorteo }: Readonly<{ sorteo: Sorteo }>) {
       </div>
       <div>
         {fechaValida && (
-          <span className={`${s.badge} ${fecha.getTime() < Date.now() ? s.badgePast : ""}`}>
+          <span className={`${s.badge} ${fecha.getTime() < ahora ? s.badgePast : ""}`}>
             <Icono nombre="calendario" chico />
             {formatearFechaHoraPeru(fecha, {
               day: "numeric",
@@ -127,6 +129,7 @@ export default function SorteosView({
   sorteos,
   hayAnteriores,
   cargando,
+  ahora,
   onChangeAnio,
   aniosDisponibles,
   anioSeleccionado,
@@ -170,7 +173,7 @@ export default function SorteosView({
           {cargando && <p className={s.estado}>Cargando sorteos…</p>}
 
           {!cargando && sorteos.length > 0 && <h2 className="sr-only">Listado de sorteos</h2>}
-          {!cargando && sorteos.map((sorteo) => <TarjetaSorteo key={sorteo.id} sorteo={sorteo} />)}
+          {!cargando && sorteos.map((sorteo) => <TarjetaSorteo key={sorteo.id} sorteo={sorteo} ahora={ahora} />)}
 
           {!cargando && sorteos.length === 0 && (
             <>

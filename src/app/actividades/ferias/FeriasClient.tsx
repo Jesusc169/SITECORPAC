@@ -8,7 +8,10 @@ export default function FeriasClient() {
   const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
   const [anio, setAnio] = useState<number | null>(null);
   const [ferias, setFerias] = useState<EventoFeria[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Año cuya lista ya llegó (undefined: todavía ninguna). "loading" se deduce
+  // de él, así el efecto no tiene que encenderlo de forma síncrona.
+  const [anioCargado, setAnioCargado] = useState<number | null | undefined>(undefined);
+  const loading = anioCargado !== anio;
 
   /* =====================================================
      PRIMERA CARGA → años reales desde la BD; se elige el más reciente
@@ -37,7 +40,6 @@ export default function FeriasClient() {
   ===================================================== */
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
 
     fetchFerias(anio ?? undefined)
       .then((res) => {
@@ -48,7 +50,7 @@ export default function FeriasClient() {
         if (mounted) setFerias([]);
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) setAnioCargado(anio);
       });
 
     return () => {
