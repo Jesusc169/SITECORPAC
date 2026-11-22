@@ -10,7 +10,7 @@ import Afiche from "@/components/Sitio/Afiche";
 import BloquesTexto from "@/components/Sitio/BloquesTexto";
 import Compartir from "@/components/Sitio/Compartir";
 import Icono from "@/components/Icono/Icono";
-import GaleriaFotos from "@/components/GaleriaFotos/GaleriaFotos";
+import CarruselFotos from "@/components/GaleriaFotos/CarruselFotos";
 import ReproductorVideo from "@/components/Video/ReproductorVideo";
 import video from "@/components/Video/Video.module.css";
 import { fechaCorta } from "@/lib/fechas";
@@ -85,6 +85,12 @@ export default async function NoticiaPage({
   // Texto con formato del editor (limpio) o texto plano de antes, en bloques.
   const html = esHtml(cuerpo) ? limpiarHtml(cuerpo) : null;
   const bloques = html === null ? textoABloques(cuerpo) : [];
+  // Fotos de la noticia, la principal primero. Con 2 o más se muestran en un
+  // carrusel que gira solo; con una, como siempre (afiche fijo).
+  const galeria = [...noticia.noticia_imagen]
+    .sort((a, b) => Number(b.principal) - Number(a.principal))
+    .map((img) => img.url);
+  const fotos = galeria.length > 0 ? galeria : noticia.imagen ? [noticia.imagen] : [];
   const url = `${process.env.NEXT_PUBLIC_BASE_URL ?? INSTITUCION.sitio}/actividades/noticias/${noticia.id}`;
 
   return (
@@ -105,7 +111,11 @@ export default async function NoticiaPage({
               {noticia.autor ? ` · ${noticia.autor}` : ""}
             </p>
             <h1>{noticia.titulo}</h1>
-            {noticia.imagen && <Afiche src={noticia.imagen} alt={noticia.titulo} prioridad />}
+            {fotos.length > 1 ? (
+              <CarruselFotos imagenes={fotos} titulo={noticia.titulo} />
+            ) : (
+              fotos.length === 1 && <Afiche src={fotos[0]} alt={noticia.titulo} prioridad />
+            )}
 
             <div className={s.body}>
               {html === null ? (
@@ -120,11 +130,6 @@ export default async function NoticiaPage({
                   <ReproductorVideo video={noticia.video} titulo={noticia.titulo} />
                 </section>
               )}
-
-              <GaleriaFotos
-                imagenes={noticia.noticia_imagen.filter((img) => !img.principal).map((img) => img.url)}
-                titulo={noticia.titulo}
-              />
 
               {noticia.noticia_pdf.map((pdf) => (
                 <div key={pdf.id} className={s.att}>
