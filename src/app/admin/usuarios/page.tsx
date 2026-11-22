@@ -5,6 +5,7 @@ import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import styles from "./usuarios.module.css";
 import { PRIVILEGIOS } from "@/lib/permisos";
 import panel from "@/styles/PanelAdmin.module.css";
+import { jsonOError, mensajeDe } from "@/lib/mensajes";
 
 interface Usuario {
   id: number;
@@ -48,24 +49,19 @@ function CeldaPrivilegios({ rol, permisos }: Readonly<{ rol: string; permisos: s
   );
 }
 
-/** Mensaje de un error atrapado, o el texto por defecto si no trae uno. */
-function mensajeDe(e: unknown, porDefecto: string) {
-  return (e instanceof Error && e.message) || porDefecto;
-}
-
 type ResultadoUsuarios = { usuarios: Usuario[] } | { error: string };
 
 // Pide la lista de cuentas del panel; nunca lanza: devuelve la lista o el error.
 async function pedirUsuarios(): Promise<ResultadoUsuarios> {
+  const ERROR_LISTA = "No se pudo cargar la lista de usuarios";
   try {
     const res = await fetch("/api/administrador/usuarios", { cache: "no-store" });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "No se pudo cargar la lista de usuarios");
-    }
-    return { usuarios: await res.json() };
+    const datos = await jsonOError<unknown>(res, ERROR_LISTA);
+    // Un 200 que no trae una lista también es un fallo (no "no hay usuarios").
+    if (!Array.isArray(datos)) return { error: ERROR_LISTA };
+    return { usuarios: datos as Usuario[] };
   } catch (e) {
-    return { error: mensajeDe(e, "Error al cargar usuarios") };
+    return { error: mensajeDe(e, ERROR_LISTA) };
   }
 }
 
@@ -154,16 +150,12 @@ export default function UsuariosPage() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "No se pudo guardar el usuario");
-      }
+      await jsonOError(res, "No se pudo guardar el usuario");
 
       setModalAbierto(false);
       await cargarUsuarios();
     } catch (e) {
-      setError(mensajeDe(e, "Error al guardar usuario"));
+      setError(mensajeDe(e, "No se pudo guardar el usuario"));
     } finally {
       setGuardando(false);
     }
@@ -185,10 +177,7 @@ export default function UsuariosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ accion }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "No se pudo completar la acción");
-      }
+      await jsonOError(res, "No se pudo completar la acción");
       await cargarUsuarios();
     } catch (e) {
       alert(mensajeDe(e, "No se pudo completar la acción"));
@@ -203,13 +192,10 @@ export default function UsuariosPage() {
       const res = await fetch(`/api/administrador/usuarios/${u.id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "No se pudo eliminar el usuario");
-      }
+      await jsonOError(res, "No se pudo eliminar el usuario");
       await cargarUsuarios();
     } catch (e) {
-      alert(mensajeDe(e, "Error al eliminar usuario"));
+      alert(mensajeDe(e, "No se pudo eliminar el usuario"));
     }
   };
 
@@ -224,7 +210,7 @@ export default function UsuariosPage() {
           </button>
         </EncabezadoPanel>
 
-        {error && !modalAbierto && <div className={styles.errorBanner}>{error}</div>}
+        {error && !modalAbierto && <div role="alert" className={styles.errorBanner}>{error}</div>}
 
         {cargando ? (
           <p className={styles.textoMuted}>Cargando...</p>
@@ -310,7 +296,7 @@ export default function UsuariosPage() {
             <div className={styles.modal}>
               <h2>{form.id ? "Editar usuario" : "Nuevo usuario"}</h2>
 
-              {error && <div className={styles.errorBanner}>{error}</div>}
+              {error && <div role="alert" className={styles.errorBanner}>{error}</div>}
 
               <label htmlFor="usuario-nombre" className={styles.label}>Nombre</label>
               <input id="usuario-nombre"
