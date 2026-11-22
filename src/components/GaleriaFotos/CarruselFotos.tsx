@@ -21,17 +21,25 @@ interface Props {
   imagenes: string[];
   titulo: string;
   intervalo?: number;
+  /** "articulo" (noticia, 3/2) o "tarjeta" (ferias y sorteos, vertical 4/5). */
+  variante?: "articulo" | "tarjeta";
 }
 
 /**
- * Carrusel de fotos para la página de una noticia: gira solo cada 5 s
- * (primero la foto principal). Accesible:
+ * Carrusel de fotos para noticias y para las tarjetas de ferias y sorteos:
+ * gira solo cada 5 s (primero la foto principal). Accesible:
  * - botón visible "Pausar / Reanudar" (WCAG 2.2.2);
  * - se detiene con el mouse encima o con el foco del teclado dentro;
  * - no gira solo si el equipo pide reducir el movimiento;
+ * - no gira mientras está fuera de la pantalla (varias tarjetas por página);
  * - flechas, puntos, deslizar con el dedo y clic para ver en grande.
  */
-export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_MS }: Readonly<Props>) {
+export default function CarruselFotos({
+  imagenes,
+  titulo,
+  intervalo = INTERVALO_MS,
+  variante = "articulo",
+}: Readonly<Props>) {
   const total = imagenes.length;
   const [actual, setActual] = useState(0);
   // null = la persona aún no tocó Pausar/Reanudar: se sigue la preferencia
@@ -44,8 +52,24 @@ export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_
   const [abierta, setAbierta] = useState<number | null>(null);
   const inicioX = useRef<number | null>(null);
   const deslizo = useRef(false);
+  const raiz = useRef<HTMLElement>(null);
+  const [enPantalla, setEnPantalla] = useState(true);
 
-  const girando = total > 1 && !pausado && !encima && !conFoco && abierta === null;
+  // Pausa el giro mientras el carrusel no se ve (sin soporte, gira siempre).
+  useEffect(() => {
+    const el = raiz.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setEnPantalla(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // autoGiro: la persona no lo detuvo. Salir de pantalla solo frena el reloj,
+  // sin cambiar lo que anuncia el lector de pantalla.
+  const autoGiro = total > 1 && !pausado && !encima && !conFoco && abierta === null;
+  const girando = autoGiro && enPantalla;
+  // En las tarjetas (varias por página) ninguna foto se carga de inmediato.
+  const cargaPrimera = variante === "articulo" ? "eager" : "lazy";
 
   // "actual" en las dependencias: si la persona cambia de foto, el reloj
   // vuelve a empezar y no salta enseguida a la siguiente.
@@ -62,7 +86,8 @@ export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_
 
   return (
     <section
-      className={s.carrusel}
+      ref={raiz}
+      className={variante === "tarjeta" ? `${s.carrusel} ${s.tarjeta}` : s.carrusel}
       aria-roledescription="carrusel"
       aria-label={`Fotos${deTitulo}`}
       onMouseEnter={() => setEncima(true)}
@@ -104,7 +129,7 @@ export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_
               aria-label={`${i + 1} de ${total}`}
               inert={!visible}
             >
-              <img className={s.fondo} src={src} alt="" loading={i === 0 ? "eager" : "lazy"} />
+              <img className={s.fondo} src={src} alt="" loading={i === 0 ? cargaPrimera : "lazy"} />
               <button
                 type="button"
                 className={s.ampliar}
@@ -117,7 +142,7 @@ export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_
                 }}
                 aria-label={`Ampliar foto ${i + 1} de ${total}${deTitulo}`}
               >
-                <img src={src} alt="" loading={i === 0 ? "eager" : "lazy"} draggable={false} />
+                <img src={src} alt="" loading={i === 0 ? cargaPrimera : "lazy"} draggable={false} />
               </button>
             </div>
           );
@@ -161,7 +186,7 @@ export default function CarruselFotos({ imagenes, titulo, intervalo = INTERVALO_
       )}
 
       {/* Anuncia el cambio solo si la persona lo provocó (no cada 5 s). */}
-      <p className="sr-only" aria-live={girando ? "off" : "polite"}>
+      <p className="sr-only" aria-live={autoGiro ? "off" : "polite"}>
         Foto {actual + 1} de {total}
       </p>
 

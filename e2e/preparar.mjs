@@ -54,8 +54,12 @@ async function main() {
   await prisma.noticia.create({ data: { titulo: "Galería E2E", descripcion: "Con fotos", autor: "SITECORPAC", imagen: "/logo_site.jpg", updatedAt: ahora,
     noticia_imagen: { create: [{ url: "/logo_site.jpg", orden: 1, principal: true }, { url: "/Fondo_principal.webp", orden: 2 }, { url: "/logo_site.jpg", orden: 3 }] } } });
   const empresa = await prisma.empresa.create({ data: { nombre: "Empresa E2E", logo_url: "/logo_site.jpg" } });
-  await prisma.evento_feria.create({ data: { titulo: "Feria E2E", descripcion: "Precios accesibles", anio: ahora.getFullYear(), evento_feria_fecha: { create: [{ fecha: ahora, hora_inicio: "09:00", hora_fin: "17:00", ubicacion: "Sede" }] }, evento_feria_empresa: { create: [{ empresa_id: empresa.id }] } } });
-  await prisma.sorteo.create({ data: { nombre: "Sorteo E2E", descripcion: "Para afiliados", lugar: "Sede", fecha_hora: ahora, anio: ahora.getFullYear(), sorteo_producto: { create: [{ nombre: "TV", cantidad: 1 }] } } });
+  // Feria y sorteo con 2 fotos (la principal en 2.º lugar) para probar el carrusel de las tarjetas
+  await prisma.evento_feria.create({ data: { titulo: "Feria E2E", descripcion: "Precios accesibles", anio: ahora.getFullYear(), imagen_portada: "/logo_site.jpg", evento_feria_imagen: { create: [{ url: "/Fondo_principal.webp", orden: 1 }, { url: "/logo_site.jpg", orden: 2, principal: true }] }, evento_feria_fecha: { create: [{ fecha: ahora, hora_inicio: "09:00", hora_fin: "17:00", ubicacion: "Sede" }] }, evento_feria_empresa: { create: [{ empresa_id: empresa.id }] } } });
+  await prisma.sorteo.create({ data: { nombre: "Sorteo E2E", descripcion: "Para afiliados", lugar: "Sede", fecha_hora: ahora, anio: ahora.getFullYear(), imagen: "/logo_site.jpg", sorteo_imagen: { create: [{ url: "/Fondo_principal.webp", orden: 1 }, { url: "/logo_site.jpg", orden: 2, principal: true }] }, sorteo_producto: { create: [{ nombre: "TV", cantidad: 1 }] } } });
+  // Respaldo: feria solo con la imagen antigua y sorteo con una sola foto → afiche fijo, sin carrusel
+  await prisma.evento_feria.create({ data: { titulo: "Feria con afiche", descripcion: "Solo portada", anio: ahora.getFullYear(), imagen_portada: "/logo_site.jpg", evento_feria_fecha: { create: [{ fecha: ahora, hora_inicio: "09:00", hora_fin: "17:00", ubicacion: "Sede" }] } } });
+  await prisma.sorteo.create({ data: { nombre: "Sorteo con una foto", descripcion: "Una foto", lugar: "Sede", fecha_hora: ahora, anio: ahora.getFullYear(), sorteo_imagen: { create: [{ url: "/logo_site.jpg", orden: 1, principal: true }] } } });
   await prisma.directorio.create({ data: { nombre: "Dirigente E2E", cargo: "Secretario General", correo: "dir@e2e.test", telefono: "999", periodoInicio: ahora, orden: 1 } });
   for (const tabla of ["constitucion_contenido", "ley_seguridad_contenido", "oit_contenido"]) {
     await prisma[tabla].create({ data: { titulo: `Contenido ${tabla}`, descripcion: "Texto" } });

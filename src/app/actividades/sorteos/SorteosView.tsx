@@ -3,9 +3,10 @@ import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
 import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
 import TextoRico from "@/components/Sitio/TextoRico";
-import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import CarruselFotos from "@/components/GaleriaFotos/CarruselFotos";
 import VideoBoton from "@/components/Video/VideoBoton";
 import type { VideoPublico } from "@/lib/videos/vincular";
+import { fotosPrincipalPrimero } from "@/lib/fotosGaleria";
 import { fechaCorta, formatearFechaHoraPeru } from "@/lib/fechas";
 import s from "@/styles/Sitio.module.css";
 
@@ -59,15 +60,19 @@ function TarjetaSorteo({ sorteo }: Readonly<{ sorteo: Sorteo }>) {
   const productos = sorteo.sorteo_producto ?? sorteo.premios ?? [];
   const fecha = new Date(sorteo.fecha_hora);
   const fechaValida = !isNaN(fecha.getTime());
-  const fotos = (sorteo.sorteo_imagen ?? []).map((i) => i.url);
+  // La principal primero; con 2 o más fotos, carrusel; con una, afiche fijo.
+  const fotos = fotosPrincipalPrimero(sorteo.sorteo_imagen, sorteo.imagen);
 
   return (
     <article className={s.feria}>
       <div>
-        <Afiche src={sorteo.imagen} alt={sorteo.nombre} />
+        {fotos.length > 1 ? (
+          <CarruselFotos imagenes={fotos} titulo={sorteo.nombre} variante="tarjeta" />
+        ) : (
+          <Afiche src={fotos[0]} alt={sorteo.nombre} />
+        )}
         <div className={s.galeria}>
           <VideoBoton video={sorteo.video} titulo={sorteo.nombre} className={s.chip} />
-          <GaleriaBoton imagenes={fotos} titulo={sorteo.nombre} className={s.chip} />
         </div>
       </div>
       <div>

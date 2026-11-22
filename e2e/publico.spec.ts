@@ -142,3 +142,82 @@ test("visor de fotos: clic en la foto no cierra; clic en el fondo sí", async ({
   await visor.click({ position: { x: 5, y: 5 } });
   await expect(visor).toHaveCount(0);
 });
+
+// Tarjetas de ferias y sorteos: con 2 o más fotos, carrusel (principal primero).
+for (const [ruta, nombre] of [
+  ["/actividades/ferias", "Feria E2E"],
+  ["/actividades/sorteos", "Sorteo E2E"],
+] as const) {
+  test(`${ruta}: la tarjeta muestra un carrusel que empieza por la foto principal`, async ({ page }) => {
+    await page.goto(ruta);
+    const tarjeta = page.locator("article", { hasText: nombre });
+    const carrusel = tarjeta.getByRole("region", { name: `Fotos de ${nombre}` });
+    const activa = () => carrusel.locator('[aria-roledescription="diapositiva"]:not([inert])');
+    await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
+    await expect(activa().locator("img").first()).toHaveAttribute("src", /logo_site\.jpg/);
+    // Ya no hay botón aparte "Ver N fotos"
+    await expect(tarjeta.getByRole("button", { name: /Ver \d+ fotos/ })).toHaveCount(0);
+    // Gira solo (estando a la vista) y se puede pausar
+    await carrusel.scrollIntoViewIfNeeded();
+    await page.mouse.move(0, 0);
+    await expect(activa()).toHaveAttribute("aria-label", "2 de 2", { timeout: 8000 });
+    await carrusel.getByRole("button", { name: /Pausar/ }).click();
+    await expect(carrusel.getByRole("button", { name: /Reanudar/ })).toBeVisible();
+    // Tocar la foto la abre en grande
+    await carrusel.getByRole("button", { name: /^Ampliar foto 2 de 2/ }).click();
+    await expect(page.getByRole("dialog")).toContainText("Foto 2 de 2");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+
+  test(`${ruta}: a 390 px el carrusel cabe en la tarjeta`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(ruta);
+    const tarjeta = page.locator("article", { hasText: nombre });
+    const carrusel = tarjeta.getByRole("region", { name: `Fotos de ${nombre}` });
+    await expect(carrusel).toBeVisible();
+    const caja = (await tarjeta.boundingBox())!;
+    for (const control of [carrusel.getByRole("button", { name: /Pausar/ }), carrusel.getByRole("button", { name: "Ir a la foto 2" })]) {
+      const c = (await control.boundingBox())!;
+      expect(c.x).toBeGreaterThanOrEqual(caja.x);
+      expect(c.x + c.width).toBeLessThanOrEqual(caja.x + caja.width);
+    }
+  });
+}
+
+test("carrusel de una tarjeta: no gira mientras está fuera de la pantalla", async ({ page }) => {
+  await page.goto("/actividades/sorteos");
+  const carrusel = page.getByRole("region", { name: "Fotos de Sorteo E2E" });
+  const activa = () => carrusel.locator('[aria-roledescription="diapositiva"]:not([inert])');
+  await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
+  // Se aleja el carrusel de la vista sin depender del alto de la página.
+  await carrusel.evaluate((el) => {
+    el.style.position = "fixed";
+    el.style.top = "-5000px";
+  });
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(6500);
+  await expect(activa()).toHaveAttribute("aria-label", "1 de 2");
+  // De vuelta en pantalla, sigue girando
+  await carrusel.evaluate((el) => {
+    el.style.position = "";
+    el.style.top = "";
+  });
+  await carrusel.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await expect(activa()).toHaveAttribute("aria-label", "2 de 2", { timeout: 8000 });
+});
+
+// Con una sola foto (o solo la imagen antigua) la tarjeta queda como antes: afiche fijo.
+for (const [ruta, nombre] of [
+  ["/actividades/ferias", "Feria con afiche"],
+  ["/actividades/sorteos", "Sorteo con una foto"],
+] as const) {
+  test(`${ruta}: con una sola foto la tarjeta muestra el afiche fijo, sin carrusel`, async ({ page }) => {
+    await page.goto(ruta);
+    const tarjeta = page.locator("article", { hasText: nombre });
+    await expect(tarjeta.getByRole("img", { name: nombre })).toBeVisible();
+    await expect(tarjeta.getByRole("region", { name: /^Fotos/ })).toHaveCount(0);
+    await expect(tarjeta.getByRole("button", { name: /Pausar|Ver \d+ fotos/ })).toHaveCount(0);
+  });
+}

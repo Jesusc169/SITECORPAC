@@ -4,9 +4,10 @@ import EncabezadoPagina from "@/components/Sitio/EncabezadoPagina";
 import Afiche from "@/components/Sitio/Afiche";
 import Icono from "@/components/Icono/Icono";
 import TextoRico from "@/components/Sitio/TextoRico";
-import GaleriaBoton from "@/components/GaleriaFotos/GaleriaBoton";
+import CarruselFotos from "@/components/GaleriaFotos/CarruselFotos";
 import VideoBoton from "@/components/Video/VideoBoton";
 import type { VideoPublico } from "@/lib/videos/vincular";
+import { fotosPrincipalPrimero } from "@/lib/fotosGaleria";
 import { diaConSemana, feriaFinalizada, rangoDias } from "@/lib/fechas";
 import { rutaPublica } from "@/lib/rutas";
 import s from "@/styles/Sitio.module.css";
@@ -85,15 +86,19 @@ function ordenarFerias(ferias: EventoFeria[]) {
 function TarjetaFeria({ feria }: Readonly<{ feria: EventoFeria }>) {
   const dias = feria.evento_feria_fecha.map((f) => f.fecha);
   const finalizada = feriaFinalizada(dias);
-  const fotos = (feria.evento_feria_imagen ?? []).map((i) => i.url);
+  // La principal primero; con 2 o más fotos, carrusel; con una, afiche fijo.
+  const fotos = fotosPrincipalPrimero(feria.evento_feria_imagen, feria.imagen_portada);
 
   return (
     <article className={s.feria}>
       <div>
-        <Afiche src={feria.imagen_portada} alt={feria.titulo} />
+        {fotos.length > 1 ? (
+          <CarruselFotos imagenes={fotos} titulo={feria.titulo} variante="tarjeta" />
+        ) : (
+          <Afiche src={fotos[0]} alt={feria.titulo} />
+        )}
         <div className={s.galeria}>
           <VideoBoton video={feria.video} titulo={feria.titulo} className={s.chip} />
-          <GaleriaBoton imagenes={fotos} titulo={feria.titulo} className={s.chip} />
         </div>
       </div>
 
