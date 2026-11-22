@@ -443,16 +443,19 @@ function Registro({
   const [aplicados, setAplicados] = useState<Filtros>(filtrosIniciales);
   const [pagina, setPagina] = useState(1);
   const [datos, setDatos] = useState<PaginaRegistro | null>(null);
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState("");
   const [verCambios, setVerCambios] = useState<number | null>(null);
   const [recarga, setRecarga] = useState(0);
 
-  useEffect(() => {
+  // Si llegan otros filtros desde fuera (p. ej. "ver errores" en el resumen),
+  // se aplican durante el render (patrón de React para "ajustar el estado
+  // cuando cambia una prop") en vez de en un efecto.
+  const [filtrosRecibidos, setFiltrosRecibidos] = useState(filtrosIniciales);
+  if (filtrosRecibidos !== filtrosIniciales) {
+    setFiltrosRecibidos(filtrosIniciales);
     setFiltros(filtrosIniciales);
     setAplicados(filtrosIniciales);
     setPagina(1);
-  }, [filtrosIniciales]);
+  }
 
   const query = useCallback(
     (extra: Record<string, string> = {}) => {
@@ -463,19 +466,33 @@ function Registro({
     [aplicados]
   );
 
+  // Respuesta de la última consulta terminada, con la consulta a la que
+  // corresponde: "cargando" se deduce de si es la consulta actual, así el
+  // efecto no tiene que encender/apagar estados de forma síncrona.
+  const [respuesta, setRespuesta] = useState<{
+    query: typeof query;
+    pagina: number;
+    recarga: number;
+    error: string;
+  } | null>(null);
+  const cargando =
+    respuesta?.query !== query || respuesta.pagina !== pagina || respuesta.recarga !== recarga;
+  const error = cargando ? "" : respuesta.error;
+
   useEffect(() => {
     let cancelado = false;
-    setCargando(true);
-    setError("");
+    const terminar = (error: string) => !cancelado && setRespuesta({ query, pagina, recarga, error });
     fetch(`/api/administrador/sistema/registro?${query({ pagina: String(pagina) })}`)
       .then(async (r) => {
         const j = await r.json();
         if (!r.ok) throw new Error(j.error || "No se pudo cargar el registro");
         return j as PaginaRegistro;
       })
-      .then((j) => !cancelado && setDatos(j))
-      .catch((e: Error) => !cancelado && setError(e.message))
-      .finally(() => !cancelado && setCargando(false));
+      .then((j) => {
+        if (!cancelado) setDatos(j);
+        terminar("");
+      })
+      .catch((e: Error) => terminar(e.message));
     return () => {
       cancelado = true;
     };
