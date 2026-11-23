@@ -55,9 +55,14 @@ async function pedirNoticias(): Promise<ResultadoNoticias> {
     });
     const datos = await jsonOError<unknown>(res, ERROR_CARGA);
     // Un 200 que no trae una lista también es un fallo (no "no hay noticias").
-    if (!Array.isArray(datos)) return { error: ERROR_CARGA };
+    if (!Array.isArray(datos)) {
+      console.error("Noticias: respuesta inesperada", datos);
+      return { error: ERROR_CARGA };
+    }
     return { noticias: datos as Noticia[] };
   } catch (e) {
+    // La persona ve un texto claro; el detalle técnico queda en la consola.
+    console.error("Noticias: no se pudo cargar", e);
     return { error: mensajeDe(e, ERROR_CARGA) };
   }
 }

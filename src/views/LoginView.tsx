@@ -14,6 +14,9 @@ export default function LoginView() {
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setEnviando(true);
+    // Se quita el aviso anterior: si sale el mismo error, el lector de
+    // pantalla lo vuelve a anunciar.
+    setError("");
 
     let res: Response;
     try {

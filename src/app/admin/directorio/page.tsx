@@ -54,9 +54,14 @@ async function pedirMiembros(): Promise<ResultadoMiembros> {
     });
     const datos = await jsonOError<unknown>(res, ERROR_CARGA);
     // Un 200 que no trae una lista también es un fallo (no "no hay miembros").
-    if (!Array.isArray(datos)) return { error: ERROR_CARGA };
+    if (!Array.isArray(datos)) {
+      console.error("Directorio: respuesta inesperada", datos);
+      return { error: ERROR_CARGA };
+    }
     return { miembros: datos as Miembro[] };
   } catch (e) {
+    // La persona ve un texto claro; el detalle técnico queda en la consola.
+    console.error("Directorio: no se pudo cargar", e);
     return { error: mensajeDe(e, ERROR_CARGA) };
   }
 }

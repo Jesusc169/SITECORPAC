@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { mensajeDe, leerJson, errorDe, jsonOError } from "@/lib/mensajes";
+import { describe, it, expect, vi } from "vitest";
+import { mensajeDe, avisoDe, leerJson, errorDe, jsonOError, ERROR_CONEXION } from "@/lib/mensajes";
 
 const POR_DEFECTO = "No se pudo";
 
@@ -9,11 +9,29 @@ describe("mensajeDe", () => {
   });
 
   it("oculta errores técnicos del navegador y casos raros", () => {
-    expect(mensajeDe(new TypeError("Failed to fetch"), POR_DEFECTO)).toBe(POR_DEFECTO);
+    expect(mensajeDe(new TypeError("Cannot read properties of undefined"), POR_DEFECTO)).toBe(POR_DEFECTO);
     expect(mensajeDe(new SyntaxError("Unexpected token <"), POR_DEFECTO)).toBe(POR_DEFECTO);
     expect(mensajeDe(new Error(""), POR_DEFECTO)).toBe(POR_DEFECTO);
     expect(mensajeDe("falla rara", POR_DEFECTO)).toBe(POR_DEFECTO);
     expect(mensajeDe(null, POR_DEFECTO)).toBe(POR_DEFECTO);
+  });
+});
+
+describe("mensajeDe sin red", () => {
+  it("pide revisar internet en Chrome, Safari y Firefox", () => {
+    for (const m of ["Failed to fetch", "Load failed", "NetworkError when attempting to fetch resource."]) {
+      expect(mensajeDe(new TypeError(m), POR_DEFECTO)).toBe(ERROR_CONEXION);
+    }
+  });
+});
+
+describe("avisoDe", () => {
+  it("deja el detalle en la consola y devuelve el texto claro", () => {
+    const consola = vi.spyOn(console, "error").mockImplementation(() => {});
+    const e = new SyntaxError("Unexpected token <");
+    expect(avisoDe("Papelera", e, POR_DEFECTO)).toBe(POR_DEFECTO);
+    expect(consola).toHaveBeenCalledWith("Papelera:", e);
+    consola.mockRestore();
   });
 });
 

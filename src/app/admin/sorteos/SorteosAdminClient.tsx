@@ -11,6 +11,7 @@ import {
 } from "@/services/sorteo.service";
 import Toast from "@/components/Toast/Toast";
 import { useToast } from "@/components/Toast/useToast";
+import { jsonOError, mensajeDe } from "@/lib/mensajes";
 
 /* =========================================
 MAP BACKEND → FRONTEND
@@ -82,11 +83,14 @@ export default function SorteosAdminClient() {
         setSorteos(data.map(mapSorteoToFrontend));
         setErrorCarga("");
       })
-      .catch(() =>
+      .catch((e: unknown) => {
+        // Puede ser red, sesión vencida o un dato corrupto al convertir la
+        // lista: la persona ve un aviso claro y el detalle queda en consola.
+        console.error("Sorteos: no se pudo cargar", e);
         setErrorCarga(
           "No se pudo cargar la lista de sorteos. Recarga la página o inténtalo en unos minutos."
-        )
-      );
+        );
+      });
   }, []);
 
   /* =========================================
@@ -110,14 +114,9 @@ export default function SorteosAdminClient() {
         body: formData,
       });
 
-      if (!res.ok) {
-        // La API devuelve el motivo real en { error } (ej. "Cada imagen
-        // debe ser menor a 10MB"), no solo un genérico "Error guardando".
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.error || "Error guardando sorteo");
-      }
-
-      const backend = await res.json();
+      // La API devuelve el motivo real en { error } (ej. "Cada imagen debe
+      // ser menor a 10MB"); una página HTML de error da el texto genérico.
+      const backend = await jsonOError<SorteoBackend>(res, "No se pudo guardar el sorteo");
       const mapped = mapSorteoToFrontend(backend);
 
       if (isEdit) {
@@ -133,7 +132,7 @@ export default function SorteosAdminClient() {
       mostrarToast("exito", isEdit ? "Sorteo actualizado correctamente" : "Sorteo publicado correctamente");
     } catch (err) {
       console.error(err);
-      mostrarToast("error", err instanceof Error ? err.message : "Error guardando sorteo");
+      mostrarToast("error", mensajeDe(err, "No se pudo guardar el sorteo"));
     } finally {
       setLoadingSave(false);
     }
@@ -151,7 +150,7 @@ export default function SorteosAdminClient() {
       mostrarToast("exito", "Sorteo eliminado correctamente");
     } catch (err) {
       console.error(err);
-      mostrarToast("error", err instanceof Error ? err.message : "No se pudo eliminar el sorteo");
+      mostrarToast("error", mensajeDe(err, "No se pudo eliminar el sorteo"));
     }
   };
 
@@ -166,7 +165,7 @@ export default function SorteosAdminClient() {
       mostrarToast("exito", "Sorteo duplicado correctamente");
     } catch (err) {
       console.error(err);
-      mostrarToast("error", err instanceof Error ? err.message : "No se pudo duplicar el sorteo");
+      mostrarToast("error", mensajeDe(err, "No se pudo duplicar el sorteo"));
     }
   };
 

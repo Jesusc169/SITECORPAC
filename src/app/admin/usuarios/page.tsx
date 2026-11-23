@@ -58,9 +58,13 @@ async function pedirUsuarios(): Promise<ResultadoUsuarios> {
     const res = await fetch("/api/administrador/usuarios", { cache: "no-store" });
     const datos = await jsonOError<unknown>(res, ERROR_LISTA);
     // Un 200 que no trae una lista también es un fallo (no "no hay usuarios").
-    if (!Array.isArray(datos)) return { error: ERROR_LISTA };
+    if (!Array.isArray(datos)) {
+      console.error("Usuarios: respuesta inesperada", datos);
+      return { error: ERROR_LISTA };
+    }
     return { usuarios: datos as Usuario[] };
   } catch (e) {
+    console.error("Usuarios: no se pudo cargar", e);
     return { error: mensajeDe(e, ERROR_LISTA) };
   }
 }

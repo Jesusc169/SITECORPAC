@@ -9,7 +9,7 @@ import styles from "./sistema.module.css";
 import { formatearFechaHoraPeru } from "@/lib/fechas";
 import { esHtml, htmlATexto } from "@/lib/textoRico";
 import type { SistemaController } from "@/controllers/sistemaController";
-import { ERROR_SISTEMA, jsonOError, mensajeDe } from "@/lib/mensajes";
+import { ERROR_SISTEMA, jsonOError, avisoDe } from "@/lib/mensajes";
 
 type Estado = Awaited<ReturnType<typeof SistemaController.estado>>;
 type Seguridad = Awaited<ReturnType<typeof SistemaController.seguridad>>;
@@ -489,7 +489,7 @@ function Registro({
         if (!cancelado) setDatos(j);
         terminar("");
       })
-      .catch((e: unknown) => terminar(mensajeDe(e, ERROR_SISTEMA)));
+      .catch((e: unknown) => terminar(avisoDe("Sistema", e, ERROR_SISTEMA)));
     return () => {
       cancelado = true;
     };
@@ -705,7 +705,7 @@ function ModalCambios({
   useEffect(() => {
     fetch(`/api/administrador/sistema/historial/${id}`)
       .then(async (r) => setD(await jsonOError<DetalleCambios>(r, "No se pudo cargar")))
-      .catch((e: unknown) => setError(mensajeDe(e, ERROR_SISTEMA)));
+      .catch((e: unknown) => setError(avisoDe("Sistema", e, ERROR_SISTEMA)));
   }, [id]);
 
   // <dialog> nativo abierto con showModal(): el navegador pone el fondo,
@@ -736,7 +736,7 @@ function ModalCambios({
       await jsonOError(r, "No se pudo restaurar");
       alRestaurar();
     } catch (e: unknown) {
-      setError(mensajeDe(e, ERROR_SISTEMA));
+      setError(avisoDe("Sistema", e, ERROR_SISTEMA));
     } finally {
       setRestaurando(false);
     }
@@ -822,8 +822,13 @@ function PapeleraTab() {
 
   const cargar = useCallback(() => {
     fetch("/api/administrador/sistema/papelera")
-      .then(async (r) => setItems(await jsonOError<ItemPapelera[]>(r, "No se pudo cargar la papelera")))
-      .catch((e: unknown) => setError(mensajeDe(e, ERROR_SISTEMA)));
+      .then(async (r) => {
+        const datos = await jsonOError<unknown>(r, "No se pudo cargar la papelera");
+        // Un 200 que no trae una lista rompería la tabla: se trata como fallo.
+        if (!Array.isArray(datos)) throw new Error("No se pudo cargar la papelera");
+        setItems(datos as ItemPapelera[]);
+      })
+      .catch((e: unknown) => setError(avisoDe("Sistema", e, ERROR_SISTEMA)));
   }, []);
 
   useEffect(() => {
@@ -851,7 +856,7 @@ function PapeleraTab() {
       );
       cargar();
     } catch (e: unknown) {
-      setError(mensajeDe(e, ERROR_SISTEMA));
+      setError(avisoDe("Sistema", e, ERROR_SISTEMA));
     } finally {
       setTrabajando(null);
     }
@@ -951,7 +956,7 @@ function SeguridadTab({ s, alCambiar }: Readonly<{ s: Seguridad; alCambiar: () =
       setMensaje(`La IP ${ip} ya puede volver a iniciar sesión.`);
       alCambiar();
     } catch (e: unknown) {
-      setError(mensajeDe(e, ERROR_SISTEMA));
+      setError(avisoDe("Sistema", e, ERROR_SISTEMA));
     } finally {
       setTrabajando(null);
     }
