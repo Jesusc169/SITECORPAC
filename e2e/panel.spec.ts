@@ -156,7 +156,44 @@ for (const ancho of [1280, 390]) {
     ).toBeVisible();
     await expect(page.getByText("No hay noticias registradas")).toHaveCount(0);
   });
+
+  test(`si la lista de sorteos no carga, se avisa sin tapar "+ Nuevo Sorteo" (${ancho} px)`, async ({ page }) => {
+    await page.setViewportSize({ width: ancho, height: 844 });
+    await entrar(page, "admin@e2e.test");
+    await page.route("**/api/administrador/sorteos", (ruta) =>
+      ruta.request().method() === "GET"
+        ? ruta.fulfill({ status: 502, contentType: "text/html", body: "<html><body>Bad Gateway</body></html>" })
+        : ruta.continue()
+    );
+    await page.goto("/admin/sorteos");
+    const aviso = page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de sorteos" });
+    await expect(aviso).toBeVisible();
+    await expect(aviso).not.toContainText(/Unexpected|JSON|Bad Gateway/);
+    await expect(page.getByText("No hay sorteos registrados")).toHaveCount(0);
+    // El botón sigue visible y el aviso no se le monta encima
+    const nuevo = page.getByRole("button", { name: "+ Nuevo Sorteo" });
+    await expect(nuevo).toBeVisible();
+    const [a, b] = [await aviso.boundingBox(), await nuevo.boundingBox()];
+    const seCruzan = a!.x < b!.x + b!.width && b!.x < a!.x + a!.width && a!.y < b!.y + b!.height && b!.y < a!.y + a!.height;
+    expect(seCruzan).toBe(false);
+    // Sin desborde horizontal
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
 }
+
+test("si la recarga de noticias falla, se avisa y se conserva la lista que había", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.goto("/admin/noticias");
+  await expect(page.getByRole("cell", { name: "Bienvenida E2E" })).toBeVisible();
+  // A partir de ahora la lista ya no carga (la edición sí se guarda)
+  await page.route("**/api/administrador/noticias", (ruta) =>
+    ruta.request().method() === "GET" ? ruta.fulfill({ status: 500, contentType: "text/html", body: "<html>Error</html>" }) : ruta.continue()
+  );
+  await page.locator("tr", { hasText: "Bienvenida E2E" }).getByRole("button", { name: "Editar" }).click();
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de noticias" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Bienvenida E2E" })).toBeVisible();
+});
 
 test("una secretaria no ve ni puede abrir Sistema y registros", async ({ page }) => {
   await entrar(page, "secretaria@e2e.test");
