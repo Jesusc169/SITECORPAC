@@ -233,11 +233,15 @@ export default function UsuariosPage() {
             </thead>
             <tbody>
               {usuarios.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className={panel.vacio}>
-                    No hay usuarios registrados
-                  </td>
-                </tr>
+                // Si la carga falló, el aviso rojo ya lo explica: no se dice
+                // "no hay usuarios" (sería falso).
+                !error && (
+                  <tr>
+                    <td colSpan={6} className={panel.vacio}>
+                      No hay usuarios registrados
+                    </td>
+                  </tr>
+                )
               ) : (
                 usuarios.map((u) => (
                   <tr key={u.id} className={u.activo ? undefined : styles.filaInactiva}>
