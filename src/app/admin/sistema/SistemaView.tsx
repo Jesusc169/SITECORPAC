@@ -823,9 +823,10 @@ function PapeleraTab() {
   const cargar = useCallback(() => {
     fetch("/api/administrador/sistema/papelera")
       .then(async (r) => {
-        const datos = await jsonOError<unknown>(r, "No se pudo cargar la papelera");
+        const errorCarga = "No se pudo cargar la papelera";
+        const datos = await jsonOError<unknown>(r, errorCarga);
         // Un 200 que no trae una lista rompería la tabla: se trata como fallo.
-        if (!Array.isArray(datos)) throw new Error("No se pudo cargar la papelera");
+        if (!Array.isArray(datos)) throw new Error(errorCarga);
         setItems(datos as ItemPapelera[]);
       })
       .catch((e: unknown) => setError(avisoDe("Sistema", e, ERROR_SISTEMA)));
