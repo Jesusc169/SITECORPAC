@@ -99,7 +99,11 @@ export default function NoticiasView() {
   // El estado se guarda al llegar la respuesta (en el .then), no de forma
   // síncrona dentro del efecto.
   useEffect(() => {
-    pedirNoticias().then(aplicarNoticias);
+    // pedirNoticias nunca rechaza (devuelve la lista o el error); si algo falla
+    // al aplicarlo, queda en la consola.
+    pedirNoticias()
+      .then(aplicarNoticias)
+      .catch((e: unknown) => console.error("pedirNoticias:", e));
   }, []);
 
   return (

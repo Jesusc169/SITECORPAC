@@ -95,7 +95,11 @@ export default function UsuariosPage() {
   // Primera carga: "cargando" ya empieza en true y el estado se guarda al
   // llegar la respuesta (en el .then), no de forma síncrona en el efecto.
   useEffect(() => {
-    pedirUsuarios().then(aplicarResultado);
+    // pedirUsuarios nunca rechaza (devuelve la lista o el error); si algo falla
+    // al aplicarlo, queda en la consola.
+    pedirUsuarios()
+      .then(aplicarResultado)
+      .catch((e: unknown) => console.error("pedirUsuarios:", e));
   }, []);
 
   const abrirCrear = () => {

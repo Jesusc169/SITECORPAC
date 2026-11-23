@@ -53,7 +53,9 @@ export default function FeriasView() {
         .fetchEmpresasDisponibles()
         .then((data) => setEmpresasDisponibles(Array.isArray(data) ? data : []))
         .catch((err) => console.error("Error cargando empresas", err)),
-    ]).finally(() => setLoading(false));
+    ])
+      .catch((e: unknown) => console.error("Cargar ferias:", e))
+      .finally(() => setLoading(false));
   }, []);
 
   /* =========================
