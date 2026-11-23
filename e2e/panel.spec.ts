@@ -140,6 +140,24 @@ test("la pantalla de Sistema muestra sus pestañas", async ({ page }) => {
   }
 });
 
+for (const ancho of [1280, 390]) {
+  test(`si la lista de noticias no carga, se avisa y no dice que no hay noticias (${ancho} px)`, async ({ page }) => {
+    await page.setViewportSize({ width: ancho, height: 844 });
+    await entrar(page, "admin@e2e.test");
+    // El servidor responde con una página de error (HTML, no JSON)
+    await page.route("**/api/administrador/noticias", (ruta) =>
+      ruta.request().method() === "GET"
+        ? ruta.fulfill({ status: 500, contentType: "text/html", body: "<html><body>Error</body></html>" })
+        : ruta.continue()
+    );
+    await page.goto("/admin/noticias");
+    await expect(
+      page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de noticias. Recarga la página o inténtalo en unos minutos." })
+    ).toBeVisible();
+    await expect(page.getByText("No hay noticias registradas")).toHaveCount(0);
+  });
+}
+
 test("una secretaria no ve ni puede abrir Sistema y registros", async ({ page }) => {
   await entrar(page, "secretaria@e2e.test");
   await expect(page.getByRole("link", { name: "Administrar noticias" })).toBeVisible();

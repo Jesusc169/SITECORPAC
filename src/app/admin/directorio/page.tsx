@@ -10,6 +10,7 @@ import panel from "@/styles/PanelAdmin.module.css";
 import { rutaPublica } from "@/lib/rutas";
 import EncabezadoPanel from "@/components/PanelAdmin/EncabezadoPanel";
 import { fechaCorta } from "@/lib/fechas";
+import { jsonOError, mensajeDe } from "@/lib/mensajes";
 
 interface Miembro {
   id: number;
@@ -39,20 +40,24 @@ function getFotoUrl(url?: string | null, refreshKey?: number) {
   return finalUrl;
 }
 
-// Pide el directorio al servidor; null si falló (se deja la lista que había).
-async function pedirMiembros(): Promise<Miembro[] | null> {
+const ERROR_CARGA =
+  "No se pudo cargar el directorio. Recarga la página o inténtalo en unos minutos.";
+
+type ResultadoMiembros = { miembros: Miembro[] } | { error: string };
+
+// Pide el directorio al servidor; nunca lanza: devuelve la lista o el error.
+async function pedirMiembros(): Promise<ResultadoMiembros> {
   try {
     const res = await fetch("/api/administrador/directorio", {
       method: "GET",
       cache: "no-store",
     });
-
-    if (!res.ok) throw new Error("Error al obtener directorio");
-
-    return (await res.json()) as Miembro[];
-  } catch (error) {
-    console.error("Error cargando miembros:", error);
-    return null;
+    const datos = await jsonOError<unknown>(res, ERROR_CARGA);
+    // Un 200 que no trae una lista también es un fallo (no "no hay miembros").
+    if (!Array.isArray(datos)) return { error: ERROR_CARGA };
+    return { miembros: datos as Miembro[] };
+  } catch (e) {
+    return { error: mensajeDe(e, ERROR_CARGA) };
   }
 }
 
@@ -61,10 +66,18 @@ export default function AdminDirectorioPage() {
   const [showAgregarModal, setShowAgregarModal] = useState(false);
   const [editarMiembro, setEditarMiembro] = useState<Miembro | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorCarga, setErrorCarga] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const aplicarMiembros = (data: Miembro[] | null) => {
-    if (data) setMiembros(data);
+  // Si la carga falla se muestra el aviso y se conserva la lista que había;
+  // "cargando" se apaga siempre.
+  const aplicarMiembros = (resultado: ResultadoMiembros) => {
+    if ("miembros" in resultado) {
+      setMiembros(resultado.miembros);
+      setErrorCarga("");
+    } else {
+      setErrorCarga(resultado.error);
+    }
     setLoading(false);
   };
 
@@ -147,12 +160,19 @@ export default function AdminDirectorioPage() {
         </button>
       </EncabezadoPanel>
 
+        {errorCarga && (
+          <div role="alert" className={panel.errorBanner}>
+            {errorCarga}
+          </div>
+        )}
+
         {loading ? (
           <p className={styles.mensaje}>Cargando directorio...</p>
         ) : (
           <div className={styles.listaMiembros}>
             {miembros.length === 0 ? (
-              <p className={styles.mensaje}>No hay miembros registrados.</p>
+              // Si no se pudo cargar no se dice "no hay": el aviso ya lo explica.
+              !errorCarga && <p className={styles.mensaje}>No hay miembros registrados.</p>
             ) : (
               miembros.map(miembro => (
                 <div key={`${miembro.id}-${refreshKey}`} className={styles.miembroCard}>

@@ -5,13 +5,7 @@
 ========================================================= */
 
 .errorBanner {
-  background: var(--rojo-claro);
-  border: 1px solid var(--rojo-borde);
-  color: var(--rojo);
-  padding: 11px 14px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 0.93rem;
+  composes: errorBanner from "../../../styles/PanelAdmin.module.css";
 }
 
 /* ---------- Etiquetas de la tabla ---------- */

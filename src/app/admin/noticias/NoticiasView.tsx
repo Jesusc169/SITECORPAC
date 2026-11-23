@@ -10,6 +10,7 @@ import Toast from "@/components/Toast/Toast";
 import { useToast } from "@/components/Toast/useToast";
 import EtiquetaVisible from "@/components/InterruptorVisible/EtiquetaVisible";
 import panel from "@/styles/PanelAdmin.module.css";
+import { jsonOError, mensajeDe } from "@/lib/mensajes";
 
 /* ===============================
    INTERFACE
@@ -39,32 +40,25 @@ function formatearFecha(fecha: string) {
 }
 
 /* ===============================
-   CARGA → lista del panel; null si falló (se deja la lista que había)
+   CARGA → lista del panel o el error (nunca lanza)
 ================================ */
-async function pedirNoticias(): Promise<Noticia[] | null> {
+const ERROR_CARGA =
+  "No se pudo cargar la lista de noticias. Recarga la página o inténtalo en unos minutos.";
+
+type ResultadoNoticias = { noticias: Noticia[] } | { error: string };
+
+async function pedirNoticias(): Promise<ResultadoNoticias> {
   try {
     const res = await fetch("/api/administrador/noticias", {
       method: "GET",
       cache: "no-store", // importante en Next 16
     });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Error backend:", text);
-      return null;
-    }
-
-    const data = await res.json();
-
-    if (!Array.isArray(data)) {
-      console.error("Respuesta inesperada:", data);
-      return [];
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error al cargar noticias:", error);
-    return null;
+    const datos = await jsonOError<unknown>(res, ERROR_CARGA);
+    // Un 200 que no trae una lista también es un fallo (no "no hay noticias").
+    if (!Array.isArray(datos)) return { error: ERROR_CARGA };
+    return { noticias: datos as Noticia[] };
+  } catch (e) {
+    return { error: mensajeDe(e, ERROR_CARGA) };
   }
 }
 
@@ -73,6 +67,7 @@ async function pedirNoticias(): Promise<Noticia[] | null> {
 ================================ */
 export default function NoticiasView() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
+  const [errorCarga, setErrorCarga] = useState("");
   const [noticiaSeleccionada, setNoticiaSeleccionada] =
     useState<Noticia | null>(null);
 
@@ -82,8 +77,14 @@ export default function NoticiasView() {
 
   const { toast, mostrarToast, cerrarToast } = useToast();
 
-  const aplicarNoticias = (data: Noticia[] | null) => {
-    if (data) setNoticias(data);
+  // Si la carga falla se muestra el aviso y se conserva la lista que había.
+  const aplicarNoticias = (resultado: ResultadoNoticias) => {
+    if ("noticias" in resultado) {
+      setNoticias(resultado.noticias);
+      setErrorCarga("");
+    } else {
+      setErrorCarga(resultado.error);
+    }
   };
 
   const cargarNoticias = async () => {
@@ -112,6 +113,12 @@ export default function NoticiasView() {
         </button>
       </EncabezadoPanel>
 
+      {errorCarga && (
+        <div role="alert" className={panel.errorBanner}>
+          {errorCarga}
+        </div>
+      )}
+
       {/* ===============================
           TABLA
       ================================ */}
@@ -128,11 +135,14 @@ export default function NoticiasView() {
         </thead>
         <tbody>
           {noticias.length === 0 ? (
-            <tr>
-              <td colSpan={5} className={panel.vacio}>
-                No hay noticias registradas
-              </td>
-            </tr>
+            // Si la lista no se pudo cargar no se dice "no hay": el aviso ya lo explica.
+            !errorCarga && (
+              <tr>
+                <td colSpan={5} className={panel.vacio}>
+                  No hay noticias registradas
+                </td>
+              </tr>
+            )
           ) : (
             noticias.map((n) => (
               <tr key={n.id}>
