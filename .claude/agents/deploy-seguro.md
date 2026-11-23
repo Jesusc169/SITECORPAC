@@ -31,9 +31,12 @@ Cuando el mensaje diga que se despliega el demo (p. ej. un parche que, por regla
 los dos sitios), el OK también debe nombrar el demo. Es OTRO procedimiento: sigue la sección
 "Demo" de `servidor.md` al pie de la letra.
 - Sale de la rama `poc-afiliados` (worktree local `../sitecorpac-poc`), con QA en verde contra
-  `sitecorpac_poc_test`. Confirma que el commit está en GitHub.
-- La carpeta del servidor NO es git: se sube con `git archive` + SFTP, se compila en `app.new` y se
-  cambia por `mv` con `systemctl stop/start sitecorpac-demo` (servicio systemd, NO PM2).
+  `sitecorpac_poc_test`. Esa rama es SOLO LOCAL (nunca se sube a GitHub, decisión de Jesús):
+  confirma el commit en el worktree y que no queden cambios sin commit.
+- La carpeta del servidor NO es git: se sube un `git -c core.autocrlf=false archive` (sin .env) y
+  se verifica con sha256 en ambos lados; se compila en `app.new` (el demo sigue arriba) y se cambia
+  por `mv` con `systemctl stop/start sitecorpac-demo` (servicio systemd, NO PM2). Desde Git Bash,
+  pasa las rutas remotas con `MSYS_NO_PATHCONV=1` (si no, `/root/...` se convierte en ruta de Windows).
 - Anota la versión anterior (`app.prev-FECHA`) para volver atrás con los mismos `mv` al revés.
 - Verifica: demo.sitecorpac.com en 200, `systemctl is-active sitecorpac-demo`, y que producción
   siguió intacta (200 y 2 procesos PM2 online).
