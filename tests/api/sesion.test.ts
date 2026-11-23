@@ -200,9 +200,21 @@ describe("login: fallos del sistema (no son culpa de quien entra)", () => {
     await esErrorDelSistema(await entrar("ana@test.local", "mala"));
   });
 
-  it("errores raros (sin mensaje o que no son Error) también son del sistema", async () => {
+  it("login correcto aunque falle borrar los intentos previos → entra igual (no se bloquea a nadie por eso)", async () => {
+    await crearUsuario({ email: "ana@test.local" });
+    vi.spyOn(prisma.login_intento, "deleteMany").mockRejectedValueOnce(new Error("BD caída"));
+    const res = await entrar();
+    expect(res.status).toBe(200);
+    expect(res.headers.get("set-cookie")).toMatch(/token=.+HttpOnly/i);
+  });
+
+  it("un error sin mensaje también es del sistema", async () => {
     vi.spyOn(AuthController, "login").mockRejectedValueOnce(new Error(""));
     await esErrorDelSistema(await entrar("a@b.c", "x"));
+    expect(await prisma.login_intento.count()).toBe(0);
+  });
+
+  it("algo lanzado que no es Error también es del sistema y queda en el registro", async () => {
     vi.spyOn(AuthController, "login").mockRejectedValueOnce("falla rara");
     await esErrorDelSistema(await entrar("a@b.c", "x"));
     expect((await ultimoRegistro())?.detalle).toContain("falla rara");

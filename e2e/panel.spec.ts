@@ -33,6 +33,12 @@ test("login: si el servidor responde una página de error, muestra un aviso clar
   await page.getByRole("button", { name: "Ingresar" }).click();
   await expect(page.locator("#login-error")).toContainText("problema del sistema");
   await expect(page.locator("#login-error")).not.toContainText(/Unexpected|JSON|Bad Gateway/);
+  // El botón vuelve a quedar disponible y, cuando el servidor se recupera, se entra
+  const ingresar = page.getByRole("button", { name: "Ingresar" });
+  await expect(ingresar).toBeEnabled();
+  await page.unroute("**/api/auth/login");
+  await ingresar.click();
+  await page.waitForURL("**/dashboard");
 });
 
 test("login: sin conexión, pide revisar internet", async ({ page }) => {
@@ -42,6 +48,7 @@ test("login: sin conexión, pide revisar internet", async ({ page }) => {
   await page.getByPlaceholder("Contraseña").fill(CLAVE);
   await page.getByRole("button", { name: "Ingresar" }).click();
   await expect(page.locator("#login-error")).toContainText("Revisa tu internet");
+  await expect(page.getByRole("button", { name: "Ingresar" })).toBeEnabled();
 });
 
 test("sin sesión el panel manda al login", async ({ page }) => {
@@ -193,6 +200,117 @@ test("si la recarga de noticias falla, se avisa y se conserva la lista que habí
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de noticias" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "Bienvenida E2E" })).toBeVisible();
+});
+
+test("si la lista de noticias llega sin forma de lista (200 con {}), se avisa igual", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.route("**/api/administrador/noticias", (ruta) =>
+    ruta.request().method() === "GET"
+      ? ruta.fulfill({ status: 200, contentType: "application/json", body: "{}" })
+      : ruta.continue()
+  );
+  await page.goto("/admin/noticias");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de noticias. Recarga la página o inténtalo en unos minutos." })
+  ).toBeVisible();
+  await expect(page.getByText("No hay noticias registradas")).toHaveCount(0);
+});
+
+test("Sistema › Seguridad: si desbloquear falla con una página de error, el aviso es rojo y claro", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.route("**/api/administrador/sistema/bloqueos", (ruta) =>
+    ruta.request().method() === "DELETE"
+      ? ruta.fulfill({ status: 502, contentType: "text/html", body: "<html><body>Bad Gateway</body></html>" })
+      : ruta.continue()
+  );
+  await page.goto("/admin/sistema");
+  await page.getByRole("tab", { name: "Seguridad" }).click();
+  // IP bloqueada sembrada por e2e/preparar.mjs
+  const fila = page.getByRole("row").filter({ hasText: "203.0.113.7" });
+  await expect(fila).toContainText("Bloqueada");
+  await fila.getByRole("button", { name: "Desbloquear" }).click();
+  // Una página HTML de error no trae { error }: sale el texto propio de la acción
+  const aviso = page.getByRole("alert").filter({ hasText: "No se pudo desbloquear" });
+  await expect(aviso).toBeVisible();
+  await expect(aviso).not.toContainText(/Bad Gateway|JSON|Unexpected/);
+  // El aviso verde (role=status) es solo para lo que salió bien
+  await expect(page.getByRole("status").filter({ hasText: /No se pudo|ya puede volver/ })).toHaveCount(0);
+  await expect(fila.getByRole("button", { name: "Desbloquear" })).toBeEnabled();
+});
+
+test("Sistema › Papelera: si no carga, se avisa y no se queda en «Cargando…»", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.route("**/api/administrador/sistema/papelera", (ruta) =>
+    ruta.request().method() === "GET"
+      ? ruta.fulfill({ status: 500, contentType: "text/html", body: "<html><body>Error</body></html>" })
+      : ruta.continue()
+  );
+  await page.goto("/admin/sistema");
+  await page.getByRole("tab", { name: "Papelera" }).click();
+  const aviso = page.getByRole("alert").filter({ hasText: "No se pudo cargar la papelera" });
+  await expect(aviso).toBeVisible();
+  await expect(aviso).not.toContainText(/Unexpected|JSON|html/);
+  await expect(page.getByText("Cargando…")).toHaveCount(0);
+  await expect(page.getByText("La papelera está vacía.")).toHaveCount(0);
+});
+
+for (const ancho of [1280, 390]) {
+  test(`si el directorio no carga, se avisa y no dice que no hay miembros (${ancho} px)`, async ({ page }) => {
+    await page.setViewportSize({ width: ancho, height: 844 });
+    await entrar(page, "admin@e2e.test");
+    await page.route("**/api/administrador/directorio", (ruta) =>
+      ruta.request().method() === "GET"
+        ? ruta.fulfill({ status: 500, contentType: "text/html", body: "<html><body>Error</body></html>" })
+        : ruta.continue()
+    );
+    await page.goto("/admin/directorio");
+    const aviso = page.getByRole("alert").filter({ hasText: "No se pudo cargar el directorio" });
+    await expect(aviso).toBeVisible();
+    await expect(aviso).not.toContainText(/Unexpected|JSON|html/);
+    await expect(page.getByText("No hay miembros registrados.")).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+
+  test(`si la lista de usuarios no carga, se avisa y no dice que no hay usuarios (${ancho} px)`, async ({ page }) => {
+    await page.setViewportSize({ width: ancho, height: 844 });
+    await entrar(page, "admin@e2e.test");
+    await page.route("**/api/administrador/usuarios", (ruta) =>
+      ruta.request().method() === "GET"
+        ? ruta.fulfill({ status: 500, contentType: "text/html", body: "<html><body>Error</body></html>" })
+        : ruta.continue()
+    );
+    await page.goto("/admin/usuarios");
+    const aviso = page.getByRole("alert").filter({ hasText: "No se pudo cargar la lista de usuarios" });
+    await expect(aviso).toBeVisible();
+    await expect(aviso).not.toContainText(/Unexpected|JSON|html/);
+    await expect(page.getByText("No hay usuarios registrados")).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+}
+
+test("Usuarios: si guardar falla con una página de error, se avisa dentro de la ventana y no se cierra", async ({ page }) => {
+  await entrar(page, "admin@e2e.test");
+  await page.route("**/api/administrador/usuarios", (ruta) =>
+    ruta.request().method() === "POST"
+      ? ruta.fulfill({ status: 502, contentType: "text/html", body: "<html><body>Bad Gateway</body></html>" })
+      : ruta.continue()
+  );
+  await page.goto("/admin/usuarios");
+  await page.getByRole("button", { name: "+ Nuevo usuario" }).click();
+  const titulo = page.getByRole("heading", { name: "Nuevo usuario" });
+  await expect(titulo).toBeVisible();
+  await page.getByLabel("Nombre").fill("Usuaria E2E");
+  await page.getByLabel("Correo").fill("nueva@e2e.test");
+  await page.getByLabel("Contraseña").fill(CLAVE);
+  await page.getByRole("button", { name: "Guardar", exact: true }).click();
+  // La ventana es el bloque más interno que contiene su título
+  const ventana = page.locator("div", { has: titulo }).last();
+  const aviso = ventana.getByRole("alert").filter({ hasText: "No se pudo guardar el usuario" });
+  await expect(aviso).toBeVisible();
+  await expect(aviso).not.toContainText(/Unexpected|JSON|Bad Gateway/);
+  await expect(titulo).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar", exact: true })).toBeEnabled();
+  await expect(page.getByLabel("Nombre")).toHaveValue("Usuaria E2E");
 });
 
 test("una secretaria no ve ni puede abrir Sistema y registros", async ({ page }) => {
