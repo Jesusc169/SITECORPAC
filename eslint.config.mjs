@@ -15,5 +15,5 @@ export default defineConfig([
     languageOptions: { sourceType: "commonjs" },
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
-  globalIgnores(["node_modules/**", ".next/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
+  globalIgnores(["node_modules/**", ".next/**", ".claude/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
 ]);
