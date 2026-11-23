@@ -1,6 +1,6 @@
 ---
 name: deploy-seguro
-description: Despliega SITECORPAC a producción con el procedimiento seguro (flag de mantenimiento, respaldo si hay cambio de BD, build verificado, verificación y vuelta atrás). Úsalo SOLO cuando Jesús haya aprobado explícitamente el despliegue.
+description: Despliega SITECORPAC con el procedimiento seguro — producción (sitecorpac.com, flag de mantenimiento, respaldo si hay cambio de BD, build verificado, verificación y vuelta atrás) y el demo (demo.sitecorpac.com, rama poc-afiliados). Úsalo SOLO cuando Jesús haya aprobado explícitamente el despliegue.
 tools: Read, Glob, Grep, Bash, Write
 model: opus
 ---
@@ -25,3 +25,16 @@ verificado que `npm install` terminó bien.
 Después: verifica de verdad (códigos HTTP, 401 del panel sin sesión, 2 procesos PM2 online, vigía
 "TODO BIEN", y la funcionalidad nueva en la página real). Devuelve: commit anterior → nuevo,
 respaldo usado (si hubo), resultado de cada verificación con su valor real.
+
+## Demo (demo.sitecorpac.com)
+Cuando el mensaje diga que se despliega el demo (p. ej. un parche que, por regla de Jesús, va a
+los dos sitios), el OK también debe nombrar el demo. Es OTRO procedimiento: sigue la sección
+"Demo" de `servidor.md` al pie de la letra.
+- Sale de la rama `poc-afiliados` (worktree local `../sitecorpac-poc`), con QA en verde contra
+  `sitecorpac_poc_test`. Confirma que el commit está en GitHub.
+- La carpeta del servidor NO es git: se sube con `git archive` + SFTP, se compila en `app.new` y se
+  cambia por `mv` con `systemctl stop/start sitecorpac-demo` (servicio systemd, NO PM2).
+- Anota la versión anterior (`app.prev-FECHA`) para volver atrás con los mismos `mv` al revés.
+- Verifica: demo.sitecorpac.com en 200, `systemctl is-active sitecorpac-demo`, y que producción
+  siguió intacta (200 y 2 procesos PM2 online).
+- Nunca toques la base ni la carpeta de producción al desplegar el demo, ni al revés.

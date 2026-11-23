@@ -104,3 +104,7 @@ public/images/temp/
 
 # Worktrees temporales de Claude Code
 /.claude/worktrees/
+
+# Bytecode de Python (scripts del servidor)
+__pycache__/
+*.pyc

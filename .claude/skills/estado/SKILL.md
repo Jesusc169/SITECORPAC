@@ -10,7 +10,7 @@ La bitácora (`.claude/local/bitacora.md`) ya está cargada. **Regla de modelo:*
 Agent pasa `model: "opus"`.
 
 1. En paralelo:
-   - `infra-servidor`: chequeo CORTO (≤2 min) de producción y demo: HEAD en el servidor, PM2 (2
+   - `infra-servidor` en **modo salud**, CORTO (≤2 min), de producción y demo: HEAD en el servidor, PM2 (2
      online), `sitecorpac-demo` activo, sitecorpac.com y demo.sitecorpac.com en 200, vigía, disco,
      RAM, paquetes de seguridad pendientes, reboot-required, vencimiento del certificado, último
      respaldo diario y último paquete off-site (fecha y tamaño). Sin cambios.
